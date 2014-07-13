@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AFDBF46F-5A9A-4505-8647-C43416E5E287}</ProjectGuid>
+    <RootNamespace>Test</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>Objs\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>Objs\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\src;..\..\src\build-release\dist\include;..\..\src\assembler\assembler;..\..\src\assembler\jit;..\..\src\assembler\moco;..\..\src\assembler\wtf;..\..\src\ds;..\..\src\frontend;..\..\src\jit\x86;..\..\src\perf;..\..\src\vm;..\..\src\build-release;..\..\src\assembler;..\..\..\mfbt;..\..\..\mfbt\decimal;..\..\..\mfbt\double-conversion;..\..\src\jit;..\..\..\intl\icu\source\common;..\..\src\jsapi-tests</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>STATIC_JS_API;WIN32;_WIN32;XP_WIN;WTF_COMPILER_MSVC;_X86_;JS_ION;ENABLE_YARR_JIT;HAVE_FORCEINLINE;HAVE_LOCALECONV;HAVE_SNPRINTF;HAVE_WINSDKVER_H;HW_THREADS;JSGC_INCREMENTAL;JS_CPU_X86;JS_METHODJIT;JS_METHODJIT_TYPED_ARRAY;JS_MONOIC;JS_NUNBOX32;JS_POLYIC;MOZ_DEBUG_SYMBOLS;NO_X11;NS_ATTR_MALLOC;NS_WARN_UNUSED_RESULT;RELEASE_BUILD;STDC_HEADERS;WIN32_LEAN_AND_MEAN;XP_WIN32;X_DISPLAY_MISSING;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WINDOWS;__MWERKS__</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\src;..\..\src\build-release\dist\include;..\..\src\assembler\assembler;..\..\src\assembler\jit;..\..\src\assembler\moco;..\..\src\assembler\wtf;..\..\src\ds;..\..\src\frontend;..\..\src\jit\x86;..\..\src\perf;..\..\src\vm;..\..\src\build-release;..\..\src\assembler;..\..\..\mfbt;..\..\..\mfbt\decimal;..\..\..\mfbt\double-conversion;..\..\src\jit;..\..\..\intl\icu\source\common;..\..\src\jsapi-tests</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>STATIC_JS_API;WIN32;_WIN32;XP_WIN;WTF_COMPILER_MSVC;_X86_;JS_ION;ENABLE_YARR_JIT;HAVE_FORCEINLINE;HAVE_LOCALECONV;HAVE_SNPRINTF;HAVE_WINSDKVER_H;HW_THREADS;JSGC_INCREMENTAL;JS_CPU_X86;JS_METHODJIT;JS_METHODJIT_TYPED_ARRAY;JS_MONOIC;JS_NUNBOX32;JS_POLYIC;MOZ_DEBUG_SYMBOLS;NO_X11;NS_ATTR_MALLOC;NS_WARN_UNUSED_RESULT;RELEASE_BUILD;STDC_HEADERS;WIN32_LEAN_AND_MEAN;XP_WIN32;X_DISPLAY_MISSING;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WINDOWS;__MWERKS__</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpiderMonkey\SpiderMonkey\SpiderMonkey.vcxproj">
+      <Project>{36228cdc-48fa-4349-b753-f64cafef0996}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

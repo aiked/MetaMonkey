@@ -1,0 +1,639 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{36228CDC-48FA-4349-B753-F64CAFEF0996}</ProjectGuid>
+    <RootNamespace>SpiderMonkey</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Lib\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>Objs\$(Configuration)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Lib\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>Objs\$(Configuration)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\src\build-release\dist\include;..\..\..\src\assembler\assembler;..\..\..\src\assembler\jit;..\..\..\src\assembler\moco;..\..\..\src\assembler\wtf;..\..\..\src\ds;..\..\..\src\frontend;..\..\..\src\jit\x86;..\..\..\src\perf;..\..\..\src\vm;..\..\..\src\build-release;..\..\..\src\assembler;..\..\..\..\mfbt;..\..\..\..\mfbt\decimal;..\..\..\..\mfbt\double-conversion;..\..\..\src\jit;..\..\..\..\intl\icu\source\common</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>STATIC_JS_API;WIN32;_WIN32;XP_WIN;WTF_COMPILER_MSVC;_X86_;JS_ION;ENABLE_YARR_JIT;HAVE_FORCEINLINE;HAVE_LOCALECONV;HAVE_SNPRINTF;HAVE_WINSDKVER_H;HW_THREADS;JSGC_INCREMENTAL;JS_CPU_X86;JS_METHODJIT;JS_METHODJIT_TYPED_ARRAY;JS_MONOIC;JS_NUNBOX32;JS_POLYIC;MOZ_DEBUG_SYMBOLS;NO_X11;NS_ATTR_MALLOC;NS_WARN_UNUSED_RESULT;RELEASE_BUILD;STDC_HEADERS;WIN32_LEAN_AND_MEAN;XP_WIN32;X_DISPLAY_MISSING;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WINDOWS;__MWERKS__</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\src\build-release\dist\include;..\..\..\src\assembler\assembler;..\..\..\src\assembler\jit;..\..\..\src\assembler\moco;..\..\..\src\assembler\wtf;..\..\..\src\ds;..\..\..\src\frontend;..\..\..\src\jit\x86;..\..\..\src\perf;..\..\..\src\vm;..\..\..\src\build-release;..\..\..\src\assembler;..\..\..\..\mfbt;..\..\..\..\mfbt\decimal;..\..\..\..\mfbt\double-conversion;..\..\..\src\jit;..\..\..\..\intl\icu\source\common</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>STATIC_JS_API;WIN32;_WIN32;XP_WIN;WTF_COMPILER_MSVC;_X86_;JS_ION;ENABLE_YARR_JIT;HAVE_FORCEINLINE;HAVE_LOCALECONV;HAVE_SNPRINTF;HAVE_WINSDKVER_H;HW_THREADS;JSGC_INCREMENTAL;JS_CPU_X86;JS_METHODJIT;JS_METHODJIT_TYPED_ARRAY;JS_MONOIC;JS_NUNBOX32;JS_POLYIC;MOZ_DEBUG_SYMBOLS;NO_X11;NS_ATTR_MALLOC;NS_WARN_UNUSED_RESULT;RELEASE_BUILD;STDC_HEADERS;WIN32_LEAN_AND_MEAN;XP_WIN32;X_DISPLAY_MISSING;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WINDOWS;__MWERKS__</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\mfbt\decimal\Decimal.cpp" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\bignum-dtoa.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\bignum.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\cached-powers.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\diy-fp.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\double-conversion.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\fast-dtoa.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\fixed-dtoa.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\strtod.cc" />
+    <ClCompile Include="..\..\..\..\mfbt\HashFunctions.cpp" />
+    <ClCompile Include="..\..\..\..\mfbt\Poison.cpp" />
+    <ClCompile Include="..\..\..\..\mfbt\SHA1.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\assembler\ARMAssembler.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\assembler\MacroAssemblerARM.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\assembler\MacroAssemblerX86Common.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocator.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocatorOS2.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocatorPosix.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocatorWin.cpp" />
+    <ClCompile Include="..\..\..\src\assembler\wtf\Assertions.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\Eval.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\Intl.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\MapObject.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\Module.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\Object.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\ParallelArray.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\Profilers.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\RegExp.cpp" />
+    <ClCompile Include="..\..\..\src\builtin\TestingFunctions.cpp" />
+    <ClCompile Include="..\..\..\src\ds\LifoAlloc.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\BytecodeCompiler.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\BytecodeEmitter.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\FoldConstants.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\NameFunctions.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\ParseMaps.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\ParseNode.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\Parser.cpp" />
+    <ClCompile Include="..\..\..\src\frontend\TokenStream.cpp" />
+    <ClCompile Include="..\..\..\src\gc\Iteration.cpp" />
+    <ClCompile Include="..\..\..\src\gc\Marking.cpp" />
+    <ClCompile Include="..\..\..\src\gc\Memory.cpp" />
+    <ClCompile Include="..\..\..\src\gc\Nursery.cpp" />
+    <ClCompile Include="..\..\..\src\gc\RootMarking.cpp" />
+    <ClCompile Include="..\..\..\src\gc\Statistics.cpp" />
+    <ClCompile Include="..\..\..\src\gc\StoreBuffer.cpp" />
+    <ClCompile Include="..\..\..\src\gc\Verifier.cpp" />
+    <ClCompile Include="..\..\..\src\gc\Zone.cpp" />
+    <ClCompile Include="..\..\..\src\jit\AliasAnalysis.cpp" />
+    <ClCompile Include="..\..\..\src\jit\AsmJS.cpp" />
+    <ClCompile Include="..\..\..\src\jit\AsmJSLink.cpp" />
+    <ClCompile Include="..\..\..\src\jit\AsmJSSignalHandlers.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BacktrackingAllocator.cpp" />
+    <ClCompile Include="..\..\..\src\jit\Bailouts.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BaselineBailouts.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BaselineCompiler.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BaselineFrame.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BaselineFrameInfo.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BaselineIC.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BaselineInspector.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BaselineJIT.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BitSet.cpp" />
+    <ClCompile Include="..\..\..\src\jit\BytecodeAnalysis.cpp" />
+    <ClCompile Include="..\..\..\src\jit\C1Spewer.cpp" />
+    <ClCompile Include="..\..\..\src\jit\CodeGenerator.cpp" />
+    <ClCompile Include="..\..\..\src\jit\EdgeCaseAnalysis.cpp" />
+    <ClCompile Include="..\..\..\src\jit\EffectiveAddressAnalysis.cpp" />
+    <ClCompile Include="..\..\..\src\jit\Ion.cpp" />
+    <ClCompile Include="..\..\..\src\jit\IonAnalysis.cpp" />
+    <ClCompile Include="..\..\..\src\jit\IonBuilder.cpp" />
+    <ClCompile Include="..\..\..\src\jit\IonCaches.cpp" />
+    <ClCompile Include="..\..\..\src\jit\IonFrames.cpp" />
+    <ClCompile Include="..\..\..\src\jit\IonMacroAssembler.cpp" />
+    <ClCompile Include="..\..\..\src\jit\IonSpewer.cpp" />
+    <ClCompile Include="..\..\..\src\jit\JSONSpewer.cpp" />
+    <ClCompile Include="..\..\..\src\jit\LICM.cpp" />
+    <ClCompile Include="..\..\..\src\jit\LinearScan.cpp" />
+    <ClCompile Include="..\..\..\src\jit\LIR.cpp" />
+    <ClCompile Include="..\..\..\src\jit\LiveRangeAllocator.cpp" />
+    <ClCompile Include="..\..\..\src\jit\Lowering.cpp" />
+    <ClCompile Include="..\..\..\src\jit\MCallOptimize.cpp" />
+    <ClCompile Include="..\..\..\src\jit\MIR.cpp" />
+    <ClCompile Include="..\..\..\src\jit\MIRGraph.cpp" />
+    <ClCompile Include="..\..\..\src\jit\MoveResolver.cpp" />
+    <ClCompile Include="..\..\..\src\jit\ParallelArrayAnalysis.cpp" />
+    <ClCompile Include="..\..\..\src\jit\ParallelFunctions.cpp" />
+    <ClCompile Include="..\..\..\src\jit\PerfSpewer.cpp" />
+    <ClCompile Include="..\..\..\src\jit\RangeAnalysis.cpp" />
+    <ClCompile Include="..\..\..\src\jit\RegisterAllocator.cpp" />
+    <ClCompile Include="..\..\..\src\jit\Safepoints.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\Assembler-x86-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\BaselineCompiler-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\BaselineCompiler-x86-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\BaselineIC-x86-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\CodeGenerator-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\CodeGenerator-x86-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\IonFrames-x86-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\Lowering-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\Lowering-x86-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\shared\MoveEmitter-x86-shared.cpp" />
+    <ClCompile Include="..\..\..\src\jit\Snapshots.cpp" />
+    <ClCompile Include="..\..\..\src\jit\StupidAllocator.cpp" />
+    <ClCompile Include="..\..\..\src\jit\TypePolicy.cpp" />
+    <ClCompile Include="..\..\..\src\jit\UnreachableCodeElimination.cpp" />
+    <ClCompile Include="..\..\..\src\jit\ValueNumbering.cpp" />
+    <ClCompile Include="..\..\..\src\jit\VMFunctions.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\Assembler-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\Bailouts-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\BaselineCompiler-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\BaselineIC-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\CodeGenerator-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\Lowering-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\MacroAssembler-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jit\x86\Trampoline-x86.cpp" />
+    <ClCompile Include="..\..\..\src\jsalloc.cpp" />
+    <ClCompile Include="..\..\..\src\jsanalyze.cpp" />
+    <ClCompile Include="..\..\..\src\jsapi.cpp" />
+    <ClCompile Include="..\..\..\src\jsarray.cpp" />
+    <ClCompile Include="..\..\..\src\jsatom.cpp" />
+    <ClCompile Include="..\..\..\src\jsbool.cpp" />
+    <ClCompile Include="..\..\..\src\jsclone.cpp" />
+    <ClCompile Include="..\..\..\src\jscntxt.cpp" />
+    <ClCompile Include="..\..\..\src\jscompartment.cpp" />
+    <ClCompile Include="..\..\..\src\jscrashreport.cpp" />
+    <ClCompile Include="..\..\..\src\jsdate.cpp" />
+    <ClCompile Include="..\..\..\src\jsdbgapi.cpp" />
+    <ClCompile Include="..\..\..\src\jsdtoa.cpp" />
+    <ClCompile Include="..\..\..\src\jsexn.cpp" />
+    <ClCompile Include="..\..\..\src\jsfriendapi.cpp" />
+    <ClCompile Include="..\..\..\src\jsfun.cpp" />
+    <ClCompile Include="..\..\..\src\jsgc.cpp" />
+    <ClCompile Include="..\..\..\src\jsinfer.cpp" />
+    <ClCompile Include="..\..\..\src\jsiter.cpp" />
+    <ClCompile Include="..\..\..\src\jsmath.cpp" />
+    <ClCompile Include="..\..\..\src\jsmemorymetrics.cpp" />
+    <ClCompile Include="..\..\..\src\jsnativestack.cpp" />
+    <ClCompile Include="..\..\..\src\jsnum.cpp" />
+    <ClCompile Include="..\..\..\src\jsobj.cpp" />
+    <ClCompile Include="..\..\..\src\json.cpp" />
+    <ClCompile Include="..\..\..\src\jsonparser.cpp" />
+    <ClCompile Include="..\..\..\src\jsopcode.cpp" />
+    <ClCompile Include="..\..\..\src\jsprf.cpp" />
+    <ClCompile Include="..\..\..\src\jspropertytree.cpp" />
+    <ClCompile Include="..\..\..\src\jsproxy.cpp" />
+    <ClCompile Include="..\..\..\src\jsreflect.cpp" />
+    <ClCompile Include="..\..\..\src\jsscript.cpp" />
+    <ClCompile Include="..\..\..\src\jsstr.cpp" />
+    <ClCompile Include="..\..\..\src\jstypedarray.cpp" />
+    <ClCompile Include="..\..\..\src\jsutil.cpp" />
+    <ClCompile Include="..\..\..\src\jswatchpoint.cpp" />
+    <ClCompile Include="..\..\..\src\jsweakmap.cpp" />
+    <ClCompile Include="..\..\..\src\jsworkers.cpp" />
+    <ClCompile Include="..\..\..\src\jswrapper.cpp" />
+    <ClCompile Include="..\..\..\src\perf\pm_stub.cpp" />
+    <ClCompile Include="..\..\..\src\prmjtime.cpp" />
+    <ClCompile Include="..\..\..\src\shell\js.cpp" />
+    <ClCompile Include="..\..\..\src\shell\jsoptparse.cpp" />
+    <ClCompile Include="..\..\..\src\vm\ArgumentsObject.cpp" />
+    <ClCompile Include="..\..\..\src\vm\CharacterEncoding.cpp" />
+    <ClCompile Include="..\..\..\src\vm\DateTime.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Debugger.cpp" />
+    <ClCompile Include="..\..\..\src\vm\ForkJoin.cpp" />
+    <ClCompile Include="..\..\..\src\vm\GlobalObject.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Interpreter.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Monitor.cpp" />
+    <ClCompile Include="..\..\..\src\vm\ObjectImpl.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Probes.cpp" />
+    <ClCompile Include="..\..\..\src\vm\PropertyKey.cpp" />
+    <ClCompile Include="..\..\..\src\vm\RegExpObject.cpp" />
+    <ClCompile Include="..\..\..\src\vm\RegExpStatics.cpp" />
+    <ClCompile Include="..\..\..\src\vm\ScopeObject.cpp" />
+    <ClCompile Include="..\..\..\src\vm\SelfHosting.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Shape.cpp" />
+    <ClCompile Include="..\..\..\src\vm\SPSProfiler.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Stack.cpp" />
+    <ClCompile Include="..\..\..\src\vm\JsString.cpp" />
+    <ClCompile Include="..\..\..\src\vm\StringBuffer.cpp" />
+    <ClCompile Include="..\..\..\src\vm\ThreadPool.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Unicode.cpp" />
+    <ClCompile Include="..\..\..\src\vm\Xdr.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\OSAllocatorOS2.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\OSAllocatorPosix.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\OSAllocatorWin.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\PageBlock.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\YarrCanonicalizeUCS2.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\YarrInterpreter.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\YarrJIT.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\YarrPattern.cpp" />
+    <ClCompile Include="..\..\..\src\yarr\YarrSyntaxChecker.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\mfbt\Assertions.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Atomics.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Attributes.h" />
+    <ClInclude Include="..\..\..\..\mfbt\BloomFilter.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Casting.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Char16.h" />
+    <ClInclude Include="..\..\..\..\mfbt\CheckedInt.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Compiler.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Constants.h" />
+    <ClInclude Include="..\..\..\..\mfbt\DebugOnly.h" />
+    <ClInclude Include="..\..\..\..\mfbt\decimal\Decimal.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\bignum-dtoa.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\bignum.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\cached-powers.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\diy-fp.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\double-conversion.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\fast-dtoa.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\fixed-dtoa.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\ieee.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\strtod.h" />
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\utils.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Endian.h" />
+    <ClInclude Include="..\..\..\..\mfbt\EnumSet.h" />
+    <ClInclude Include="..\..\..\..\mfbt\FloatingPoint.h" />
+    <ClInclude Include="..\..\..\..\mfbt\GuardObjects.h" />
+    <ClInclude Include="..\..\..\..\mfbt\HashFunctions.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Likely.h" />
+    <ClInclude Include="..\..\..\..\mfbt\LinkedList.h" />
+    <ClInclude Include="..\..\..\..\mfbt\MathAlgorithms.h" />
+    <ClInclude Include="..\..\..\..\mfbt\MemoryChecking.h" />
+    <ClInclude Include="..\..\..\..\mfbt\MSStdInt.h" />
+    <ClInclude Include="..\..\..\..\mfbt\NullPtr.h" />
+    <ClInclude Include="..\..\..\..\mfbt\PodOperations.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Poison.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Range.h" />
+    <ClInclude Include="..\..\..\..\mfbt\RangedPtr.h" />
+    <ClInclude Include="..\..\..\..\mfbt\RefPtr.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Scoped.h" />
+    <ClInclude Include="..\..\..\..\mfbt\SHA1.h" />
+    <ClInclude Include="..\..\..\..\mfbt\SplayTree.h" />
+    <ClInclude Include="..\..\..\..\mfbt\StandardInteger.h" />
+    <ClInclude Include="..\..\..\..\mfbt\ThreadLocal.h" />
+    <ClInclude Include="..\..\..\..\mfbt\TypedEnum.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Types.h" />
+    <ClInclude Include="..\..\..\..\mfbt\TypeTraits.h" />
+    <ClInclude Include="..\..\..\..\mfbt\Util.h" />
+    <ClInclude Include="..\..\..\..\mfbt\WeakPtr.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\AbstractMacroAssembler.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\ARMAssembler.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\ARMv7Assembler.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\AssemblerBuffer.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\AssemblerBufferWithConstantPool.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\CodeLocation.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\LinkBuffer.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssembler.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerARM.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerARMv7.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerCodeRef.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerMIPS.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerSparc.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerX86.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerX86Common.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerX86_64.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\MIPSAssembler.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\RepatchBuffer.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\SparcAssembler.h" />
+    <ClInclude Include="..\..\..\src\assembler\assembler\X86Assembler.h" />
+    <ClInclude Include="..\..\..\src\assembler\jit\ExecutableAllocator.h" />
+    <ClInclude Include="..\..\..\src\assembler\moco\MocoStubs.h" />
+    <ClInclude Include="..\..\..\src\assembler\wtf\Assertions.h" />
+    <ClInclude Include="..\..\..\src\assembler\wtf\Platform.h" />
+    <ClInclude Include="..\..\..\src\assembler\wtf\SegmentedVector.h" />
+    <ClInclude Include="..\..\..\src\assembler\wtf\VMTags.h" />
+    <ClInclude Include="..\..\..\src\build-release\js-confdefs.h" />
+    <ClInclude Include="..\..\..\src\build-release\js-config.h" />
+    <ClInclude Include="..\..\..\src\build-release\jsautokw.h" />
+    <ClInclude Include="..\..\..\src\build-release\jsautooplen.h" />
+    <ClInclude Include="..\..\..\src\build-release\selfhosted.out.h" />
+    <ClInclude Include="..\..\..\src\builtin\Eval.h" />
+    <ClInclude Include="..\..\..\src\builtin\Intl.h" />
+    <ClInclude Include="..\..\..\src\builtin\Iterator-inl.h" />
+    <ClInclude Include="..\..\..\src\builtin\MapObject.h" />
+    <ClInclude Include="..\..\..\src\builtin\Module.h" />
+    <ClInclude Include="..\..\..\src\builtin\Object.h" />
+    <ClInclude Include="..\..\..\src\builtin\ParallelArray.h" />
+    <ClInclude Include="..\..\..\src\builtin\Profilers.h" />
+    <ClInclude Include="..\..\..\src\builtin\RegExp.h" />
+    <ClInclude Include="..\..\..\src\builtin\TestingFunctions.h" />
+    <ClInclude Include="..\..\..\src\ds\BitArray.h" />
+    <ClInclude Include="..\..\..\src\ds\FixedSizeHash.h" />
+    <ClInclude Include="..\..\..\src\ds\InlineMap.h" />
+    <ClInclude Include="..\..\..\src\ds\LifoAlloc.h" />
+    <ClInclude Include="..\..\..\src\ds\PriorityQueue.h" />
+    <ClInclude Include="..\..\..\src\ds\Sort.h" />
+    <ClInclude Include="..\..\..\src\ds\SplayTree.h" />
+    <ClInclude Include="..\..\..\src\frontend\BytecodeCompiler.h" />
+    <ClInclude Include="..\..\..\src\frontend\BytecodeEmitter-inl.h" />
+    <ClInclude Include="..\..\..\src\frontend\BytecodeEmitter.h" />
+    <ClInclude Include="..\..\..\src\frontend\FoldConstants.h" />
+    <ClInclude Include="..\..\..\src\frontend\FullParseHandler.h" />
+    <ClInclude Include="..\..\..\src\frontend\NameFunctions.h" />
+    <ClInclude Include="..\..\..\src\frontend\ParseMaps-inl.h" />
+    <ClInclude Include="..\..\..\src\frontend\ParseMaps.h" />
+    <ClInclude Include="..\..\..\src\frontend\ParseNode-inl.h" />
+    <ClInclude Include="..\..\..\src\frontend\ParseNode.h" />
+    <ClInclude Include="..\..\..\src\frontend\Parser-inl.h" />
+    <ClInclude Include="..\..\..\src\frontend\Parser.h" />
+    <ClInclude Include="..\..\..\src\frontend\SharedContext-inl.h" />
+    <ClInclude Include="..\..\..\src\frontend\SharedContext.h" />
+    <ClInclude Include="..\..\..\src\frontend\SourceNotes.h" />
+    <ClInclude Include="..\..\..\src\frontend\SyntaxParseHandler.h" />
+    <ClInclude Include="..\..\..\src\frontend\TokenStream.h" />
+    <ClInclude Include="..\..\..\src\gc\Barrier-inl.h" />
+    <ClInclude Include="..\..\..\src\gc\Barrier.h" />
+    <ClInclude Include="..\..\..\src\gc\FindSCCs-inl.h" />
+    <ClInclude Include="..\..\..\src\gc\FindSCCs.h" />
+    <ClInclude Include="..\..\..\src\gc\GCInternals.h" />
+    <ClInclude Include="..\..\..\src\gc\Heap.h" />
+    <ClInclude Include="..\..\..\src\gc\Marking.h" />
+    <ClInclude Include="..\..\..\src\gc\Memory.h" />
+    <ClInclude Include="..\..\..\src\gc\Nursery-inl.h" />
+    <ClInclude Include="..\..\..\src\gc\Nursery.h" />
+    <ClInclude Include="..\..\..\src\gc\Statistics.h" />
+    <ClInclude Include="..\..\..\src\gc\StoreBuffer.h" />
+    <ClInclude Include="..\..\..\src\gc\Zone.h" />
+    <ClInclude Include="..\..\..\src\jit\AliasAnalysis.h" />
+    <ClInclude Include="..\..\..\src\jit\AsmJS.h" />
+    <ClInclude Include="..\..\..\src\jit\AsmJSModule.h" />
+    <ClInclude Include="..\..\..\src\jit\BacktrackingAllocator.h" />
+    <ClInclude Include="..\..\..\src\jit\Bailouts.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineCompiler.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineFrame-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineFrame.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineFrameInfo.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineHelpers.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineIC.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineInspector.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineJIT.h" />
+    <ClInclude Include="..\..\..\src\jit\BaselineRegisters.h" />
+    <ClInclude Include="..\..\..\src\jit\BitSet.h" />
+    <ClInclude Include="..\..\..\src\jit\BytecodeAnalysis.h" />
+    <ClInclude Include="..\..\..\src\jit\C1Spewer.h" />
+    <ClInclude Include="..\..\..\src\jit\CodeGenerator.h" />
+    <ClInclude Include="..\..\..\src\jit\CompactBuffer.h" />
+    <ClInclude Include="..\..\..\src\jit\CompileInfo-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\CompileInfo.h" />
+    <ClInclude Include="..\..\..\src\jit\CompilerRoot.h" />
+    <ClInclude Include="..\..\..\src\jit\EdgeCaseAnalysis.h" />
+    <ClInclude Include="..\..\..\src\jit\EffectiveAddressAnalysis.h" />
+    <ClInclude Include="..\..\..\src\jit\ExecutionModeInlines.h" />
+    <ClInclude Include="..\..\..\src\jit\FixedArityList.h" />
+    <ClInclude Include="..\..\..\src\jit\FixedList.h" />
+    <ClInclude Include="..\..\..\src\jit\InlineList.h" />
+    <ClInclude Include="..\..\..\src\jit\Ion.h" />
+    <ClInclude Include="..\..\..\src\jit\IonAllocPolicy.h" />
+    <ClInclude Include="..\..\..\src\jit\IonAnalysis.h" />
+    <ClInclude Include="..\..\..\src\jit\IonBuilder.h" />
+    <ClInclude Include="..\..\..\src\jit\IonCaches.h" />
+    <ClInclude Include="..\..\..\src\jit\IonCode.h" />
+    <ClInclude Include="..\..\..\src\jit\IonCompartment.h" />
+    <ClInclude Include="..\..\..\src\jit\IonFrameIterator-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\IonFrameIterator.h" />
+    <ClInclude Include="..\..\..\src\jit\IonFrames-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\IonFrames.h" />
+    <ClInclude Include="..\..\..\src\jit\IonInstrumentation.h" />
+    <ClInclude Include="..\..\..\src\jit\IonLinker.h" />
+    <ClInclude Include="..\..\..\src\jit\IonMacroAssembler.h" />
+    <ClInclude Include="..\..\..\src\jit\IonSpewer.h" />
+    <ClInclude Include="..\..\..\src\jit\IonTypes.h" />
+    <ClInclude Include="..\..\..\src\jit\JSONSpewer.h" />
+    <ClInclude Include="..\..\..\src\jit\LICM.h" />
+    <ClInclude Include="..\..\..\src\jit\LinearScan.h" />
+    <ClInclude Include="..\..\..\src\jit\LIR-Common.h" />
+    <ClInclude Include="..\..\..\src\jit\LIR-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\LIR.h" />
+    <ClInclude Include="..\..\..\src\jit\LiveRangeAllocator.h" />
+    <ClInclude Include="..\..\..\src\jit\LOpcodes.h" />
+    <ClInclude Include="..\..\..\src\jit\Lowering.h" />
+    <ClInclude Include="..\..\..\src\jit\MIR.h" />
+    <ClInclude Include="..\..\..\src\jit\MIRGenerator.h" />
+    <ClInclude Include="..\..\..\src\jit\MIRGraph.h" />
+    <ClInclude Include="..\..\..\src\jit\MOpcodes.h" />
+    <ClInclude Include="..\..\..\src\jit\MoveEmitter.h" />
+    <ClInclude Include="..\..\..\src\jit\MoveResolver.h" />
+    <ClInclude Include="..\..\..\src\jit\ParallelArrayAnalysis.h" />
+    <ClInclude Include="..\..\..\src\jit\ParallelFunctions.h" />
+    <ClInclude Include="..\..\..\src\jit\PcScriptCache-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\PcScriptCache.h" />
+    <ClInclude Include="..\..\..\src\jit\PerfSpewer.h" />
+    <ClInclude Include="..\..\..\src\jit\RangeAnalysis.h" />
+    <ClInclude Include="..\..\..\src\jit\RegisterAllocator.h" />
+    <ClInclude Include="..\..\..\src\jit\Registers.h" />
+    <ClInclude Include="..\..\..\src\jit\RegisterSets.h" />
+    <ClInclude Include="..\..\..\src\jit\Safepoints.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\Assembler-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\Assembler-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\BaselineCompiler-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\BaselineCompiler-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\CodeGenerator-shared-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\CodeGenerator-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\CodeGenerator-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\IonAssemblerBuffer.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\IonAssemblerBufferWithConstantPools.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\IonFrames-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\IonFrames-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\LIR-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\Lowering-shared-inl.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\Lowering-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\Lowering-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\MacroAssembler-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\shared\MoveEmitter-x86-shared.h" />
+    <ClInclude Include="..\..\..\src\jit\SnapshotReader.h" />
+    <ClInclude Include="..\..\..\src\jit\SnapshotWriter.h" />
+    <ClInclude Include="..\..\..\src\jit\StackSlotAllocator.h" />
+    <ClInclude Include="..\..\..\src\jit\StupidAllocator.h" />
+    <ClInclude Include="..\..\..\src\jit\TypePolicy.h" />
+    <ClInclude Include="..\..\..\src\jit\UnreachableCodeElimination.h" />
+    <ClInclude Include="..\..\..\src\jit\ValueNumbering.h" />
+    <ClInclude Include="..\..\..\src\jit\VMFunctions.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\Architecture-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\Assembler-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\BaselineCompiler-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\BaselineHelpers-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\BaselineRegisters-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\CodeGenerator-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\LIR-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\LOpcodes-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\Lowering-x86.h" />
+    <ClInclude Include="..\..\..\src\jit\x86\MacroAssembler-x86.h" />
+    <ClInclude Include="..\..\..\src\jsalloc.h" />
+    <ClInclude Include="..\..\..\src\jsanalyze.h" />
+    <ClInclude Include="..\..\..\src\jsanalyzeinlines.h" />
+    <ClInclude Include="..\..\..\src\jsapi.h" />
+    <ClInclude Include="..\..\..\src\jsarray.h" />
+    <ClInclude Include="..\..\..\src\jsatom.h" />
+    <ClInclude Include="..\..\..\src\jsatominlines.h" />
+    <ClInclude Include="..\..\..\src\jsbool.h" />
+    <ClInclude Include="..\..\..\src\jsboolinlines.h" />
+    <ClInclude Include="..\..\..\src\jsclass.h" />
+    <ClInclude Include="..\..\..\src\jsclist.h" />
+    <ClInclude Include="..\..\..\src\jsclone.h" />
+    <ClInclude Include="..\..\..\src\jscntxt.h" />
+    <ClInclude Include="..\..\..\src\jscntxtinlines.h" />
+    <ClInclude Include="..\..\..\src\jscompartment.h" />
+    <ClInclude Include="..\..\..\src\jscompartmentinlines.h" />
+    <ClInclude Include="..\..\..\src\jscpucfg.h" />
+    <ClInclude Include="..\..\..\src\jscrashformat.h" />
+    <ClInclude Include="..\..\..\src\jscrashreport.h" />
+    <ClInclude Include="..\..\..\src\jsdate.h" />
+    <ClInclude Include="..\..\..\src\jsdbgapi.h" />
+    <ClInclude Include="..\..\..\src\jsdtoa.h" />
+    <ClInclude Include="..\..\..\src\jsexn.h" />
+    <ClInclude Include="..\..\..\src\jsfriendapi.h" />
+    <ClInclude Include="..\..\..\src\jsfun.h" />
+    <ClInclude Include="..\..\..\src\jsfuninlines.h" />
+    <ClInclude Include="..\..\..\src\jsgc.h" />
+    <ClInclude Include="..\..\..\src\jsgcinlines.h" />
+    <ClInclude Include="..\..\..\src\jsinfer.h" />
+    <ClInclude Include="..\..\..\src\jsinferinlines.h" />
+    <ClInclude Include="..\..\..\src\jsiter.h" />
+    <ClInclude Include="..\..\..\src\jslibmath.h" />
+    <ClInclude Include="..\..\..\src\jslock.h" />
+    <ClInclude Include="..\..\..\src\jsmath.h" />
+    <ClInclude Include="..\..\..\src\jsnativestack.h" />
+    <ClInclude Include="..\..\..\src\jsnum.h" />
+    <ClInclude Include="..\..\..\src\jsobj.h" />
+    <ClInclude Include="..\..\..\src\jsobjinlines.h" />
+    <ClInclude Include="..\..\..\src\json.h" />
+    <ClInclude Include="..\..\..\src\jsonparser.h" />
+    <ClInclude Include="..\..\..\src\jsopcode.h" />
+    <ClInclude Include="..\..\..\src\jsopcodeinlines.h" />
+    <ClInclude Include="..\..\..\src\jsprf.h" />
+    <ClInclude Include="..\..\..\src\jspropertytree.h" />
+    <ClInclude Include="..\..\..\src\jsprototypes.h" />
+    <ClInclude Include="..\..\..\src\jsproxy.h" />
+    <ClInclude Include="..\..\..\src\jsprvtd.h" />
+    <ClInclude Include="..\..\..\src\jspubtd.h" />
+    <ClInclude Include="..\..\..\src\jsreflect.h" />
+    <ClInclude Include="..\..\..\src\jsscript.h" />
+    <ClInclude Include="..\..\..\src\jsscriptinlines.h" />
+    <ClInclude Include="..\..\..\src\jsstr.h" />
+    <ClInclude Include="..\..\..\src\jsstrinlines.h" />
+    <ClInclude Include="..\..\..\src\jstypedarray.h" />
+    <ClInclude Include="..\..\..\src\jstypedarrayinlines.h" />
+    <ClInclude Include="..\..\..\src\jstypes.h" />
+    <ClInclude Include="..\..\..\src\jsutil.h" />
+    <ClInclude Include="..\..\..\src\jsversion.h" />
+    <ClInclude Include="..\..\..\src\jswatchpoint.h" />
+    <ClInclude Include="..\..\..\src\jsweakcache.h" />
+    <ClInclude Include="..\..\..\src\jsweakmap.h" />
+    <ClInclude Include="..\..\..\src\jswin.h" />
+    <ClInclude Include="..\..\..\src\jsworkers.h" />
+    <ClInclude Include="..\..\..\src\jswrapper.h" />
+    <ClInclude Include="..\..\..\src\perf\jsperf.h" />
+    <ClInclude Include="..\..\..\src\prmjtime.h" />
+    <ClInclude Include="..\..\..\src\shell\jsheaptools.h" />
+    <ClInclude Include="..\..\..\src\shell\jsoptparse.h" />
+    <ClInclude Include="..\..\..\src\TraceLogging.h" />
+    <ClInclude Include="..\..\..\src\vm\ArgumentsObject-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\ArgumentsObject.h" />
+    <ClInclude Include="..\..\..\src\vm\BooleanObject-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\BooleanObject.h" />
+    <ClInclude Include="..\..\..\src\vm\CommonPropertyNames.h" />
+    <ClInclude Include="..\..\..\src\vm\DateTime.h" />
+    <ClInclude Include="..\..\..\src\vm\Debugger-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\Debugger.h" />
+    <ClInclude Include="..\..\..\src\vm\ForkJoin.h" />
+    <ClInclude Include="..\..\..\src\vm\GeneratorObject.h" />
+    <ClInclude Include="..\..\..\src\vm\GlobalObject-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\GlobalObject.h" />
+    <ClInclude Include="..\..\..\src\vm\Interpreter-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\Interpreter.h" />
+    <ClInclude Include="..\..\..\src\vm\Keywords.h" />
+    <ClInclude Include="..\..\..\src\vm\MatchPairs.h" />
+    <ClInclude Include="..\..\..\src\vm\Monitor.h" />
+    <ClInclude Include="..\..\..\src\vm\NumberObject-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\NumberObject.h" />
+    <ClInclude Include="..\..\..\src\vm\NumericConversions.h" />
+    <ClInclude Include="..\..\..\src\vm\ObjectImpl-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\ObjectImpl.h" />
+    <ClInclude Include="..\..\..\src\vm\Probes-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\Probes.h" />
+    <ClInclude Include="..\..\..\src\vm\RegExpObject-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\RegExpObject.h" />
+    <ClInclude Include="..\..\..\src\vm\RegExpStatics-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\RegExpStatics.h" />
+    <ClInclude Include="..\..\..\src\vm\ScopeObject-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\ScopeObject.h" />
+    <ClInclude Include="..\..\..\src\vm\Shape-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\Shape.h" />
+    <ClInclude Include="..\..\..\src\vm\SPSProfiler.h" />
+    <ClInclude Include="..\..\..\src\vm\Stack-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\Stack.h" />
+    <ClInclude Include="..\..\..\src\vm\StopIterationObject.h" />
+    <ClInclude Include="..\..\..\src\vm\String-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\JsString.h" />
+    <ClInclude Include="..\..\..\src\vm\StringBuffer.h" />
+    <ClInclude Include="..\..\..\src\vm\StringObject-inl.h" />
+    <ClInclude Include="..\..\..\src\vm\StringObject.h" />
+    <ClInclude Include="..\..\..\src\vm\ThreadPool.h" />
+    <ClInclude Include="..\..\..\src\vm\Unicode.h" />
+    <ClInclude Include="..\..\..\src\vm\WeakMapObject.h" />
+    <ClInclude Include="..\..\..\src\vm\Xdr.h" />
+    <ClInclude Include="..\..\..\src\yarr\ASCIICType.h" />
+    <ClInclude Include="..\..\..\src\yarr\BumpPointerAllocator.h" />
+    <ClInclude Include="..\..\..\src\yarr\CheckedArithmetic.h" />
+    <ClInclude Include="..\..\..\src\yarr\MatchResult.h" />
+    <ClInclude Include="..\..\..\src\yarr\OSAllocator.h" />
+    <ClInclude Include="..\..\..\src\yarr\PageAllocation.h" />
+    <ClInclude Include="..\..\..\src\yarr\PageBlock.h" />
+    <ClInclude Include="..\..\..\src\yarr\RegExpJitTables.h" />
+    <ClInclude Include="..\..\..\src\yarr\VMTags.h" />
+    <ClInclude Include="..\..\..\src\yarr\wtfbridge.h" />
+    <ClInclude Include="..\..\..\src\yarr\Yarr.h" />
+    <ClInclude Include="..\..\..\src\yarr\YarrCanonicalizeUCS2.h" />
+    <ClInclude Include="..\..\..\src\yarr\YarrInterpreter.h" />
+    <ClInclude Include="..\..\..\src\yarr\YarrJIT.h" />
+    <ClInclude Include="..\..\..\src\yarr\YarrParser.h" />
+    <ClInclude Include="..\..\..\src\yarr\YarrPattern.h" />
+    <ClInclude Include="..\..\..\src\yarr\YarrSyntaxChecker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

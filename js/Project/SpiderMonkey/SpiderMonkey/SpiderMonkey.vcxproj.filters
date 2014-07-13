@@ -1,0 +1,1778 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Assembler">
+      <UniqueIdentifier>{4d3e5766-04ab-4f56-9e61-0565032a6d21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Assembler">
+      <UniqueIdentifier>{b65d8a05-35f4-4781-ae2e-39c5c006a229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Assembler\JIT">
+      <UniqueIdentifier>{934ceeca-762b-482c-bb46-6b9069441e28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Assembler\JIT">
+      <UniqueIdentifier>{978821e0-6a0d-46d8-bac3-315b10caebf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Assembler\Moco">
+      <UniqueIdentifier>{edfd5439-574a-48ec-8fc1-dab853f619cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Assembler\WTF">
+      <UniqueIdentifier>{a8ba3e46-f4de-4651-bb0a-4ce1d1803dd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Assembler\WTF">
+      <UniqueIdentifier>{b9814e9a-177a-4431-b412-7f6699c904dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DS">
+      <UniqueIdentifier>{bdf0b997-feb2-4d2f-b0c0-8a95c72f7d86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DS">
+      <UniqueIdentifier>{f41568f3-4e37-4f90-ad68-d3d7d8880907}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\FrontEnd">
+      <UniqueIdentifier>{4338fbca-adcf-45c2-af76-c40037f45dc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FrontEnd">
+      <UniqueIdentifier>{1a682364-a80c-45a9-9134-9554936751f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GC">
+      <UniqueIdentifier>{bd00ea31-6efc-4476-9b52-a5d896c36b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GC">
+      <UniqueIdentifier>{0eb71882-56fd-4665-ab3d-4e4393dc971e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\JIT">
+      <UniqueIdentifier>{09130ec1-44df-4aca-945a-0885c91b8569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\JIT">
+      <UniqueIdentifier>{c7903096-5245-42a4-9245-aca88701c546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\JIT\x86">
+      <UniqueIdentifier>{27bca15e-e0d8-4a1a-a2cb-ee9e5757f079}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\JIT\x86">
+      <UniqueIdentifier>{f4a46872-c1b0-499d-8956-76f5d70bf6d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Perf">
+      <UniqueIdentifier>{96fe6ab4-f4e2-47bf-af22-f88803c52587}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Perf">
+      <UniqueIdentifier>{b3a7455a-3b01-423b-b1e6-eadd4707d085}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\VM">
+      <UniqueIdentifier>{50445c0d-7264-4d36-92d3-b215e5fcf959}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\VM">
+      <UniqueIdentifier>{6e173d26-3cd4-4fbc-875e-4e5c05260a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\YARR">
+      <UniqueIdentifier>{4df8c21f-248b-49ea-8d6b-20a49c29e91c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\YARR">
+      <UniqueIdentifier>{38fcb80f-3d16-4ef1-b3ce-d480e3acdbbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Std">
+      <UniqueIdentifier>{cf365a91-a260-4f6a-9ea0-ed8058cdb1d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Std">
+      <UniqueIdentifier>{2d376ea8-146b-45ed-a077-28c0d3fc7f65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Builtin">
+      <UniqueIdentifier>{d8124c75-d96a-4dce-ab8f-952ddfe5f017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Builtin">
+      <UniqueIdentifier>{932447e5-ca94-4a6a-b8fe-3583adb13f3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\BuildAutoGen">
+      <UniqueIdentifier>{0740833e-b7b0-4e72-93f0-183dccea1843}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MFBT">
+      <UniqueIdentifier>{c8aa99d9-7d29-4b52-8bf0-62d4755b1616}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MFBT">
+      <UniqueIdentifier>{2cb183e2-85b2-4a0c-9704-7a2038f8bc4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MFBT\decimal">
+      <UniqueIdentifier>{8ca00bff-b087-498d-9805-edea5a58e174}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MFBT\decimal">
+      <UniqueIdentifier>{75ed93eb-792d-49c8-9542-b014337e1015}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MFBT\double-conversion">
+      <UniqueIdentifier>{3b13448f-c9e2-4116-a87a-832eb88a688e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MFBT\double-conversion">
+      <UniqueIdentifier>{eb4b0f3c-5c9d-4f2a-91a4-55f9e69a3591}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\JIT\Shared">
+      <UniqueIdentifier>{1eafde51-1bbf-47f7-82df-fb498fee05a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Assembler\JIT\Shared">
+      <UniqueIdentifier>{1cf9e5c5-3cbb-49fc-aba5-84433097b1ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shell">
+      <UniqueIdentifier>{776e079d-53cb-4c7b-a0fd-d24f096e8b9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SHELL">
+      <UniqueIdentifier>{235758d9-384c-4dfa-95a9-4fc30616b565}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\jsscript.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsstr.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jstypedarray.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsutil.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jswatchpoint.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsweakmap.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsworkers.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jswrapper.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\prmjtime.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsalloc.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsanalyze.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsapi.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsarray.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsatom.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsbool.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsclone.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jscntxt.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jscompartment.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jscrashreport.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsdate.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsdbgapi.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsdtoa.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsexn.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsfriendapi.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsfun.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsgc.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsinfer.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsiter.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsmath.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsmemorymetrics.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsnativestack.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsnum.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsobj.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\json.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsonparser.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsopcode.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsprf.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jspropertytree.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsproxy.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsreflect.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\assembler\ARMAssembler.cpp">
+      <Filter>Source Files\Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\assembler\MacroAssemblerARM.cpp">
+      <Filter>Source Files\Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\assembler\MacroAssemblerX86Common.cpp">
+      <Filter>Source Files\Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocatorWin.cpp">
+      <Filter>Source Files\Assembler\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocator.cpp">
+      <Filter>Source Files\Assembler\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocatorOS2.cpp">
+      <Filter>Source Files\Assembler\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\jit\ExecutableAllocatorPosix.cpp">
+      <Filter>Source Files\Assembler\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ds\LifoAlloc.cpp">
+      <Filter>Source Files\DS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\TokenStream.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\BytecodeCompiler.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\BytecodeEmitter.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\FoldConstants.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\NameFunctions.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\ParseMaps.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\ParseNode.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\frontend\Parser.cpp">
+      <Filter>Source Files\FrontEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\Iteration.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\Marking.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\Memory.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\Nursery.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\RootMarking.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\Statistics.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\StoreBuffer.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\Verifier.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gc\Zone.cpp">
+      <Filter>Source Files\GC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\Trampoline-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\MacroAssembler-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\Lowering-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\CodeGenerator-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\BaselineIC-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\BaselineCompiler-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\Bailouts-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\x86\Assembler-x86.cpp">
+      <Filter>Source Files\JIT\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\perf\pm_stub.cpp">
+      <Filter>Source Files\Perf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\ArgumentsObject.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\CharacterEncoding.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\DateTime.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Debugger.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\ForkJoin.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\GlobalObject.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Interpreter.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Monitor.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\ObjectImpl.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Probes.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\PropertyKey.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\RegExpObject.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\RegExpStatics.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\ScopeObject.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\SelfHosting.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Shape.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\SPSProfiler.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Stack.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\StringBuffer.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\ThreadPool.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Unicode.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\Xdr.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\OSAllocatorOS2.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\OSAllocatorPosix.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\OSAllocatorWin.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\PageBlock.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\YarrCanonicalizeUCS2.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\YarrInterpreter.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\YarrJIT.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\YarrPattern.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\yarr\YarrSyntaxChecker.cpp">
+      <Filter>Source Files\YARR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vm\JsString.cpp">
+      <Filter>Source Files\VM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\Eval.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\Intl.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\MapObject.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\Module.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\Object.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\ParallelArray.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\Profilers.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\RegExp.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\builtin\TestingFunctions.cpp">
+      <Filter>Source Files\Builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\Poison.cpp">
+      <Filter>Source Files\MFBT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\SHA1.cpp">
+      <Filter>Source Files\MFBT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\HashFunctions.cpp">
+      <Filter>Source Files\MFBT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\decimal\Decimal.cpp">
+      <Filter>Source Files\MFBT\decimal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\cached-powers.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\diy-fp.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\double-conversion.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\fast-dtoa.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\fixed-dtoa.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\strtod.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\bignum.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\mfbt\double-conversion\bignum-dtoa.cc">
+      <Filter>Source Files\MFBT\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\VMFunctions.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\AliasAnalysis.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\AsmJS.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\AsmJSLink.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\AsmJSSignalHandlers.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BacktrackingAllocator.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\Bailouts.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BaselineBailouts.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BaselineCompiler.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BaselineFrame.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BaselineFrameInfo.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BaselineIC.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BaselineInspector.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BaselineJIT.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BitSet.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\BytecodeAnalysis.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\C1Spewer.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\CodeGenerator.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\EdgeCaseAnalysis.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\EffectiveAddressAnalysis.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\Ion.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\IonAnalysis.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\IonBuilder.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\IonCaches.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\IonFrames.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\IonMacroAssembler.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\IonSpewer.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\JSONSpewer.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\LICM.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\LinearScan.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\LIR.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\LiveRangeAllocator.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\Lowering.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\MCallOptimize.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\MIR.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\MIRGraph.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\MoveResolver.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\ParallelArrayAnalysis.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\ParallelFunctions.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\PerfSpewer.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\RangeAnalysis.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\RegisterAllocator.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\Safepoints.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\Snapshots.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\StupidAllocator.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\TypePolicy.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\UnreachableCodeElimination.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\ValueNumbering.cpp">
+      <Filter>Source Files\JIT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\assembler\wtf\Assertions.cpp">
+      <Filter>Source Files\Assembler\WTF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\Assembler-x86-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\BaselineCompiler-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\BaselineCompiler-x86-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\BaselineIC-x86-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\CodeGenerator-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\CodeGenerator-x86-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\IonFrames-x86-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\Lowering-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\Lowering-x86-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jit\shared\MoveEmitter-x86-shared.cpp">
+      <Filter>Source Files\JIT\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\shell\jsoptparse.cpp">
+      <Filter>Source Files\Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\shell\js.cpp">
+      <Filter>Source Files\Shell</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\TraceLogging.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsalloc.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsanalyze.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsanalyzeinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsapi.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsarray.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsatom.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsatominlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsbool.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsboolinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsclass.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsclist.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsclone.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jscntxt.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jscntxtinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jscompartment.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jscompartmentinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jscpucfg.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jscrashformat.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jscrashreport.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsdate.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsdbgapi.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsdtoa.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsexn.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsfriendapi.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsfun.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsfuninlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsgc.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsgcinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsinfer.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsinferinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsiter.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jslibmath.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jslock.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsmath.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsnativestack.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsnum.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsobj.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsobjinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\json.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsonparser.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsopcode.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsopcodeinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsprf.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jspropertytree.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsprototypes.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsproxy.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsprvtd.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jspubtd.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsreflect.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsscript.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsscriptinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsstr.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsstrinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jstypedarray.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jstypedarrayinlines.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jstypes.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsutil.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsversion.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jswatchpoint.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsweakcache.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsweakmap.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jswin.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsworkers.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jswrapper.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\prmjtime.h">
+      <Filter>Header Files\Std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\AbstractMacroAssembler.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\ARMAssembler.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\ARMv7Assembler.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\AssemblerBuffer.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\AssemblerBufferWithConstantPool.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\CodeLocation.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\LinkBuffer.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssembler.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerARM.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerARMv7.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerCodeRef.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerMIPS.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerSparc.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerX86.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerX86_64.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MacroAssemblerX86Common.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\MIPSAssembler.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\RepatchBuffer.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\SparcAssembler.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\assembler\X86Assembler.h">
+      <Filter>Header Files\Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\jit\ExecutableAllocator.h">
+      <Filter>Header Files\Assembler\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\moco\MocoStubs.h">
+      <Filter>Header Files\Assembler\Moco</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\wtf\Assertions.h">
+      <Filter>Header Files\Assembler\WTF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\wtf\Platform.h">
+      <Filter>Header Files\Assembler\WTF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\wtf\SegmentedVector.h">
+      <Filter>Header Files\Assembler\WTF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\assembler\wtf\VMTags.h">
+      <Filter>Header Files\Assembler\WTF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ds\BitArray.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ds\FixedSizeHash.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ds\InlineMap.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ds\LifoAlloc.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ds\PriorityQueue.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ds\Sort.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ds\SplayTree.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\BytecodeCompiler.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\BytecodeEmitter.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\BytecodeEmitter-inl.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\FoldConstants.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\FullParseHandler.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\NameFunctions.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\ParseMaps.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\ParseMaps-inl.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\ParseNode.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\ParseNode-inl.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\Parser.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\Parser-inl.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\SharedContext.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\SharedContext-inl.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\SourceNotes.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\SyntaxParseHandler.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\frontend\TokenStream.h">
+      <Filter>Header Files\FrontEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Barrier.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Barrier-inl.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\FindSCCs.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\FindSCCs-inl.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\GCInternals.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Heap.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Marking.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Memory.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Nursery.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Nursery-inl.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Statistics.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\StoreBuffer.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gc\Zone.h">
+      <Filter>Header Files\GC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\Architecture-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\MacroAssembler-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\Lowering-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\LOpcodes-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\LIR-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\CodeGenerator-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\BaselineRegisters-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\BaselineHelpers-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\BaselineCompiler-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\x86\Assembler-x86.h">
+      <Filter>Header Files\JIT\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\perf\jsperf.h">
+      <Filter>Header Files\Perf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\RegExpStatics-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ScopeObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ScopeObject-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Shape.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Shape-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\SPSProfiler.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Stack.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Stack-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\StopIterationObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\StringBuffer.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\String-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\StringObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\StringObject-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ThreadPool.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Unicode.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\WeakMapObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Xdr.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ArgumentsObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ArgumentsObject-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\BooleanObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\BooleanObject-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\CommonPropertyNames.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\DateTime.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Debugger.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Debugger-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ForkJoin.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\GeneratorObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\GlobalObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\GlobalObject-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Interpreter.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Interpreter-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Keywords.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\MatchPairs.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Monitor.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\NumberObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\NumberObject-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\NumericConversions.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ObjectImpl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\ObjectImpl-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Probes.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\Probes-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\RegExpObject.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\RegExpObject-inl.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\RegExpStatics.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\ASCIICType.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\BumpPointerAllocator.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\CheckedArithmetic.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\MatchResult.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\OSAllocator.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\PageAllocation.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\PageBlock.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\RegExpJitTables.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\VMTags.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\wtfbridge.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\Yarr.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\YarrCanonicalizeUCS2.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\YarrInterpreter.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\YarrJIT.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\YarrParser.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\YarrPattern.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\yarr\YarrSyntaxChecker.h">
+      <Filter>Header Files\YARR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vm\JsString.h">
+      <Filter>Header Files\VM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\Eval.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\Intl.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\Iterator-inl.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\MapObject.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\Module.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\Object.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\ParallelArray.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\Profilers.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\RegExp.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\builtin\TestingFunctions.h">
+      <Filter>Header Files\Builtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\build-release\selfhosted.out.h">
+      <Filter>Header Files\BuildAutoGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\build-release\js-config.h">
+      <Filter>Header Files\BuildAutoGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\build-release\js-confdefs.h">
+      <Filter>Header Files\BuildAutoGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\build-release\jsautooplen.h">
+      <Filter>Header Files\BuildAutoGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\build-release\jsautokw.h">
+      <Filter>Header Files\BuildAutoGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Assertions.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Atomics.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Attributes.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\BloomFilter.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Casting.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Char16.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\CheckedInt.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Compiler.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Constants.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\DebugOnly.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Endian.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\EnumSet.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\FloatingPoint.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\GuardObjects.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\HashFunctions.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Likely.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\LinkedList.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\MathAlgorithms.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\MemoryChecking.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\MSStdInt.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\NullPtr.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\PodOperations.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Poison.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Range.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\RangedPtr.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\RefPtr.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Scoped.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\SHA1.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\SplayTree.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\StandardInteger.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\ThreadLocal.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\TypedEnum.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Types.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\TypeTraits.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\Util.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\WeakPtr.h">
+      <Filter>Header Files\MFBT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\decimal\Decimal.h">
+      <Filter>Header Files\MFBT\decimal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\diy-fp.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\double-conversion.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\fast-dtoa.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\fixed-dtoa.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\ieee.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\strtod.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\utils.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\bignum.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\bignum-dtoa.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\mfbt\double-conversion\cached-powers.h">
+      <Filter>Header Files\MFBT\double-conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\VMFunctions.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\AliasAnalysis.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\AsmJS.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\AsmJSModule.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BacktrackingAllocator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\Bailouts.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineCompiler.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineFrame.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineFrameInfo.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineFrame-inl.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineHelpers.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineIC.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineInspector.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineJIT.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BaselineRegisters.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BitSet.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\BytecodeAnalysis.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\C1Spewer.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\CodeGenerator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\CompactBuffer.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\CompileInfo.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\CompileInfo-inl.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\CompilerRoot.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\EdgeCaseAnalysis.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\EffectiveAddressAnalysis.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\ExecutionModeInlines.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\FixedArityList.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\FixedList.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\InlineList.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\Ion.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonAllocPolicy.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonAnalysis.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonBuilder.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonCaches.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonCode.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonCompartment.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonFrameIterator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonFrameIterator-inl.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonFrames.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonFrames-inl.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonInstrumentation.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonLinker.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonMacroAssembler.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonSpewer.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\IonTypes.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\JSONSpewer.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\LICM.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\LinearScan.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\LIR.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\LIR-Common.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\LIR-inl.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\LiveRangeAllocator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\LOpcodes.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\Lowering.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\MIR.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\MIRGenerator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\MIRGraph.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\MOpcodes.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\MoveEmitter.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\MoveResolver.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\ParallelArrayAnalysis.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\ParallelFunctions.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\PcScriptCache.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\PcScriptCache-inl.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\PerfSpewer.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\RangeAnalysis.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\RegisterAllocator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\Registers.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\RegisterSets.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\Safepoints.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\SnapshotReader.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\SnapshotWriter.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\StackSlotAllocator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\StupidAllocator.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\TypePolicy.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\UnreachableCodeElimination.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\ValueNumbering.h">
+      <Filter>Header Files\JIT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\Assembler-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\Assembler-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\BaselineCompiler-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\BaselineCompiler-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\CodeGenerator-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\CodeGenerator-shared-inl.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\CodeGenerator-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\IonAssemblerBuffer.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\IonAssemblerBufferWithConstantPools.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\IonFrames-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\IonFrames-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\LIR-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\Lowering-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\Lowering-shared-inl.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\Lowering-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\MacroAssembler-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jit\shared\MoveEmitter-x86-shared.h">
+      <Filter>Source Files\Assembler\JIT\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\shell\jsoptparse.h">
+      <Filter>Header Files\SHELL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\shell\jsheaptools.h">
+      <Filter>Header Files\SHELL</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.txt" />
+  </ItemGroup>
+</Project>
