@@ -927,9 +927,7 @@ class JSObject : public js::ObjectImpl
 
     static inline js::ThingRootKind rootKind() { return js::THING_ROOT_OBJECT; }
 
-#ifdef DEBUG
     void dump();
-#endif
 
   private:
     static void staticAsserts() {

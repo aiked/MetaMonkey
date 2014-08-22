@@ -25,6 +25,9 @@
 
 #include "js/Vector.h"
 
+// METADEV
+#include <vector>
+
 namespace js {
 namespace frontend {
 
@@ -38,15 +41,24 @@ enum TokenKind {
     TOK_INC, TOK_DEC,              /* increment/decrement (++ --) */
     TOK_DOT,                       /* member operator (.) */
     TOK_TRIPLEDOT,                 /* for rest arguments (...) */
-    TOK_LB, TOK_RB,                /* left and right brackets */
-    TOK_LC, TOK_RC,                /* left and right curlies (braces) */
-    TOK_LP, TOK_RP,                /* left and right parentheses */
+    TOK_LB, TOK_RB,                /* left and right brackets 10,11 [] */
+    TOK_LC, TOK_RC,                /* left and right curlies (braces) {} */
+    TOK_LP, TOK_RP,                /* left and right parentheses () */
+
+	/* METADEV meta tag tokens, per TokenKindIsMetaTag */
+	TOK_META_LQ, TOK_META_RQ,	// produce ast from expression .< expr >.
+	TOK_META_ESC, // .~ escape
+	TOK_META_INLINE, // .! inline
+	TOK_META_DUCK, 	// .@ ast to string
+	TOK_META_HASH,	// .# string to ast
+	/////////////////////////////////
+
     TOK_NAME,                      /* identifier */
     TOK_NUMBER,                    /* numeric constant */
     TOK_STRING,                    /* string constant */
     TOK_REGEXP,                    /* RegExp constant */
     TOK_TRUE,                      /* true */
-    TOK_FALSE,                     /* false */
+    TOK_FALSE,                     /* false 20 */
     TOK_NULL,                      /* null */
     TOK_THIS,                      /* this */
     TOK_FUNCTION,                  /* function keyword */
@@ -136,7 +148,7 @@ enum TokenKind {
     TOK_ARROW,                     /* function arrow (=>) */
 
     /* Assignment ops (= += -= etc.), per TokenKindIsAssignment */
-    TOK_ASSIGN,                    /* assignment ops (= += -= etc.) */
+    TOK_ASSIGN,                    /* assignment ops (= += -= etc.) 80*/
     TOK_ASSIGNMENT_START = TOK_ASSIGN,
     TOK_ADDASSIGN,
     TOK_SUBASSIGN,
@@ -465,6 +477,7 @@ class MOZ_STACK_CLASS TokenStream
         return type == type1 || type == type2;
     }
     const CharBuffer &getTokenbuf() const { return tokenbuf; }
+
     const char *getFilename() const { return filename; }
     unsigned getLineno() const { return lineno; }
     unsigned getColumn() const { return userbuf.addressOfNextRawChar() - linebase - 1; }
@@ -779,7 +792,14 @@ class MOZ_STACK_CLASS TokenStream
         TokenBuf(JSContext *cx, const jschar *buf, size_t length)
           : base_(buf), limit_(buf + length), ptr(buf),
             skipBase(cx, &base_), skipLimit(cx, &limit_), skipPtr(cx, &ptr)
-        { }
+        {  }
+
+		//metadev
+		void initBufferChar( jschar *chars, size_t length ) {
+			JS_ASSERT( _bufferedPtr.size() > 0 );
+		}
+
+
 
         bool hasRawChars() const {
             return ptr < limit_;
@@ -835,6 +855,7 @@ class MOZ_STACK_CLASS TokenStream
         /* Use this with caution! */
         void setAddressOfNextRawChar(const jschar *a, bool allowPoisoned = false) {
             JS_ASSERT_IF(!allowPoisoned, a);
+			// check if it goes  here
             ptr = a;
         }
 
@@ -861,6 +882,10 @@ class MOZ_STACK_CLASS TokenStream
         // We are not yet moving strings
         SkipRoot skipBase, skipLimit, skipPtr;
     };
+
+	private:
+
+	TokenBuf* getUserBuffer() { return &userbuf; }
 
     TokenKind getTokenInternal();     /* doesn't check for pushback or error flag. */
 

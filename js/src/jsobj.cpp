@@ -4997,7 +4997,6 @@ js_GetterOnlyPropertyStub(JSContext *cx, HandleObject obj, HandleId id, JSBool s
     return JS_FALSE;
 }
 
-#ifdef DEBUG
 
 /*
  * Routines to print out values during debugging.  These are FRIEND_API to help
@@ -5046,7 +5045,7 @@ dumpValue(const Value &v)
             fprintf(stderr, "false");
     } else if (v.isMagic()) {
         fprintf(stderr, "<invalid");
-#ifdef DEBUG
+
         switch (v.whyMagic()) {
           case JS_ELEMENTS_HOLE:     fprintf(stderr, " elements hole");      break;
           case JS_NATIVE_ENUMERATE:  fprintf(stderr, " native enumeration"); break;
@@ -5054,7 +5053,7 @@ dumpValue(const Value &v)
           case JS_GENERATOR_CLOSING: fprintf(stderr, " generator closing");  break;
           default:                   fprintf(stderr, " ?!");                 break;
         }
-#endif
+
         fprintf(stderr, ">");
     } else {
         fprintf(stderr, "unexpected value");
@@ -5282,8 +5281,6 @@ js_DumpStackFrame(JSContext *cx, StackFrame *start)
         fputc('\n', stderr);
     }
 }
-
-#endif /* DEBUG */
 
 JS_FRIEND_API(void)
 js_DumpBacktrace(JSContext *cx)

@@ -60,6 +60,7 @@ class UpvarCookie
     }
 };
 
+// metadev added METAQUAZI, METAESC, METAINLINE
 #define FOR_EACH_PARSE_NODE_KIND(F) \
     F(NOP) \
     F(SEMI) \
@@ -102,6 +103,7 @@ class UpvarCookie
     F(VAR) \
     F(CONST) \
     F(WITH) \
+	F(METAQUAZI) \
     F(RETURN) \
     F(NEW) \
     F(DELETE) \
@@ -126,6 +128,8 @@ class UpvarCookie
     \
     /* Unary operators. */ \
     F(TYPEOF) \
+	F(METAESC) \
+	F(METAINLINE) \
     F(VOID) \
     F(NOT) \
     F(BITNOT) \
@@ -808,10 +812,10 @@ struct ParseNode
         return *static_cast<const NodeType *>(this);
     }
 
-#ifdef DEBUG
+
     void dump();
     void dump(int indent);
-#endif
+
 };
 
 struct NullaryNode : public ParseNode
@@ -834,9 +838,9 @@ struct NullaryNode : public ParseNode
         return node.isArity(PN_NULLARY);
     }
 
-#ifdef DEBUG
+
     void dump();
-#endif
+
 };
 
 struct UnaryNode : public ParseNode
@@ -855,9 +859,9 @@ struct UnaryNode : public ParseNode
         return node.isArity(PN_UNARY);
     }
 
-#ifdef DEBUG
+
     void dump(int indent);
-#endif
+
 };
 
 struct BinaryNode : public ParseNode
@@ -884,9 +888,9 @@ struct BinaryNode : public ParseNode
         return node.isArity(PN_BINARY);
     }
 
-#ifdef DEBUG
+
     void dump(int indent);
-#endif
+
 };
 
 struct TernaryNode : public ParseNode
@@ -918,9 +922,9 @@ struct TernaryNode : public ParseNode
         return node.isArity(PN_TERNARY);
     }
 
-#ifdef DEBUG
+
     void dump(int indent);
-#endif
+
 };
 
 struct ListNode : public ParseNode
@@ -945,9 +949,9 @@ struct ListNode : public ParseNode
         return node.isArity(PN_LIST);
     }
 
-#ifdef DEBUG
+
     void dump(int indent);
-#endif
+
 };
 
 struct CodeNode : public ParseNode
@@ -960,9 +964,9 @@ struct CodeNode : public ParseNode
         return node.isArity(PN_CODE);
     }
 
-#ifdef DEBUG
+
     void dump(int indent);
-#endif
+
 };
 
 enum InBlockBool {
@@ -988,9 +992,9 @@ struct NameNode : public ParseNode
         return node.isArity(PN_NAME);
     }
 
-#ifdef DEBUG
+
     void dump(int indent);
-#endif
+
 };
 
 struct LexicalScopeNode : public ParseNode
@@ -1200,9 +1204,9 @@ class PropertyByValue : public ParseNode
     }
 };
 
-#ifdef DEBUG
+
 void DumpParseTree(ParseNode *pn, int indent = 0);
-#endif
+
 
 /*
  * js::Definition is a degenerate subtype of the PN_FUNC and PN_NAME variants

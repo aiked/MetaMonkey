@@ -137,8 +137,6 @@ js_ObjectClassIs(JSContext *cx, JS::HandleObject obj, js::ESClassValue classValu
 JS_FRIEND_API(const char *)
 js_ObjectClassName(JSContext *cx, JS::HandleObject obj);
 
-#ifdef JS_DEBUG
-
 /*
  * Routines to print out values during debugging.  These are FRIEND_API to help
  * the debugger find them and to support temporarily hacking js_Dump* calls
@@ -156,7 +154,7 @@ js_DumpObject(JSObject *obj);
 
 extern JS_FRIEND_API(void)
 js_DumpChars(const jschar *s, size_t n);
-#endif
+
 
 extern JS_FRIEND_API(bool)
 JS_CopyPropertiesFrom(JSContext *cx, JSObject *target, JSObject *obj);

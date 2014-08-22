@@ -689,6 +689,9 @@
     <ClCompile Include="..\..\..\src\shell\js.cpp">
       <Filter>Source Files\Shell</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\jsunparse.cpp">
+      <Filter>Source Files\Std</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\TraceLogging.h">
@@ -1770,6 +1773,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\shell\jsheaptools.h">
       <Filter>Header Files\SHELL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsunparse.h">
+      <Filter>Header Files\Std</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

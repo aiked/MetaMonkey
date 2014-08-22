@@ -11,3 +11,5 @@
 4.	Deleted the /gdb folder. I did not find where we used it so far.
 5.	Deleted the /editline. A small project to log changes of src inside the 
 	SpiderMonkey. To be enabled required a flag we did not used.
+
+-	search entire solution for METADEV

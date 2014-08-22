@@ -278,6 +278,8 @@ const char js_script_str[]         = "script";
 
 static const char * const statementName[] = {
     "label statement",       /* LABEL */
+	// METADEV
+	"quazi statement", 
     "if statement",          /* IF */
     "else statement",        /* ELSE */
     "destructuring body",    /* BODY */

@@ -16,6 +16,7 @@
  *
  * This parser attempts no error recovery.
  */
+#include <iostream>
 
 #include "frontend/Parser.h"
 
@@ -47,12 +48,19 @@
 #include "vm/NumericConversions.h"
 #include "vm/RegExpStatics-inl.h"
 
+#include <vector>
+
 using namespace js;
 using namespace js::gc;
 using mozilla::Maybe;
 
 namespace js {
 namespace frontend {
+
+//METADEV
+int metaBeginParse::start = 0;
+bool metaBeginParse::hasStart(){ return metaBeginParse::start; }
+void metaBeginParse::markAsStart(){ metaBeginParse::start = 1; }
 
 typedef Rooted<StaticBlockObject*> RootedStaticBlockObject;
 typedef Handle<StaticBlockObject*> HandleStaticBlockObject;
@@ -392,7 +400,7 @@ Parser<ParseHandler>::Parser(JSContext *cx, const CompileOptions &options,
     pc(NULL),
     sct(NULL),
     keepAtoms(cx->runtime()),
-    foldConstants(foldConstants),
+    foldConstants(0),
     compileAndGo(options.compileAndGo),
     selfHostingMode(options.selfHostingMode),
     abortedSyntaxParse(false),
@@ -598,6 +606,8 @@ Parser<ParseHandler>::parse(JSObject *chain)
      *   an object lock before it finishes generating bytecode into a script
      *   protected from the GC by a root or a stack frame reference.
      */
+
+
     GlobalSharedContext globalsc(context, chain, StrictModeFromContext(context));
     ParseContext<ParseHandler> globalpc(this, NULL, &globalsc, /* staticLevel = */ 0, /* bodyid = */ 0);
     if (!globalpc.init())
@@ -2324,7 +2334,7 @@ Parser<SyntaxParseHandler>::moduleDecl()
 template <typename ParseHandler>
 typename ParseHandler::Node
 Parser<ParseHandler>::functionStmt()
-{
+{	
     JS_ASSERT(tokenStream.currentToken().type == TOK_FUNCTION);
     RootedPropertyName name(context);
     if (tokenStream.getToken(TSF_KEYWORD_IS_NAME) == TOK_NAME) {
@@ -2490,6 +2500,13 @@ Parser<ParseHandler>::statements()
         if (!next) {
             if (tokenStream.isEOF())
                 tokenStream.setUnexpectedEOF();
+
+			// METADEV
+			TokenKind currt = tokenStream.currentToken().type;
+			if( currt == TOK_META_RQ ) {
+				break;
+			}
+
             return null();
         }
 
@@ -3599,6 +3616,7 @@ template <typename ParseHandler>
 typename ParseHandler::Node
 Parser<ParseHandler>::expressionStatement()
 {
+	
     tokenStream.ungetToken();
     Node pnexpr = expr();
     if (!pnexpr)
@@ -4776,15 +4794,19 @@ template <typename ParseHandler>
 typename ParseHandler::Node
 Parser<ParseHandler>::statement(bool canHaveDirectives)
 {
+	if( frontend::metaBeginParse::hasStart() ) {
+		//std::cout << "begin\n";
+	}
+
     Node pn;
 
     JS_CHECK_RECURSION(context, return null());
-
+	
     switch (tokenStream.getToken(TSF_OPERAND)) {
       case TOK_LC:
         return blockStatement();
 
-      case TOK_VAR:
+      case TOK_VAR: 
         pn = variables(PNK_VAR);
         if (!pn)
             return null();
@@ -4796,7 +4818,7 @@ Parser<ParseHandler>::statement(bool canHaveDirectives)
       case TOK_CONST:
         if (!abortIfSyntaxParser())
             return null();
-
+		
         pn = variables(PNK_CONST);
         if (!pn)
             return null();
@@ -4851,7 +4873,7 @@ Parser<ParseHandler>::statement(bool canHaveDirectives)
       case TOK_ERROR:
         return null();
 
-      case TOK_STRING:
+      case TOK_STRING: 
         if (!canHaveDirectives && tokenStream.currentToken().atom() == context->names().useAsm) {
             if (!report(ParseWarning, false, null(), JSMSG_USE_ASM_DIRECTIVE_FAIL))
                 return null();
@@ -4859,16 +4881,18 @@ Parser<ParseHandler>::statement(bool canHaveDirectives)
         return expressionStatement();
 
       case TOK_NAME:
-        if (tokenStream.peekToken() == TOK_COLON)
+		  
+        if (tokenStream.peekToken() == TOK_COLON){
             return labeledStatement();
-        if (tokenStream.currentToken().name() == context->names().module
+		}if (tokenStream.currentToken().name() == context->names().module
             && tokenStream.peekTokenSameLine() == TOK_STRING)
         {
             return moduleDecl();
         }
+		
         return expressionStatement();
 
-      default:
+      default: 
         return expressionStatement();
     }
 
@@ -4879,7 +4903,7 @@ Parser<ParseHandler>::statement(bool canHaveDirectives)
 template <>
 ParseNode *
 Parser<FullParseHandler>::expr()
-{
+{    	
     ParseNode *pn = assignExpr();
     if (pn && tokenStream.matchToken(TOK_COMMA)) {
         ParseNode *pn2 = ListNode::create(PNK_COMMA, &handler);
@@ -5082,7 +5106,6 @@ Parser<ParseHandler>::condExpr1()
     Node condition = orExpr1();
     if (!condition || !tokenStream.isCurrentTokenType(TOK_HOOK))
         return condition;
-
     /*
      * Always accept the 'in' operator in the middle clause of a ternary,
      * where it's unambiguous, even if we might be parsing the init of a
@@ -5175,11 +5198,10 @@ Parser<ParseHandler>::assignExpr()
     // rewind.
     TokenStream::Position start(keepAtoms);
     tokenStream.tell(&start);
-
+	
     Node lhs = condExpr1();
     if (!lhs)
         return null();
-
     ParseNodeKind kind;
     switch (tokenStream.currentToken().type) {
       case TOK_ASSIGN:       kind = PNK_ASSIGN;       break;
@@ -5300,7 +5322,12 @@ Parser<ParseHandler>::unaryExpr()
 
     TokenKind tt = tokenStream.getToken(TSF_OPERAND);
     uint32_t begin = pos().begin;
+	// metadev
     switch (tt) {
+	  case TOK_META_INLINE:
+		return unaryOpExpr(PNK_METAINLINE, JSOP_NOP, begin);
+	  case TOK_META_ESC:
+		return unaryOpExpr(PNK_METAESC, JSOP_NOP, begin);
       case TOK_TYPEOF:
         return unaryOpExpr(PNK_TYPEOF, JSOP_TYPEOF, begin);
       case TOK_VOID:
@@ -6321,6 +6348,7 @@ typename ParseHandler::Node
 Parser<ParseHandler>::identifierName()
 {
     JS_ASSERT(tokenStream.isCurrentTokenType(TOK_NAME));
+	
 
     RootedPropertyName name(context, tokenStream.currentToken().name());
     Node pn = newName(name);
@@ -6375,17 +6403,41 @@ typename ParseHandler::Node
 Parser<ParseHandler>::primaryExpr(TokenKind tt)
 {
     JS_ASSERT(tokenStream.isCurrentTokenType(tt));
-
+	
     Node pn, pn2, pn3;
     JSOp op;
 
     JS_CHECK_RECURSION(context, return null());
-
+	//metadev
     switch (tt) {
-      case TOK_FUNCTION:
+		// METADEV
+		case TOK_META_LQ:
+		{
+			/////////////////////////////
+			// AS statement step by step
+
+			pn = handler.newStatementList(pc->blockid(), pos());
+			if (!pn)
+				return null();
+
+			while(!tokenStream.matchToken(TOK_META_RQ, TSF_OPERAND)) {
+				Node next = statement(true); 
+				if (!pn)
+					return null();
+
+				handler.addStatementToList(pn, next, pc);
+			}
+
+			return handler.newMetaQuaziStatement(pn, pos());
+			/////////////////////////////
+		}
+
+
+
+      case TOK_FUNCTION: // function...
         return functionExpr();
 
-      case TOK_LB:
+      case TOK_LB: // [ start of array...
       {
         pn = handler.newList(PNK_ARRAY, null(), JSOP_NEWINIT);
         if (!pn)
@@ -6502,11 +6554,12 @@ Parser<ParseHandler>::primaryExpr(TokenKind tt)
 
             MUST_MATCH_TOKEN(TOK_RB, JSMSG_BRACKET_AFTER_LIST);
         }
+		Token tok = tokenStream.currentToken();
         handler.setEndPosition(pn, pos().end);
         return pn;
       }
 
-      case TOK_LC:
+      case TOK_LC: // { start of object
       {
         Node pnval;
 
@@ -6740,7 +6793,7 @@ Parser<ParseHandler>::primaryExpr(TokenKind tt)
         return letBlock(LetExpresion);
 #endif
 
-      case TOK_LP:
+      case TOK_LP: // ( it is for ( expr )
       {
         bool genexp;
 

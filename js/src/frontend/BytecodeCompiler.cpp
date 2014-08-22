@@ -138,6 +138,8 @@ frontend::CompileScript(JSContext *cx, HandleObject scopeChain,
                         SourceCompressionToken *extraSct /* = NULL */)
 {
     RootedString source(cx, source_);
+
+	/////////////////// metatrace char
     SkipRoot skip(cx, &chars);
 
     /*
@@ -162,8 +164,11 @@ frontend::CompileScript(JSContext *cx, HandleObject scopeChain,
         return NULL;
     SourceCompressionToken mysct(cx);
     SourceCompressionToken *sct = (extraSct) ? extraSct : &mysct;
+
+	//////////////// metaatrace does not go to the cases
     switch (options.sourcePolicy) {
       case CompileOptions::SAVE_SOURCE:
+		  /////////////////// metatrace char, length
         if (!ss->setSourceCopy(cx, chars, length, false, sct))
             return NULL;
         break;
@@ -178,11 +183,13 @@ frontend::CompileScript(JSContext *cx, HandleObject scopeChain,
 
     Maybe<Parser<SyntaxParseHandler> > syntaxParser;
     if (canLazilyParse) {
+		/////////////////// metatrace char, length
         syntaxParser.construct(cx, options, chars, length, /* foldConstants = */ false,
                                (Parser<SyntaxParseHandler> *) NULL,
                                (LazyScript *) NULL);
     }
 
+	/////////////////// metatrace char, length
     Parser<FullParseHandler> parser(cx, options, chars, length, /* foldConstants = */ true,
                                     canLazilyParse ? &syntaxParser.ref() : NULL, NULL);
     parser.sct = sct;
@@ -193,6 +200,7 @@ frontend::CompileScript(JSContext *cx, HandleObject scopeChain,
         options.compileAndGo &&
         evalCaller &&
         (evalCaller->function() || evalCaller->savedCallerFun);
+	/////////////////// metatrace length
     Rooted<JSScript*> script(cx, JSScript::Create(cx, NullPtr(), savedCallerFun,
                                                   options, staticLevel, sourceObject, 0, length));
     if (!script)

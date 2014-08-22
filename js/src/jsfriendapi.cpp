@@ -622,7 +622,6 @@ JS_CloneObject(JSContext *cx, JSObject *obj_, JSObject *proto_, JSObject *parent
     return CloneObject(cx, obj, proto, parent);
 }
 
-#ifdef DEBUG
 JS_FRIEND_API(void)
 js_DumpString(JSString *str)
 {
@@ -652,8 +651,6 @@ js_DumpObject(JSObject *obj)
     }
     obj->dump();
 }
-
-#endif
 
 struct JSDumpHeapTracer : public JSTracer
 {

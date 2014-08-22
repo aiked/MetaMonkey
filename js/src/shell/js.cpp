@@ -2257,6 +2257,8 @@ DumpHeap(JSContext *cx, unsigned argc, jsval *vp)
     return false;
 }
 
+#endif /* DEBUG */
+
 static JSBool
 DumpObject(JSContext *cx, unsigned argc, jsval *vp)
 {
@@ -2271,7 +2273,7 @@ DumpObject(JSContext *cx, unsigned argc, jsval *vp)
     return true;
 }
 
-#endif /* DEBUG */
+
 
 static JSBool
 BuildDate(JSContext *cx, unsigned argc, jsval *vp)

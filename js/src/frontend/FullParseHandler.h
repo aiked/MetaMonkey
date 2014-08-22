@@ -219,6 +219,7 @@ class FullParseHandler
         list->append(stmt);
     }
 
+
     ParseNode *newEmptyStatement(const TokenPos &pos) {
         return new_<UnaryNode>(PNK_SEMI, JSOP_NOP, pos, (ParseNode *) NULL);
     }
@@ -284,6 +285,12 @@ class FullParseHandler
     ParseNode *newBreakStatement(PropertyName *label, const TokenPos &pos) {
         return new_<BreakStatement>(label, pos);
     }
+
+	// METADEV
+    ParseNode *newMetaQuaziStatement(ParseNode *stmts, const TokenPos &pos) {
+		return new_<UnaryNode>(PNK_METAQUAZI, JSOP_NOP, pos, stmts);
+    }
+
 
     ParseNode *newReturnStatement(ParseNode *expr, const TokenPos &pos) {
         JS_ASSERT_IF(expr, pos.encloses(expr->pn_pos));

@@ -226,6 +226,7 @@
     <ClCompile Include="..\..\..\src\jsscript.cpp" />
     <ClCompile Include="..\..\..\src\jsstr.cpp" />
     <ClCompile Include="..\..\..\src\jstypedarray.cpp" />
+    <ClCompile Include="..\..\..\src\jsunparse.cpp" />
     <ClCompile Include="..\..\..\src\jsutil.cpp" />
     <ClCompile Include="..\..\..\src\jswatchpoint.cpp" />
     <ClCompile Include="..\..\..\src\jsweakmap.cpp" />
@@ -554,6 +555,7 @@
     <ClInclude Include="..\..\..\src\jstypedarray.h" />
     <ClInclude Include="..\..\..\src\jstypedarrayinlines.h" />
     <ClInclude Include="..\..\..\src\jstypes.h" />
+    <ClInclude Include="..\..\..\src\jsunparse.h" />
     <ClInclude Include="..\..\..\src\jsutil.h" />
     <ClInclude Include="..\..\..\src\jsversion.h" />
     <ClInclude Include="..\..\..\src\jswatchpoint.h" />

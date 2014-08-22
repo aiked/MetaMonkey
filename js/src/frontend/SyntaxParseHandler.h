@@ -102,6 +102,7 @@ class SyntaxParseHandler
 
     Node newStatementList(unsigned blockid, const TokenPos &pos) { return NodeGeneric; }
     void addStatementToList(Node list, Node stmt, ParseContext<SyntaxParseHandler> *pc) {}
+	
     Node newEmptyStatement(const TokenPos &pos) { return NodeGeneric; }
 
     Node newExprStatement(Node expr, uint32_t end) {
@@ -115,6 +116,8 @@ class SyntaxParseHandler
     Node newCaseOrDefault(uint32_t begin, Node expr, Node body) { return NodeGeneric; }
     Node newContinueStatement(PropertyName *label, const TokenPos &pos) { return NodeGeneric; }
     Node newBreakStatement(PropertyName *label, const TokenPos &pos) { return NodeGeneric; }
+	//metadev
+	Node newMetaQuaziStatement(Node expr, const TokenPos &pos) { return NodeGeneric; }
     Node newReturnStatement(Node expr, const TokenPos &pos) { return NodeGeneric; }
 
     Node newLabeledStatement(PropertyName *label, Node stmt, uint32_t begin) {

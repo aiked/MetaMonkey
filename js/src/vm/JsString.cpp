@@ -75,8 +75,6 @@ JSString::sizeOfExcludingThis(JSMallocSizeOfFun mallocSizeOf)
     return mallocSizeOf(flat.chars());
 }
 
-#ifdef DEBUG
-
 void
 JSString::dumpChars(const jschar *s, size_t n)
 {
@@ -101,6 +99,9 @@ JSString::dumpChars(const jschar *s, size_t n)
     }
     fputc('"', stderr);
 }
+
+
+
 
 void
 JSString::dump()
@@ -133,7 +134,6 @@ JSString::equals(const char *s)
     }
     return *c == *s;
 }
-#endif /* DEBUG */
 
 static JS_ALWAYS_INLINE bool
 AllocChars(JSContext *maybecx, size_t length, jschar **chars, size_t *capacity)
@@ -587,11 +587,11 @@ StaticStrings::isStatic(JSAtom *atom)
     }
 }
 
-#ifdef DEBUG
+
 void
 JSAtom::dump()
 {
     fprintf(stderr, "JSAtom* (%p) = ", (void *) this);
     this->JSString::dump();
 }
-#endif /* DEBUG */
+

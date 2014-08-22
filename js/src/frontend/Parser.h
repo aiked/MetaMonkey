@@ -20,8 +20,21 @@
 #include "frontend/SharedContext.h"
 #include "frontend/SyntaxParseHandler.h"
 
+
+
+
 namespace js {
 namespace frontend {
+
+	//METADEV
+struct metaBeginParse{
+public:
+	static int start;
+	static void init();
+
+	static bool hasStart();
+	static void markAsStart();
+};
 
 struct StmtInfoPC : public StmtInfoBase {
     StmtInfoPC      *down;          /* info for enclosing statement */

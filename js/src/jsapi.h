@@ -2186,6 +2186,10 @@ JS_GetScriptedGlobal(JSContext *cx);
 extern JS_PUBLIC_API(JSObject *)
 JS_InitReflect(JSContext *cx, JSObject *global);
 
+//metadev
+extern JS_PUBLIC_API(bool)
+reflect_parse_from_string(JSContext *cx, jschar *jsQuaziSnippet, uint32_t quaziSnippetLength, jsval *vp);
+
 #ifdef JS_HAS_CTYPES
 /*
  * Initialize the 'ctypes' object on a global variable 'obj'. The 'ctypes'
@@ -2322,6 +2326,7 @@ JS_AddNamedStringRoot(JSContext *cx, JSString **rp, const char *name);
 extern JS_PUBLIC_API(JSBool)
 JS_AddNamedObjectRoot(JSContext *cx, JSObject **rp, const char *name);
 
+//usefull
 extern JS_PUBLIC_API(JSBool)
 JS_AddNamedScriptRoot(JSContext *cx, JSScript **rp, const char *name);
 

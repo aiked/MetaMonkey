@@ -422,11 +422,12 @@ class JSString : public js::gc::Cell
 
     static inline js::ThingRootKind rootKind() { return js::THING_ROOT_STRING; }
 
-#ifdef DEBUG
+	static void dumpChars(const jschar *s, size_t len);
+
     void dump();
-    static void dumpChars(const jschar *s, size_t len);
+    
     bool equals(const char *s);
-#endif
+
 
   private:
     JSString() MOZ_DELETE;
@@ -765,9 +766,7 @@ class JSAtom : public JSFlatString
 
     inline void finalize(js::FreeOp *fop);
 
-#ifdef DEBUG
     void dump();
-#endif
 };
 
 JS_STATIC_ASSERT(sizeof(JSAtom) == sizeof(JSString));

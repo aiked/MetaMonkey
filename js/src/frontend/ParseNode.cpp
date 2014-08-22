@@ -544,7 +544,7 @@ Parser<FullParseHandler>::cloneLeftHandSide(ParseNode *opn)
 } /* namespace frontend */
 } /* namespace js */
 
-#ifdef DEBUG
+
 
 static const char * const parseNodeNames[] = {
 #define STRINGIFY(name) #name,
@@ -744,7 +744,7 @@ NameNode::dump(int indent)
         fprintf(stderr, ")");
     }
 }
-#endif
+
 
 ObjectBox::ObjectBox(JSObject *object, ObjectBox* traceLink)
   : object(object),

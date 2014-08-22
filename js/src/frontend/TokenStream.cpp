@@ -936,6 +936,9 @@ IsTokenSane(Token *tp)
 }
 #endif
 
+
+
+
 bool
 TokenStream::putIdentInTokenbuf(const jschar *identStart)
 {
@@ -1198,6 +1201,34 @@ TokenStream::getTokenInternal()
 
     if (c1kind == Dot) {
         c = getCharIgnoreEOL();
+
+		// METADEV metatags lexical recognition
+		if (c == '<') {
+			tt = TOK_META_LQ;
+			goto out;
+		}
+		if (c == '>') {
+			tt = TOK_META_RQ;
+			goto out;
+		}
+		if (c == '~') {
+			tt = TOK_META_ESC;
+			goto out;
+		}
+		if (c == '!') {
+			tt = TOK_META_INLINE;
+			goto out;
+		}
+		if (c == '@') {
+			tt = TOK_META_DUCK;
+			goto out;
+		}
+		if (c == '#') {
+			tt = TOK_META_HASH;
+			goto out;
+		}
+		/////////////////////////////
+		
         if (JS7_ISDEC(c)) {
             numStart = userbuf.addressOfNextRawChar() - 2;
             decimalPoint = HasDecimal;
@@ -1574,7 +1605,10 @@ TokenStream::getTokenInternal()
             if (matchChar('=')) {
                 tp->t_op = JSOP_GE;
                 tt = TOK_GE;
-            } else {
+            } else if (matchChar('.')) { // METADEV
+				tp->t_op = JSOP_NOP;
+				tt = TOK_META_RQ;
+			} else {
                 tp->t_op = JSOP_GT;
                 tt = TOK_GT;
             }
