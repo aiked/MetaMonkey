@@ -207,45 +207,47 @@ static int run (JSContext *cx) {
 
     /* Your application code here. This may include JSAPI calls to create your own custom JS objects and run scripts. */
 
-
-	size_t lineno = 1;
-	ScopedJSFreePtr<char> filename;
-	const char *quaziSnippet =  "function foo(){print(4);} t=0;";
-	uint32_t quaziSnippetLength = strlen(quaziSnippet);
-
-	//JSScript *script = JS_CompileScript(cx, global,	quaziSnippet, quaziSnippetLength, NULL, lineno);
-	
-	jsval	rval;
-	JSBool	ok;
-
-	ok = JS_EvaluateScript(
-		cx, 
-		global, 
-		quaziSnippet, 
-		strlen(quaziSnippet),
-		"test.js", 
-		1, 
-		&rval
-	);
-
-	JS::Value stringlify;
-	if (!JS_CallFunctionName(cx, global, "foo", 0, NULL, &stringlify))
-	   return false;
-
-
-	//uint32_t lineno = 1;
+	//size_t lineno = 1;
 	//ScopedJSFreePtr<char> filename;
 	//const char *quaziSnippet =  "function foo(){print(4);} t=0;";
 	//uint32_t quaziSnippetLength = strlen(quaziSnippet);
-	//jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);
-	//jsval	rval;
-	//if (!reflect_parse_from_string(cx, jsQuaziSnippet, quaziSnippetLength, &rval))
-	//	return JS_FALSE;
 
-	//JS::Value args[] = { rval  };
+	////JSScript *script = JS_CompileScript(cx, global,	quaziSnippet, quaziSnippetLength, NULL, lineno);
+	//
+	//jsval	rval;
+	//JSBool	ok;
+
+	//ok = JS_EvaluateScript(
+	//	cx, 
+	//	global, 
+	//	quaziSnippet, 
+	//	strlen(quaziSnippet),
+	//	"test.js", 
+	//	1, 
+	//	&rval
+	//);
+
 	//JS::Value stringlify;
-	//if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
+	//if (!JS_CallFunctionName(cx, global, "foo", 0, NULL, &stringlify))
 	//   return false;
+
+//============================= JAST START ================================
+
+	uint32_t lineno = 1;
+	ScopedJSFreePtr<char> filename;
+	const char *quaziSnippet =  "x = [\"dsadas\",1];";
+	uint32_t quaziSnippetLength = strlen(quaziSnippet);
+	jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);
+	jsval	rval;
+	if (!reflect_parse_from_string(cx, jsQuaziSnippet, quaziSnippetLength, &rval))
+		return JS_FALSE;
+
+	JS::Value args[] = { rval  };
+	JS::Value stringlify;
+	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
+	   return false;
+
+//============================= JAST END ================================
 
 	//jsval	rval;
 	//JSBool	ok;
@@ -253,7 +255,7 @@ static int run (JSContext *cx) {
 	//std::cout << "\n\n_________________________________\n";
 
 	//char *source = "parse('x=.< print() + .~y; >.');";
-	////char *source = "Reflect.parse('x=1+print(5);');";
+	//char *source = "Reflect.parse('x=1+print(5);');";
 	//frontend::metaBeginParse::markAsStart();
 	//ok = JS_EvaluateScript(
 	//	cx, 

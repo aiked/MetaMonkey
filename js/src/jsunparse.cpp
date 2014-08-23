@@ -15,9 +15,48 @@ using namespace js;
 
 JSBool unparse::expr_array(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
-	const char *s = "expr_array";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	JSObject *arrayObj;
+	if( !getObjPropertyAndConvertToObj(val, "elements", &arrayObj) )
+		return JS_FALSE;
+
+	uint32_t arrayLen;
+	if (!JS_GetArrayLength(cx, arrayObj, &arrayLen))
+		return JS_FALSE;
+
+	Vector<JSString*> children(cx);
 	
+	children.append(srcStr(JSSRCNAME_LB));
+
+	for(uint32_t i=0; i<arrayLen; ++i) {
+		jsval node;
+
+		if (!JS_GetElement(cx, arrayObj, i, &node)){
+			JS_ReportError(cx, "expr_array: Array does not have index %d", i);
+			return JS_FALSE;
+		}
+
+		JSObject *nodeObj;
+		if( !JS_ValueToObject(cx, node, &nodeObj) ){
+			JS_ReportError(cx, "expr_array: array has not object as value @ index: %d", i);
+		}
+		else{
+			children.append(srcStr(JSSRCNAME_SPACE));
+			
+			JSString *nodeStr;
+			if( !unparse_expr(nodeObj, &nodeStr, indent, 2, false) ){
+				return JS_FALSE;
+			}
+			children.append(nodeStr);
+		}
+
+		if(i!=arrayLen-1 || !JS_GetElement(cx, arrayObj, i, &node) ){
+			children.append(srcStr(JSSRCNAME_COMMA));
+		}
+	}
+	children.append(srcStr(JSSRCNAME_RB));
+	
+	*child = joinStringVector(&children, NULL, NULL, NULL);
+
 	return JS_TRUE;
 }
 
@@ -460,14 +499,33 @@ JSBool unparse::stmt_if(JSObject *val, JSString **child, JSString *indent){
 		children.append(elseStr);
 		children.append(elseSubStmtStr);
 	}
-	*child = joinStringVector(&children, NULL, NULL, NULL);
 
+
+	*child = joinStringVector(&children, NULL, NULL, NULL);
 	return JS_TRUE;	
 }
 
 JSBool unparse::stmt_while(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_while";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+
+	JSObject *testObj;
+	if( !getObjPropertyAndConvertToObj(val, "test", &testObj) )
+		return JS_FALSE;
+
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *whileCondStr;
+	if( !unparse_expr(testObj, &whileCondStr, indent, 0, false) ){
+		return JS_FALSE;
+	}
+
+	JSString *bodySubStmtStr;
+	if(!substmt(bodyObj, &bodySubStmtStr, indent, false))
+		return JS_FALSE;
+
+	*child = joinString(6, indent, srcStr(JSSRCNAME_WHILESPACELP), whileCondStr, 
+		srcStr(JSSRCNAME_RP), bodySubStmtStr, indent);
 
 	return JS_TRUE;	
 }
@@ -795,9 +853,10 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 	char *standardNames[] = {
 		" ", 
 		"do", 
-		"while", 
+		"while (", 
 		"(", ")", 
 		"{", "}",
+		"[", "]",
 		";", 
 		"\n", 
 		";\n",
@@ -810,6 +869,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"return",
 		"function",
 		"=",
+		",",
 		", ",
 		"for ("
 	};
