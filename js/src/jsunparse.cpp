@@ -149,32 +149,69 @@ JSBool unparse::expr_obj(JSObject *val, JSString **child, JSString *indent, int 
 
 JSBool unparse::expr_graph(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
-	const char *s = "expr_graph";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	JSString *indexStr;
+	if( !getObjPropertyAndConvertToString(val, "index", &indexStr) )
+		return JS_FALSE;
+
+	JSObject *expressionObj;
+	if( !getObjPropertyAndConvertToObj(val, "expression", &expressionObj) )
+		return JS_FALSE;
+
+	JSString *expressionStr;
+	if( !unparse_expr(expressionObj, &expressionStr, indent, 18, false) )
+		return JS_FALSE;
+
+	*child = joinString(4, srcStr(JSSRCNAME_HASH), indexStr, 
+						srcStr(JSSRCNAME_ASSIGN), expressionStr );
 
 	return JS_TRUE;
 }
 
 JSBool unparse::expr_graphIndx(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
-	const char *s = "expr_graphIndx";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	JSString *indexStr;
+	if( !getObjPropertyAndConvertToString(val, "index", &indexStr) )
+		return JS_FALSE;
+
+	*child = joinString(3, srcStr(JSSRCNAME_HASH), indexStr, srcStr(JSSRCNAME_HASH) );
 
 	return JS_TRUE;
 }
 
 JSBool unparse::expr_let(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
-	const char *s = "expr_let";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	JSObject *headObj; 
+	if( !getObjPropertyAndConvertToObj(val, "head", &headObj) )
+		return JS_FALSE;
+
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *headStr;
+	if ( !declarators(headObj, &headStr, indent, false) )
+		return JS_FALSE;
+
+	JSString *expressionStr;
+	if( !unparse_expr(bodyObj, &expressionStr, indent, 2, false) )
+		return JS_FALSE;
+
+	*child = joinString(5, JS_NewStringCopyZ(cx,"var ("), headStr,
+							srcStr(JSSRCNAME_RP), srcStr(JSSRCNAME_SPACE), expressionStr );
+		
+	if( !wrapExpr(child, cprec, 3) )
+		return JS_FALSE;
 
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_gen(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
-	const char *s = "expr_gen";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+JSBool unparse::expr_gen(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
+	
+	JSString *compreStr;
+	if ( !comprehension(val, &compreStr, indent) )
+		return JS_FALSE;
+
+	*child = joinString(3, srcStr(JSSRCNAME_LP), compreStr, srcStr(JSSRCNAME_RP));
 
 	return JS_TRUE;
 }
@@ -248,8 +285,7 @@ JSBool unparse::expr_literal(JSObject *val, JSString **child, JSString *indent, 
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_call(JSObject *val, JSString **child, 
-	JSString *indent, int cprec, bool noIn)
+JSBool unparse::expr_call(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
 	JSObject *calleeObj;
 	if( !getObjPropertyAndConvertToObj(val, "callee", &calleeObj) )
@@ -944,6 +980,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"default", 
 		":",
 		": ",
+		"#",
 		"\"",
 		"if (",
 		"return",
@@ -951,7 +988,10 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"=",
 		",",
 		", ",
-		"for ("
+		"for",
+		"for (",
+		"each",
+		"in"
 	};
 
 	for( size_t i=0; i<JSSRCNAME_END; ++i ){
@@ -1055,7 +1095,6 @@ JSBool unparse::params(JSObject *values, JSString **s, JSString *indent)
 	return JS_TRUE;
 }
 
-
 // TODO Needs more code relating the properties of the object
 JSBool unparse::unexpected(JSObject *node, JSString **s){
 	Vector<JSString*> children(cx);
@@ -1088,11 +1127,137 @@ JSBool unparse::unexpected(JSObject *node, JSString **s){
 	return JS_TRUE;
 }
 
+JSBool unparse::forHead(JSObject *val, JSString **s, JSString *indent){
+
+	JSString *lhsStr = NULL;
+	Vector<JSString*> children(cx);
+	Vector<JSString*> lhsVector(cx);
+
+	JSObject *leftObj;
+	if( !getObjPropertyAndConvertToObj(val, "left", &leftObj) )
+		return JS_FALSE;
+
+	JSString *typeStr;
+	if( !getObjPropertyAndConvertToString(leftObj, "type", &typeStr) )
+		return JS_FALSE;
+
+	JSString *varDecStr = JS_NewStringCopyZ(cx,"VariableDeclaration");
+	int32_t cmpVarDecVal;
+	if( !JS_CompareStrings(cx, varDecStr, typeStr, &cmpVarDecVal) )
+			return JS_FALSE;
+
+	if( cmpVarDecVal == 0 ){
+		JSString *kindStr;
+		if( !getObjPropertyAndConvertToString(leftObj, "kind", &kindStr) )
+		return JS_FALSE;
+
+		JSObject *declarObj;
+		if( !getObjPropertyAndConvertToObj(leftObj, "declarations", &declarObj) )
+		return JS_FALSE;
+
+		JSString *declarStr;
+		if ( !declarators(declarObj, &declarStr, indent, false) )
+		return JS_FALSE;
+
+		lhsVector.append(kindStr);
+		lhsVector.append(srcStr(JSSRCNAME_SPACE));
+		lhsVector.append(declarStr);
+	}
+	else{
+		JSString *expressionStr;
+		if( !unparse_expr(leftObj, &expressionStr, indent, 0, false) )
+		return JS_FALSE;
+
+		lhsVector.append(expressionStr);
+	}
+
+	lhsStr = joinStringVector(&lhsVector, NULL, NULL, NULL);
+
+	children.append(srcStr(JSSRCNAME_FOR));
+	children.append(srcStr(JSSRCNAME_SPACE));
+
+	jsval eachVal;
+	if ( JS_GetProperty(cx, val, "each", &eachVal) )
+		children.append(srcStr(JSSRCNAME_EACH));
+
+	children.append(srcStr(JSSRCNAME_LP));
+	children.append(lhsStr);
+	children.append(srcStr(JSSRCNAME_IN));
+	children.append(srcStr(JSSRCNAME_SPACE));
+
+	JSObject *rightObj;
+	if( !getObjPropertyAndConvertToObj(val, "right", &rightObj) )
+		return JS_FALSE;
+
+	JSString *rightStr;
+	if( !unparse_expr(rightObj, &rightStr, indent, 0, false) )
+		return JS_FALSE;
+
+	children.append(srcStr(JSSRCNAME_RP));
+
+	*s = joinStringVector(&children, NULL, NULL, NULL);
+
+	return JS_TRUE;
+}
+
+JSBool unparse::comprehension(JSObject *val, JSString **s, JSString *indent){
+	Vector<JSString*> children(cx);
+
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *bodyStr;
+	if( !unparse_expr(bodyObj, &bodyStr, indent, 2, false) )
+		return JS_FALSE;
+
+	children.append(bodyStr);
+
+	JSObject *blocksObj;
+	if( !getObjPropertyAndConvertToObj(val, "blocks", &blocksObj) )
+		return JS_FALSE;
+
+	uint32_t blocksLen;
+	if (!JS_GetArrayLength(cx, blocksObj, &blocksLen))
+		return JS_FALSE;
+
+	for( uint32_t i=0; i<blocksLen; ++i ){
+		JSObject *blocksNodeObj;
+		if( !getArrayElementAndConvertToObj(blocksObj, i, &blocksNodeObj) )
+			return JS_FALSE;
+
+		children.append(srcStr(JSSRCNAME_SPACE));
+
+		JSString *forHeadStr;
+		if( !forHead(blocksNodeObj, &forHeadStr, indent) )
+			return JS_FALSE;
+
+		children.append(forHeadStr);
+	}
+
+	JSObject *filterObj;
+	if( getObjPropertyAndConvertToObj(val, "filter", &filterObj) ){
+		children.append(srcStr(JSSRCNAME_IFSPACELP));
+
+		JSString *filterStr;
+		if( !unparse_expr(filterObj, &filterStr, indent, 0, false) )
+			return JS_FALSE;
+
+		children.append(filterStr);
+		children.append(srcStr(JSSRCNAME_RP));
+	}
+
+	*s = joinStringVector(&children, NULL, NULL, NULL);
+
+	return JS_TRUE;
+}
+
 JSBool unparse::functionDeclaration(JSString *funcInitStr, JSString **s, 
 		jsval id, JSObject *val, JSString *indent)
 {
 	bool isIdNull = id.isNullOrUndefined();
 	JSString *funcNameStr = NULL;
+
 	if(!isIdNull){
 		JSObject *idObj;
 		if( !JS_ValueToObject(cx, id, &idObj) ){

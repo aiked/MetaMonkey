@@ -64,6 +64,7 @@ class unparse{
 		JSSRCNAME_DEFAULT,
 		JSSRCNAME_COLON,
 		JSSRCNAME_COLONSPACE,
+		JSSRCNAME_HASH,
 		JSSRCNAME_QM,
 		JSSRCNAME_IFSPACELP,
 		JSSRCNAME_RETURN,
@@ -71,7 +72,10 @@ class unparse{
 		JSSRCNAME_ASSIGN,
 		JSSRCNAME_COMMA,
 		JSSRCNAME_COMMASPACE,
+		JSSRCNAME_FOR,
 		JSSRCNAME_FORSPACELP,
+		JSSRCNAME_EACH,
+		JSSRCNAME_IN,
 
 		JSSRCNAME_END
 	};
@@ -133,14 +137,16 @@ class unparse{
 	JSString* prefixSuffixConcatString(JSString *sep, Vector<JSString*> *strs, 
 		JSString *str, size_t index);
 
-	JSBool unparse::declarators(JSObject *decls, JSString **s, JSString *indent, bool noIn);
+	JSBool declarators(JSObject *decls, JSString **s, JSString *indent, bool noIn);
 	JSBool wrapExpr(JSString **s, int cprec, int xprec);
-	JSBool unparse::substmt(JSObject *obj, JSString **s, JSString *indent, bool more);
+	JSBool forHead(JSObject *val, JSString **s, JSString *indent);
+	JSBool comprehension(JSObject *val, JSString **s, JSString *indent);
+	JSBool substmt(JSObject *obj, JSString **s, JSString *indent, bool more);
 	JSBool args(JSObject *values, JSString **s, JSString *indent);
 	JSBool params(JSObject *values, JSString **s, JSString *indent);
 	JSBool unexpected(JSObject *values, JSString **s);
 	JSBool functionDeclaration(JSString *funcInitStr, JSString **s, 
-		jsval id, JSObject *val, JSString *indent);
+								jsval id, JSObject *val, JSString *indent);
 
 
 	JSString *unparse::joinString(size_t num, ...);
