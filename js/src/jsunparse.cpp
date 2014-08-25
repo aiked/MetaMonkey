@@ -218,33 +218,103 @@ JSBool unparse::expr_gen(JSObject *val, JSString **child, JSString *indent, int 
 
 JSBool unparse::expr_comprehen(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
-	const char *s = "expr_comprehen";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	JSString *compreStr;
+	if ( !comprehension(val, &compreStr, indent) )
+		return JS_FALSE;
+
+	*child = joinString(3, srcStr(JSSRCNAME_LB), compreStr, srcStr(JSSRCNAME_RB));
 
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_yield(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
-	const char *s = "expr_yield";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+JSBool unparse::expr_yield(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
+	Vector<JSString*> children(cx);
+	children.append(srcStr(JSSRCNAME_YIELD));
+
+	JSObject *argumentObj;
+	if( getObjPropertyAndConvertToObj(val, "argument", &argumentObj) ){
+
+		JSString *argumentStr;
+		if( !unparse_expr(argumentObj, &argumentStr, indent, 2, false) )
+			return JS_FALSE;
+		children.append(argumentStr);
+	}
+	*child = joinStringVector(&children, NULL, NULL, NULL);
+
+	wrapExpr(child, cprec, 1);
 
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_sequence(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
-	const char *s = "expr_sequence";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+JSBool unparse::expr_sequence(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
+	
+	JSObject *expressionsObj;
+	if( !getObjPropertyAndConvertToObj(val, "expressions", &expressionsObj) )
+		return JS_FALSE;
+
+	uint32_t expressionsLen;
+	if (!JS_GetArrayLength(cx, expressionsObj, &expressionsLen))
+		return JS_FALSE;
+
+	Vector<JSString*> children(cx);
+
+	for (uint32_t i=0; i<expressionsLen; ++i){
+
+		JSObject *propObj;
+		if( !getArrayElementAndConvertToObj(expressionsObj, i, &propObj) )
+			return JS_FALSE;
+
+		JSString *exprStr;
+		if( !unparse_expr(propObj, &exprStr, indent, 2, noIn) )
+			return JS_FALSE;
+
+		children.append(exprStr);
+
+		if( i != expressionsLen-1 ){
+				children.append(srcStr(JSSRCNAME_COMMA));
+		}
+	}
+
+	*child = joinStringVector(&children, NULL, NULL, NULL);
+
+	if( !wrapExpr(child, cprec, 2) )
+		return JS_FALSE;
 
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_cond(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
-	const char *s = "expr_cond";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+JSBool unparse::expr_cond(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
 
+	JSObject *testObj;
+	if( !getObjPropertyAndConvertToObj(val, "test", &testObj) )
+		return JS_FALSE;
+
+	JSString *testStr;
+	if( !unparse_expr(testObj, &testStr, indent, 4, noIn) )
+		return JS_FALSE;
+
+	JSObject *consequentObj;
+	if( !getObjPropertyAndConvertToObj(val, "consequent", &consequentObj) )
+		return JS_FALSE;
+
+	JSString *consequentStr;
+	if( !unparse_expr(consequentObj, &consequentStr, indent, 0, noIn) )
+		return JS_FALSE;
+
+	JSObject *alternateObj;
+	if( !getObjPropertyAndConvertToObj(val, "alternate", &alternateObj) )
+		return JS_FALSE;
+
+	JSString *alternateStr;
+	if( !unparse_expr(alternateObj, &alternateStr, indent, 3, noIn) )
+		return JS_FALSE;
+
+	*child = joinString( 5, testStr, srcStr(JSSRCNAME_QUESTION),
+						consequentStr, srcStr(JSSRCNAME_COLON), alternateStr );
+
+	if( !wrapExpr(child, cprec, 4) )
+		return JS_FALSE;
+	
 	return JS_TRUE;
 }
 
@@ -439,8 +509,7 @@ JSBool unparse::expr_logic(JSObject *val, JSString **child, JSString *indent, in
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_assign(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
+JSBool unparse::expr_assign(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
 	JSObject *leftObj;
 	if( !getObjPropertyAndConvertToObj(val, "left", &leftObj) )
 		return JS_FALSE;
@@ -485,7 +554,6 @@ JSBool unparse::expr_objpattern(JSObject *val, JSString **child, JSString *inden
 
 	return JS_TRUE;
 }
-
 
 //////////////////////////// expression
 
@@ -972,7 +1040,8 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"(", ")", 
 		"{", "}",
 		"[", "]",
-		";", 
+		";",
+		"?",
 		"\n", 
 		";\n",
 		"switch",
@@ -991,7 +1060,8 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"for",
 		"for (",
 		"each",
-		"in"
+		"in",
+		"yield",
 	};
 
 	for( size_t i=0; i<JSSRCNAME_END; ++i ){
