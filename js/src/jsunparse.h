@@ -63,6 +63,7 @@ class unparse{
 		JSSRCNAME_CASE,
 		JSSRCNAME_DEFAULT,
 		JSSRCNAME_COLON,
+		JSSRCNAME_COLONSPACE,
 		JSSRCNAME_QM,
 		JSSRCNAME_IFSPACELP,
 		JSSRCNAME_RETURN,
@@ -137,6 +138,7 @@ class unparse{
 	JSBool unparse::substmt(JSObject *obj, JSString **s, JSString *indent, bool more);
 	JSBool args(JSObject *values, JSString **s, JSString *indent);
 	JSBool params(JSObject *values, JSString **s, JSString *indent);
+	JSBool unexpected(JSObject *values, JSString **s);
 	JSBool functionDeclaration(JSString *funcInitStr, JSString **s, 
 		jsval id, JSObject *val, JSString *indent);
 
@@ -148,6 +150,8 @@ class unparse{
 		const char *key, JSObject **objVal);
 	JSBool unparse::getObjPropertyAndConvertToString(JSObject *obj, 
 		const char *key, JSString **strVal);
+	JSBool unparse::getArrayElementAndConvertToObj(JSObject *arrayObj, 
+		const uint32_t index, JSObject **objVal);
 
 	inline size_t getPrecedence(const char *key){
 		stringToIntMap::Ptr ptr = precedence.lookup(key);

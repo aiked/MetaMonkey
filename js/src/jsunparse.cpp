@@ -28,31 +28,23 @@ JSBool unparse::expr_array(JSObject *val, JSString **child, JSString *indent, in
 	children.append(srcStr(JSSRCNAME_LB));
 
 	for(uint32_t i=0; i<arrayLen; ++i) {
-		jsval node;
-
-		if (!JS_GetElement(cx, arrayObj, i, &node)){
-			JS_ReportError(cx, "expr_array: Array does not have index %d", i);
-			return JS_FALSE;
-		}
-
+		
 		JSObject *nodeObj;
-		if( !JS_ValueToObject(cx, node, &nodeObj) ){
-			JS_ReportError(cx, "expr_array: array has not object as value @ index: %d", i);
-		}
-		else{
-			children.append(srcStr(JSSRCNAME_SPACE));
-			
-			JSString *nodeStr;
-			if( !unparse_expr(nodeObj, &nodeStr, indent, 2, false) ){
-				return JS_FALSE;
-			}
-			children.append(nodeStr);
-		}
-
-		if(i!=arrayLen-1 || !JS_GetElement(cx, arrayObj, i, &node) ){
+		if( !getArrayElementAndConvertToObj(arrayObj, i, &nodeObj) )
+			return JS_FALSE;
+		children.append(srcStr(JSSRCNAME_SPACE));
+		
+		JSString *nodeStr;
+		if( !unparse_expr(nodeObj, &nodeStr, indent, 2, false) )
+			return JS_FALSE;
+		children.append(nodeStr);
+		
+		jsval node;
+		if( i != arrayLen-1 || !JS_GetElement(cx, arrayObj, i, &node) ){
 			children.append(srcStr(JSSRCNAME_COMMA));
 		}
 	}
+
 	children.append(srcStr(JSSRCNAME_RB));
 	
 	*child = joinStringVector(&children, NULL, NULL, NULL);
@@ -62,8 +54,95 @@ JSBool unparse::expr_array(JSObject *val, JSString **child, JSString *indent, in
 
 JSBool unparse::expr_obj(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
-	const char *s = "expr_obj";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	JSObject *propertiesObj;
+	if( !getObjPropertyAndConvertToObj(val, "properties", &propertiesObj) )
+		return JS_FALSE;
+
+	uint32_t propertiesLen;
+	if (!JS_GetArrayLength(cx, propertiesObj, &propertiesLen))
+		return JS_FALSE;
+
+	Vector<JSString*> children(cx);
+	children.append(srcStr(JSSRCNAME_LC));
+
+	for (uint32_t i=0; i<propertiesLen; ++i){
+
+		JSObject *propObj;
+		if( !getArrayElementAndConvertToObj(propertiesObj, i, &propObj) )
+			return JS_FALSE;
+
+		JSString *kindStr;
+		if( !getObjPropertyAndConvertToString(propObj, "kind", &kindStr) )
+			return JS_FALSE;
+
+		JSString *initStr = JS_NewStringCopyZ(cx,"init");
+		JSString *getStr = JS_NewStringCopyZ(cx,"get");
+		JSString *setStr = JS_NewStringCopyZ(cx,"set");
+
+		int32_t cmpInitVal, cmpGetVal, cmpSetVal;
+
+		if( !JS_CompareStrings(cx, initStr, kindStr, &cmpInitVal) )
+			return JS_FALSE;
+		if( !JS_CompareStrings(cx, getStr, kindStr, &cmpGetVal) )
+			return JS_FALSE;
+		if( !JS_CompareStrings(cx, setStr, kindStr, &cmpSetVal) )
+			return JS_FALSE;
+
+		if(cmpInitVal == 0){
+			JSObject *keyObj, *valueObj;
+			if( !getObjPropertyAndConvertToObj(propObj, "key", &keyObj) )
+				return JS_FALSE;
+			if( !getObjPropertyAndConvertToObj(propObj, "value", &valueObj) )
+				return JS_FALSE;
+
+			JSString *initKeyStr, *initValueStr;
+			if( !unparse_expr(keyObj, &initKeyStr, indent, 18, false) )
+				return JS_FALSE;
+			if( !unparse_expr(valueObj, &initValueStr, indent, 18, false) )
+				return JS_FALSE;
+
+			children.append(initKeyStr);
+			children.append(srcStr(JSSRCNAME_COLONSPACE));
+			children.append(initValueStr);
+
+			if( i != propertiesLen-1 ){
+				children.append(srcStr(JSSRCNAME_COMMA));
+			}
+		}
+		else if( cmpGetVal == 0 || cmpSetVal == 0 ){
+			jsval keyVal;
+			if (!JS_GetProperty(cx, propObj, "key", &keyVal))
+				return JS_FALSE;
+
+			JSObject *valueObj;
+			if( !getObjPropertyAndConvertToObj(propObj, "value", &valueObj) )
+				return JS_FALSE;
+
+			JSString *functionStr;
+			if( !functionDeclaration(kindStr, &functionStr, keyVal, valueObj, indent ) )
+				return JS_FALSE;
+
+			children.append(functionStr);
+
+			if( i != propertiesLen-1 ){
+				children.append(srcStr(JSSRCNAME_COMMA));
+			}
+		}
+		else{
+			JSString *unexpectedStr;
+			unexpected(val, &unexpectedStr);
+
+			children.append(unexpectedStr);
+
+			if( i != propertiesLen-1 ){
+				children.append(srcStr(JSSRCNAME_COMMA));
+			}
+		}
+	}
+
+	children.append(srcStr(JSSRCNAME_RC));
+
+	*child = joinStringVector(&children, NULL, NULL, NULL);
 
 	return JS_TRUE;
 }
@@ -864,6 +943,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"case", 
 		"default", 
 		":",
+		": ",
 		"\"",
 		"if (",
 		"return",
@@ -963,8 +1043,47 @@ JSBool unparse::params(JSObject *values, JSString **s, JSString *indent)
 	if ( !unparse_values(values, &children, ava, false) )
 		return JS_FALSE;
 
-	*s = joinStringVector(&children, srcStr(JSSRCNAME_COMMASPACE),
-		srcStr(JSSRCNAME_LP), srcStr(JSSRCNAME_RP));
+	if( children.empty() ){
+		children.append(srcStr(JSSRCNAME_LP));
+		children.append(srcStr(JSSRCNAME_RP));
+		*s = joinStringVector(&children, NULL, NULL, NULL);
+	}
+	else{
+		*s = joinStringVector(&children, srcStr(JSSRCNAME_COMMASPACE),
+			srcStr(JSSRCNAME_LP), srcStr(JSSRCNAME_RP));
+	}
+	return JS_TRUE;
+}
+
+
+// TODO Needs more code relating the properties of the object
+JSBool unparse::unexpected(JSObject *node, JSString **s){
+	Vector<JSString*> children(cx);
+
+	JSString *typeStr;
+	if( !getObjPropertyAndConvertToString(node, "type", &typeStr) )
+		return JS_FALSE;
+
+	JSObject *locObj, *locStartObj;
+	if( getObjPropertyAndConvertToObj(node,"loc", &locObj ) ){
+
+		if( !getObjPropertyAndConvertToObj(locObj, "start", &locStartObj) )
+			return JS_FALSE;
+
+		JSString *sourceStr, *startLineStr;
+		if( !getObjPropertyAndConvertToString(locObj, "source", &sourceStr) )
+			return JS_FALSE;
+		if( !getObjPropertyAndConvertToString(locStartObj, "line", &startLineStr) )
+			return JS_FALSE;
+
+		children.append(JS_NewStringCopyZ(cx," at "));
+		children.append(sourceStr);
+		children.append(srcStr(JSSRCNAME_COLON));
+	}
+	
+	children.append(JS_NewStringCopyZ(cx,"Unexpected parse node type: "));
+
+	*s = joinStringVector(&children, NULL, NULL, NULL);
 
 	return JS_TRUE;
 }
@@ -1125,6 +1244,23 @@ JSBool unparse::getObjPropertyAndConvertToString(JSObject *obj, const char *key,
 		return JS_FALSE;
 	}
 	*strVal = s;
+
+	return JS_TRUE;
+}
+
+JSBool unparse::getArrayElementAndConvertToObj(JSObject *arrayObj, const uint32_t index, 
+	JSObject **objVal)
+{
+	jsval node;
+	if (!JS_GetElement(cx, arrayObj, index, &node)){
+		JS_ReportError(cx, "Array does not have index %d", index);
+		return JS_FALSE;
+	}
+
+	if( !JS_ValueToObject(cx, node, objVal) ){
+		JS_ReportError(cx, "Array has not object as value @ index: %d", index);
+		return JS_FALSE;
+	}
 
 	return JS_TRUE;
 }
