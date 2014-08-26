@@ -1,0 +1,18 @@
+JSObject *propertiesObj;
+if( !getObjPropertyAndConvertToObj(val, "properties", &propertiesObj) )
+	return JS_FALSE;
+
+JSString *kindStr;
+if( !getObjPropertyAndConvertToString(propObj, "kind", &kindStr) )
+	return JS_FALSE;
+
+JSString *kindStr;
+if( !unparse_expr(keyObj, &initKeyStr, indent, 18, false) )
+			return JS_FALSE;
+
+*child = joinStringVector(&children, NULL, NULL, NULL);
+
+if( !wrapExpr(child, cprec, 3) )
+		return JS_FALSE;
+
+JS_NewStringCopyZ(cx,"init");

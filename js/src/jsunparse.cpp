@@ -382,26 +382,113 @@ JSBool unparse::expr_call(JSObject *val, JSString **child, JSString *indent, int
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_new(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
-	const char *s = "expr_new";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+JSBool unparse::expr_new(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
+
+	JSObject *argsObj;
+	if( !getObjPropertyAndConvertToObj(val, "arguments", &argsObj) )
+		return JS_FALSE;
+
+	uint32_t argsLen;
+	if (!JS_GetArrayLength(cx, argsObj, &argsLen))
+		return JS_FALSE;
+
+	if ( argsLen == 0 ){
+		JSObject *calleeObj;
+		if( !getObjPropertyAndConvertToObj(val, "callee", &calleeObj) )
+			return JS_FALSE;
+
+		JSString *exprStr;
+		if( !unparse_expr(calleeObj, &exprStr, indent, 18, false) )
+			return JS_FALSE;
+
+		*child = joinString(3, srcStr(JSSRCNAME_NEW), srcStr(JSSRCNAME_SPACE), exprStr); 
+		
+		if( !wrapExpr(child, cprec, 17) )
+			return JS_FALSE;
+	}
+	else{
+		JSObject *calleeObj;
+		if( !getObjPropertyAndConvertToObj(val, "callee", &calleeObj) )
+			return JS_FALSE;
+
+		JSString *exprStr;
+		if( !unparse_expr(calleeObj, &exprStr, indent, 18, false) )
+			return JS_FALSE;
+
+		JSString *argsStr;
+		if ( !args(argsObj, &argsStr, indent) )
+			return JS_FALSE;
+
+		*child = joinString(4, srcStr(JSSRCNAME_NEW), srcStr(JSSRCNAME_SPACE), exprStr, argsStr); 
+		
+		if( !wrapExpr(child, cprec, 17) )
+			return JS_FALSE;
+	}
 
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_this(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
-	const char *s = "expr_this";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+JSBool unparse::expr_this(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
+	*child = JS_NewStringCopyZ(cx,"this");
 
 	return JS_TRUE;
 }
 
-JSBool unparse::expr_member(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
-{
-	const char *s = "expr_member";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+JSBool unparse::expr_member(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
+	Vector<JSString*> children(cx);
+
+	JSObject *objectObj;
+	if( !getObjPropertyAndConvertToObj(val, "object", &objectObj) )
+		return JS_FALSE;
+
+	JSString *objectStr;
+	if( !unparse_expr(objectObj, &objectStr, indent, 17, false) )
+		return JS_FALSE;
+
+	children.append(objectStr);
+
+	JSObject *computedObj;
+	if( !getObjPropertyAndConvertToObj(val, "computed", &computedObj) ){
+		JSObject *propertyObj;
+		if( !getObjPropertyAndConvertToObj(val, "property", &propertyObj) )
+			return JS_FALSE;
+
+		JSString *propertyStr;
+		if( !unparse_expr(propertyObj, &propertyStr, indent, 0, false) )
+			return JS_FALSE;
+
+		children.append(src(JSSRCNAME_LB));
+		children.append(propertyStr);
+		children.append(src(JSSRCNAME_LB));
+	}
+	else{
+		JSObject *propertyObj;
+		if( !getObjPropertyAndConvertToObj(val, "property", &propertyObj) )
+			return JS_FALSE;
+
+		if( isBadIdentifier(propertyObj) ){
+			JSString *nameStr;
+			if( !getObjPropertyAndConvertToString(propObj, "name", &nameStr) )
+				return JS_FALSE;
+
+			children.append(src(JSSRCNAME_LB));
+			children.append(nameStr);
+			children.append(src(JSSRCNAME_LB));
+		}
+		else{
+			JSString *propertyStr;
+			if( !unparse_expr(propertyObj, &propertyStr, indent, 18, false) )
+				return JS_FALSE;
+
+			children.append(src(JSSRCNAME_DOT));
+			children.append(propertyStr);
+		}
+	}
+
+	*child = joinStringVector(&children, NULL, NULL, NULL);
+
+	if( !wrapExpr(child, cprec, 18) )
+		return JS_FALSE;
 
 	return JS_TRUE;
 }
@@ -1055,6 +1142,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"return",
 		"function",
 		"=",
+		".",
 		",",
 		", ",
 		"for",
@@ -1062,6 +1150,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"each",
 		"in",
 		"yield",
+		"new",
 	};
 
 	for( size_t i=0; i<JSSRCNAME_END; ++i ){
@@ -1404,6 +1493,11 @@ JSString* unparse::prefixSuffixConcatString(JSString *sep, Vector<JSString*> *st
 	}
 	return JS_ConcatStrings(cx, str, (*strs)[index]);
 }
+
+JSBool isBadIdentifier(JSObject *val){
+	return JS_TRUE;
+}
+
 
 JSString* unparse::joinString(size_t num, ...)
 {

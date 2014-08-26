@@ -71,6 +71,7 @@ class unparse{
 		JSSRCNAME_RETURN,
 		JSSRCNAME_FUNCTION,
 		JSSRCNAME_ASSIGN,
+		JSSRCNAME_DOT,
 		JSSRCNAME_COMMA,
 		JSSRCNAME_COMMASPACE,
 		JSSRCNAME_FOR,
@@ -78,6 +79,7 @@ class unparse{
 		JSSRCNAME_EACH,
 		JSSRCNAME_IN,
 		JSSRCNAME_YIELD,
+		JSSRCNAME_NEW,
 
 		JSSRCNAME_END
 	};
@@ -150,6 +152,7 @@ class unparse{
 	JSBool functionDeclaration(JSString *funcInitStr, JSString **s, 
 								jsval id, JSObject *val, JSString *indent);
 
+	JSBool isBadIdentifier(JSObject *val);
 
 	JSString *unparse::joinString(size_t num, ...);
 	JSString *unparse::joinStringVector(Vector<JSString*> *strs, 
