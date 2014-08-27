@@ -20,6 +20,14 @@ if (!JS_GetProperty(cx, val, "id", &idVal)){
 	return JS_FALSE;
 }
 
+JSString *declStr;
+if( !declarators( declObj, &declStr, indent, false) )
+	return JS_FALSE;
+
+JSString *ifSubStmtStr;
+if(!substmt(consequentObj, &ifSubStmtStr, indent, gotElse))
+	return JS_FALSE;
+
 *child = joinStringVector(&children, NULL, NULL, NULL);
 
 if( !wrapExpr(child, cprec, 3) )
@@ -30,3 +38,4 @@ JS_NewStringCopyZ(cx,"init");
 *child = joinString(4, srcStr(JSSRCNAME_HASH), indexStr, 
 						srcStr(JSSRCNAME_ASSIGN), expressionStr );
 
+return indent + "var (" + declarators(n.head, indent) + ")" + substmt(n.body, indent);

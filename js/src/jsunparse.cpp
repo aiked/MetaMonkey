@@ -785,13 +785,16 @@ JSBool unparse::stmt_variableDeclaration(JSObject *val, JSString **child, JSStri
 }
 
 JSBool unparse::stmt_empty(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_empty";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
 
+	*child = joinString(3, indent, srcStr(JSSRCNAME_SEMI), srcStr(JSSRCNAME_NL) );
 	return JS_TRUE;	
 }
 
 JSBool unparse::stmt_expression(JSObject *val, JSString **child, JSString *indent){
+
+	Vector<JSString*> children(cx);
+	children.append(indent);
+
 	JSObject *exprObj;
 	if( !getObjPropertyAndConvertToObj(val, "expression", &exprObj) )
 		return JS_FALSE;
@@ -799,18 +802,61 @@ JSBool unparse::stmt_expression(JSObject *val, JSString **child, JSString *inden
 	JSString *exprStr;
 	if (!unparse_expr(exprObj, &exprStr, indent, 0, false))
 		return JS_FALSE;
-    /*   
-	if (s.match(/^(?:function |var |{)/))
-    s = "(" + s + ")"; 
-	*/
-	*child = joinString(3, indent, exprStr, srcStr(JSSRCNAME_SEMINL));
 
+	char *regexStr = "/^(?:function |var |{)/";
+	JSObject *regexObj = JS_NewRegExpObjectNoStatics(cx, regexStr, strlen(regexStr), 0);
+
+	size_t *exprCharLen;
+	jschar *exprChar = (jschar *)JS_GetStringCharsAndLength(cx, exprStr, exprCharLen);
+
+	JSBool exprBol;
+	jsval *exprRegInfo;
+	if( !JS_ExecuteRegExpNoStatics( cx, regexObj, (jschar *)exprChar, *exprCharLen,
+                          exprCharLen, exprBol, exprRegInfo) )
+		return JS_FALSE;
+
+	if( exprBol == JS_TRUE ){
+		children.append(srcStr(JSSRCNAME_LP));
+		children.append(exprStr);
+		children.append(srcStr(JSSRCNAME_RP));
+	}
+	else{
+		children.append(exprStr);
+	}
+
+	children.append(srcStr(JSSRCNAME_SEMINL));
+	*child = joinStringVector(&children, NULL, NULL, NULL);
+	
 	return JS_TRUE;	
 }
 
 JSBool unparse::stmt_let(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_let";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+
+	JSObject *headObj;
+	if( !getObjPropertyAndConvertToObj(val, "head", &headObj) )
+		return JS_FALSE;
+
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *headStr;
+	if( !declarators( headObj, &headStr, indent, false) )
+		return JS_FALSE;
+
+	JSString *bodyStr;
+	if(!substmt(bodyObj, &bodyStr, indent, false))
+		return JS_FALSE;
+
+	Vector<JSString*> children(cx);
+
+	children.append(indent);
+	children.append(JS_NewStringCopyZ(cx,"var ("));
+	children.append(headStr);
+	children.append(srcStr(JSSRCNAME_RP));
+	children.append(bodyStr);
+
+	*child = joinStringVector(&children, NULL, NULL, NULL);
 
 	return JS_TRUE;	
 }
@@ -1613,12 +1659,12 @@ JSBool unparse::isBadIdentifier(JSObject *val){
 	char *regexStr = "/^[_$A-Za-z][_$A-Za-z0-9]*$/";
 	JSObject *regexObj = JS_NewRegExpObjectNoStatics(cx, regexStr, strlen(regexStr), 0);
 
-	size_t *nameCharLen;
-	const jschar *nameChar = JS_GetStringCharsAndLength(cx, nameStr, nameCharLen);
+	size_t *nameCharLen = 0;
+	jschar *nameChar = (jschar *)JS_GetStringCharsAndLength(cx, nameStr, nameCharLen);
 
-	JSBool nameBol;
-	jsval *retvalInfo;
-	if( !JS_ExecuteRegExpNoStatics( cx,regexObj, nameChar, *nameCharLen,
+	JSBool nameBol = JS_FALSE;
+	jsval *retvalInfo = NULL;
+	if( !JS_ExecuteRegExpNoStatics( cx, regexObj, (jschar *)nameChar, *nameCharLen,
                           nameCharLen, nameBol, retvalInfo) )
 		return JS_FALSE;
 
