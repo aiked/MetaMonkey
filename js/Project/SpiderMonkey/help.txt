@@ -10,9 +10,23 @@ JSString *kindStr;
 if( !unparse_expr(keyObj, &initKeyStr, indent, 18, false) )
 			return JS_FALSE;
 
+JSString *functionStr;
+if( !functionDeclaration(kindStr, &functionStr, keyVal, valueObj, indent ) )
+	return JS_FALSE;
+
+jsval idVal;
+if (!JS_GetProperty(cx, val, "id", &idVal)){
+	JS_ReportError(cx, "object has not property (expression)");
+	return JS_FALSE;
+}
+
 *child = joinStringVector(&children, NULL, NULL, NULL);
 
 if( !wrapExpr(child, cprec, 3) )
 		return JS_FALSE;
 
 JS_NewStringCopyZ(cx,"init");
+
+*child = joinString(4, srcStr(JSSRCNAME_HASH), indexStr, 
+						srcStr(JSSRCNAME_ASSIGN), expressionStr );
+
