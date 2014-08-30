@@ -8,7 +8,7 @@ if( !getObjPropertyAndConvertToString(propObj, "kind", &kindStr) )
 
 JSString *kindStr;
 if( !unparse_expr(keyObj, &initKeyStr, indent, 18, false) )
-			return JS_FALSE;
+	return JS_FALSE;
 
 JSString *functionStr;
 if( !functionDeclaration(kindStr, &functionStr, keyVal, valueObj, indent ) )
@@ -35,7 +35,9 @@ if( !wrapExpr(child, cprec, 3) )
 
 JS_NewStringCopyZ(cx,"init");
 
+Vector<JSString*> children(cx);
+
 *child = joinString(4, srcStr(JSSRCNAME_HASH), indexStr, 
 						srcStr(JSSRCNAME_ASSIGN), expressionStr );
 
-return indent + "var (" + declarators(n.head, indent) + ")" + substmt(n.body, indent);
+

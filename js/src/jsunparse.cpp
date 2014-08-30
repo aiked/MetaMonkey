@@ -806,13 +806,13 @@ JSBool unparse::stmt_expression(JSObject *val, JSString **child, JSString *inden
 	char *regexStr = "/^(?:function |var |{)/";
 	JSObject *regexObj = JS_NewRegExpObjectNoStatics(cx, regexStr, strlen(regexStr), 0);
 
-	size_t *exprCharLen;
-	jschar *exprChar = (jschar *)JS_GetStringCharsAndLength(cx, exprStr, exprCharLen);
+	size_t exprCharLen = 0;
+	jschar *exprChar = (jschar *)JS_GetStringCharsAndLength(cx, exprStr, &exprCharLen);
 
-	JSBool exprBol;
-	jsval *exprRegInfo;
-	if( !JS_ExecuteRegExpNoStatics( cx, regexObj, (jschar *)exprChar, *exprCharLen,
-                          exprCharLen, exprBol, exprRegInfo) )
+	JSBool exprBol = JS_FALSE;
+	jsval exprRegInfo;
+	if( !JS_ExecuteRegExpNoStatics( cx, regexObj, (jschar *)exprChar, exprCharLen,
+                          &exprCharLen, exprBol, &exprRegInfo) )
 		return JS_FALSE;
 
 	if( exprBol == JS_TRUE ){
@@ -1058,29 +1058,91 @@ JSBool unparse::stmt_for(JSObject *val, JSString **child, JSString *indent){
 }
 
 JSBool unparse::stmt_forin(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_forin";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	
+	JSString **forHeadStr = NULL;
+	if ( !forHead(val, forHeadStr, indent) )
+		return JS_FALSE;
+
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *bodyStr;
+	if(!substmt(bodyObj, &bodyStr, indent, false))
+		return JS_FALSE;
+
+	*child = joinString(3, indent, forHeadStr, bodyStr );
 
 	return JS_TRUE;	
 }
 
 JSBool unparse::stmt_dowhile(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_dowhile";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *bodyStr;
+	if(!substmt(bodyObj, &bodyStr, indent, true))
+		return JS_FALSE;
+
+	JSObject *testObj;
+	if( !getObjPropertyAndConvertToObj(val, "test", &testObj) )
+		return JS_FALSE;
+
+	JSString *testStr;
+	if( !unparse_expr(testObj, &testStr, indent, 0, false) )
+		return JS_FALSE;
+
+	*child = joinString(7, indent, srcStr(JSSRCNAME_DO), bodyStr,
+						srcStr(JSSRCNAME_WHILESPACELP), testStr,
+						srcStr(JSSRCNAME_RP), srcStr(JSSRCNAME_SEMINL));
 
 	return JS_TRUE;	
 }
 
 JSBool unparse::stmt_continue(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_continue";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	Vector<JSString*> children(cx);
+
+	children.append(indent);
+	children.append(srcStr(JSSRCNAME_CONTINUE));
+
+	JSObject *labelObj;
+	if( getObjPropertyAndConvertToObj(val, "label", &labelObj) ){
+
+		JSString *nameStr;
+		if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
+			return JS_FALSE;
+
+		children.append(srcStr(JSSRCNAME_SPACE));
+		children.append(nameStr);
+	}
+
+	children.append(srcStr(JSSRCNAME_SEMINL));
+	*child = joinStringVector(&children, NULL, NULL, NULL);
 
 	return JS_TRUE;	
 }
 
 JSBool unparse::stmt_break(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_break";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	Vector<JSString*> children(cx);
+
+	children.append(indent);
+	children.append(srcStr(JSSRCNAME_BREAK));
+
+	JSObject *labelObj;
+	if( getObjPropertyAndConvertToObj(val, "label", &labelObj) ){
+
+		JSString *nameStr;
+		if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
+			return JS_FALSE;
+
+		children.append(srcStr(JSSRCNAME_SPACE));
+		children.append(nameStr);
+	}
+
+	children.append(srcStr(JSSRCNAME_SEMINL));
+	*child = joinStringVector(&children, NULL, NULL, NULL);
 
 	return JS_TRUE;	
 }
@@ -1119,15 +1181,48 @@ JSBool unparse::stmt_return(JSObject *val, JSString **child, JSString *indent){
 }
 
 JSBool unparse::stmt_with(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_with";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	
+	JSObject *objectObj;
+	if( !getObjPropertyAndConvertToObj(val, "object", &objectObj) )
+		return JS_FALSE;
 
+	JSString *objectStr;
+	if( !unparse_expr(objectObj, &objectStr, indent, 0, false) )
+		return JS_FALSE;
+	
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *bodyStr;
+	if(!substmt(bodyObj, &bodyStr, indent, false))
+		return JS_FALSE;
+
+	*child = joinString(4, indent, srcStr(JSSRCNAME_WITHSPACELP),
+						srcStr(JSSRCNAME_RP), bodyStr);
+	
 	return JS_TRUE;	
 }
 
 JSBool unparse::stmt_labeled(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_labeled";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	
+	JSObject *labelObj;
+	if( !getObjPropertyAndConvertToObj(val, "label", &labelObj) )
+		return JS_FALSE;
+
+	JSString *nameStr;
+	if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
+		return JS_FALSE;
+
+	JSObject *bodyObj;
+	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+		return JS_FALSE;
+
+	JSString *bodyStr;
+	if (!unparse_sourceElement(bodyObj, &bodyStr, indent))
+			return JS_FALSE;
+
+	*child = joinString(3, nameStr, srcStr(JSSRCNAME_COLONSPACE), bodyStr);
 
 	return JS_TRUE;	
 }
@@ -1140,8 +1235,17 @@ JSBool unparse::stmt_switch(JSObject *val, JSString **child, JSString *indent){
 }
 
 JSBool unparse::stmt_throw(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_throw";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	
+	JSObject *argumentObj;
+	if( !getObjPropertyAndConvertToObj(val, "argument", &argumentObj) )
+		return JS_FALSE;
+
+	JSString *argumentStr;
+	if( !unparse_expr(argumentObj, &argumentStr, indent, 0, false) )
+		return JS_FALSE;
+
+	*child = joinString(4, indent, srcStr(JSSRCNAME_THROWSPACE),
+						argumentStr, srcStr(JSSRCNAME_SEMINL));
 
 	return JS_TRUE;	
 }
@@ -1154,8 +1258,8 @@ JSBool unparse::stmt_try(JSObject *val, JSString **child, JSString *indent){
 }
 
 JSBool unparse::stmt_debugger(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_debugger";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	
+	*child = joinString(2, indent, JS_NewStringCopyZ(cx,"debugger;"));
 
 	return JS_TRUE;	
 }
@@ -1296,6 +1400,11 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"in",
 		"yield",
 		"new",
+		"continue",
+		"break",
+		"throw ",
+		"with (",
+		
 	};
 
 	for( size_t i=0; i<JSSRCNAME_END; ++i ){
@@ -1659,13 +1768,13 @@ JSBool unparse::isBadIdentifier(JSObject *val){
 	char *regexStr = "/^[_$A-Za-z][_$A-Za-z0-9]*$/";
 	JSObject *regexObj = JS_NewRegExpObjectNoStatics(cx, regexStr, strlen(regexStr), 0);
 
-	size_t *nameCharLen = 0;
-	jschar *nameChar = (jschar *)JS_GetStringCharsAndLength(cx, nameStr, nameCharLen);
+	size_t nameCharLen = 0;
+	jschar *nameChar = (jschar *)JS_GetStringCharsAndLength(cx, nameStr, &nameCharLen);
 
 	JSBool nameBol = JS_FALSE;
-	jsval *retvalInfo = NULL;
+	jsval retvalInfo;
 	if( !JS_ExecuteRegExpNoStatics( cx, regexObj, (jschar *)nameChar, *nameCharLen,
-                          nameCharLen, nameBol, retvalInfo) )
+                          nameCharLen, nameBol, &retvalInfo) )
 		return JS_FALSE;
 
 	/* ------------------ */
