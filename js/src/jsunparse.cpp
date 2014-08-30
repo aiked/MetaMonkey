@@ -231,8 +231,14 @@ JSBool unparse::expr_yield(JSObject *val, JSString **child, JSString *indent, in
 	Vector<JSString*> children(cx);
 	children.append(srcStr(JSSRCNAME_YIELD));
 
-	JSObject *argumentObj;
-	if( getObjPropertyAndConvertToObj(val, "argument", &argumentObj) ){
+	jsval argumentVal;
+	if (!JS_GetProperty(cx, val, "argument", &argumentVal))
+		return JS_FALSE;
+
+	if( argumentVal.isObject() ){
+		JSObject *argumentObj;
+		if( !JS_ValueToObject(cx, argumentVal, &argumentObj) )
+			return JS_FALSE;
 
 		JSString *argumentStr;
 		if( !unparse_expr(argumentObj, &argumentStr, indent, 2, false) )
@@ -447,8 +453,15 @@ JSBool unparse::expr_member(JSObject *val, JSString **child, JSString *indent, i
 
 	children.append(objectStr);
 
-	JSObject *computedObj;
-	if( !getObjPropertyAndConvertToObj(val, "computed", &computedObj) ){
+	jsval computedVal;
+	if (!JS_GetProperty(cx, val, "computed", &computedVal))
+		return JS_FALSE;
+
+	if( computedVal.isObject() ){
+		JSObject *computedObj;
+		if( !JS_ValueToObject(cx, computedVal, &computedObj) )
+			return JS_FALSE;
+
 		JSObject *propertyObj;
 		if( !getObjPropertyAndConvertToObj(val, "property", &propertyObj) )
 			return JS_FALSE;
@@ -1107,8 +1120,14 @@ JSBool unparse::stmt_continue(JSObject *val, JSString **child, JSString *indent)
 	children.append(indent);
 	children.append(srcStr(JSSRCNAME_CONTINUE));
 
-	JSObject *labelObj;
-	if( getObjPropertyAndConvertToObj(val, "label", &labelObj) ){
+	jsval labelVal;
+	if (!JS_GetProperty(cx, val, "label", &labelVal))
+		return JS_FALSE;
+
+	if( labelVal.isObject() ){
+		JSObject *labelObj;
+		if( !JS_ValueToObject(cx, labelVal, &labelObj) )
+			return JS_FALSE;
 
 		JSString *nameStr;
 		if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
@@ -1130,8 +1149,14 @@ JSBool unparse::stmt_break(JSObject *val, JSString **child, JSString *indent){
 	children.append(indent);
 	children.append(srcStr(JSSRCNAME_BREAK));
 
-	JSObject *labelObj;
-	if( getObjPropertyAndConvertToObj(val, "label", &labelObj) ){
+	jsval labelVal;
+	if (!JS_GetProperty(cx, val, "label", &labelVal))
+		return JS_FALSE;
+
+	if( labelVal.isObject() ){
+		JSObject *labelObj;
+		if( !JS_ValueToObject(cx, labelVal, &labelObj) )
+			return JS_FALSE;
 
 		JSString *nameStr;
 		if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
@@ -1228,8 +1253,95 @@ JSBool unparse::stmt_labeled(JSObject *val, JSString **child, JSString *indent){
 }
 
 JSBool unparse::stmt_switch(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_switch";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	
+	Vector<JSString*> children(cx);
+
+	JSObject *discriminantObj;
+	if( !getObjPropertyAndConvertToObj(val, "discriminant", &discriminantObj) )
+		return JS_FALSE;
+
+	JSString *discriminantStr;
+	if( !unparse_expr(discriminantObj, &discriminantStr, indent, 0, false) )
+		return JS_FALSE;
+
+	children.append(indent);
+	children.append(srcStr(JSSRCNAME_SWITCH));
+	children.append(srcStr(JSSRCNAME_SPACE));
+	children.append(srcStr(JSSRCNAME_LP));
+	children.append(discriminantStr);
+	children.append(srcStr(JSSRCNAME_RP));
+	children.append(srcStr(JSSRCNAME_SPACE));
+	children.append(srcStr(JSSRCNAME_LC));
+	children.append(srcStr(JSSRCNAME_NL));
+
+	JSString *deeperStr;
+	deeperStr = joinString(2, indent, indentChar);
+
+	JSObject *casesObj;
+	if( !getObjPropertyAndConvertToObj(val, "cases", &casesObj) )
+		return JS_FALSE;
+
+	uint32_t casesLen;
+	if (!JS_GetArrayLength(cx, casesObj, &casesLen))
+		return JS_FALSE;
+
+	for (uint32_t i=0; i<casesLen; ++i){
+
+		JSObject *caseObj;
+		if( !getArrayElementAndConvertToObj(casesObj, i, &caseObj) )
+			return JS_FALSE;
+
+		children.append(indent);
+
+		jsval testVal;
+		if (!JS_GetProperty(cx, caseObj, "test", &testVal))
+			return JS_FALSE;
+
+		if( testVal.isObject() ){
+			JSObject *testObj;
+			if( !JS_ValueToObject(cx, testVal, &testObj) )
+				return JS_FALSE;
+				
+			JSString *testStr;
+			if( !unparse_expr(testObj, &testStr, indent, 0, false) )
+				return JS_FALSE;
+
+			children.append(srcStr(JSSRCNAME_CASE));
+			children.append(srcStr(JSSRCNAME_SPACE));
+			children.append(testStr);
+		}
+		else{
+			children.append(srcStr(JSSRCNAME_DEFAULT));
+		}
+		children.append(srcStr(JSSRCNAME_COLON));
+		children.append(srcStr(JSSRCNAME_NL));
+
+		JSObject *stmtsObj;
+		if( !getObjPropertyAndConvertToObj(caseObj, "consequent", &stmtsObj) )
+			return JS_FALSE;
+
+		uint32_t stmtsLen;
+		if (!JS_GetArrayLength(cx, stmtsObj, &stmtsLen))
+			return JS_FALSE;
+
+		for (uint32_t j=0; j<stmtsLen; ++j){
+			JSObject *stmtObj;
+			if( !getArrayElementAndConvertToObj(stmtsObj, j, &stmtObj) )
+				return JS_FALSE;
+
+			JSString *stmtStr;
+			if (!unparse_sourceElement(stmtObj, &stmtStr, deeperStr))
+				return JS_FALSE;
+
+			children.append(stmtStr);
+		}
+	}
+
+	children.append(indent);
+	children.append(srcStr(JSSRCNAME_RC));
+	children.append(srcStr(JSSRCNAME_NL));
+
+	*child = joinStringVector(&children, NULL, NULL, NULL);
 
 	return JS_TRUE;	
 }
@@ -1773,8 +1885,8 @@ JSBool unparse::isBadIdentifier(JSObject *val){
 
 	JSBool nameBol = JS_FALSE;
 	jsval retvalInfo;
-	if( !JS_ExecuteRegExpNoStatics( cx, regexObj, (jschar *)nameChar, *nameCharLen,
-                          nameCharLen, nameBol, &retvalInfo) )
+	if( !JS_ExecuteRegExpNoStatics( cx, regexObj, (jschar *)nameChar, nameCharLen,
+                          &nameCharLen, nameBol, &retvalInfo) )
 		return JS_FALSE;
 
 	/* ------------------ */

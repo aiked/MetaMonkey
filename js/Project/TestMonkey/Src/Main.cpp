@@ -235,7 +235,7 @@ static int run (JSContext *cx) {
 
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
-	const char *quaziSnippet =  "oscar: x=1;";
+	const char *quaziSnippet =  "x=1; switch(x){ case 0: x=10;break; case 1: x=10;break; default: x=10;break; }";
 
 	uint32_t quaziSnippetLength = strlen(quaziSnippet);
 	jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);

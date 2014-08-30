@@ -28,6 +28,15 @@ JSString *ifSubStmtStr;
 if(!substmt(consequentObj, &ifSubStmtStr, indent, gotElse))
 	return JS_FALSE;
 
+jsval labelVal;
+if (!JS_GetProperty(cx, val, "label", &labelVal))
+	return JS_FALSE;
+
+if( labelVal.isObject() ){
+	JSObject *labelObj;
+	if( !JS_ValueToObject(cx, labelVal, &labelObj) )
+		return JS_FALSE;
+
 *child = joinStringVector(&children, NULL, NULL, NULL);
 
 if( !wrapExpr(child, cprec, 3) )
@@ -35,9 +44,24 @@ if( !wrapExpr(child, cprec, 3) )
 
 JS_NewStringCopyZ(cx,"init");
 
+*child = joinString(3, nameStr, srcStr(JSSRCNAME_COLONSPACE), bodyStr);
+
 Vector<JSString*> children(cx);
 
-*child = joinString(4, srcStr(JSSRCNAME_HASH), indexStr, 
-						srcStr(JSSRCNAME_ASSIGN), expressionStr );
+--------------------------------------------------------------------------------------
+var cases = n.cases;
+var s = indent + "switch (" + expr(n.discriminant, indent, 0, false) + ") {\n";
+var deeper = indent + indentChar;
+
+for (var j = 0; j < n.cases.length; j++) {
+    var scase = cases[j];
+    s += indent;
+    s += (scase.test ? "case " + expr(scase.test, indent, 0, false) : "default");
+    s += ":\n";
+    var stmts = scase.consequent;
+    for (var i = 0; i < stmts.length; i++)
+        s += stmt(stmts[i], deeper);
+}
+return s + indent + "}\n";
 
 
