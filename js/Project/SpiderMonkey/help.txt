@@ -37,8 +37,6 @@ if( labelVal.isObject() ){
 	if( !JS_ValueToObject(cx, labelVal, &labelObj) )
 		return JS_FALSE;
 
-*child = joinStringVector(&children, NULL, NULL, NULL);
-
 if( !wrapExpr(child, cprec, 3) )
 		return JS_FALSE;
 
@@ -47,21 +45,20 @@ JS_NewStringCopyZ(cx,"init");
 *child = joinString(3, nameStr, srcStr(JSSRCNAME_COLONSPACE), bodyStr);
 
 Vector<JSString*> children(cx);
-
+*child = joinStringVector(&children, NULL, NULL, NULL);
 --------------------------------------------------------------------------------------
-var cases = n.cases;
-var s = indent + "switch (" + expr(n.discriminant, indent, 0, false) + ") {\n";
-var deeper = indent + indentChar;
+var s = indent + "try" + substmt(n.block, indent, true);
+var h = n.handlers;
+var handlers = h === null ? [] : "length" in h ? h : [h];
+for (var i = 0; i < handlers.length; i++) {
+    var c = handlers[i];
+    s += 'catch (' + expr(c.param, '####', 0, false);
+    if (c.guard !== null)
+        s +=  " if (" + expr(c.guard, indent, 0, false) + ")";
 
-for (var j = 0; j < n.cases.length; j++) {
-    var scase = cases[j];
-    s += indent;
-    s += (scase.test ? "case " + expr(scase.test, indent, 0, false) : "default");
-    s += ":\n";
-    var stmts = scase.consequent;
-    for (var i = 0; i < stmts.length; i++)
-        s += stmt(stmts[i], deeper);
+    var more = (n.finalizer !== null || i !== handlers.length - 1);
+    s += ")" + substmt(c.body, indent, more);
 }
-return s + indent + "}\n";
-
-
+if (n.finalizer)
+    s += "finally" + substmt(n.finalizer, indent, false);
+return s;

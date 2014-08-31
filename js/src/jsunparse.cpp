@@ -1363,8 +1363,125 @@ JSBool unparse::stmt_throw(JSObject *val, JSString **child, JSString *indent){
 }
 
 JSBool unparse::stmt_try(JSObject *val, JSString **child, JSString *indent){
-	const char *s = "stmt_try";
-	*child = JS_NewStringCopyN(cx, s, strlen(s));
+	Vector<JSString*> children(cx);
+
+	JSObject *blockObj;
+	if( !getObjPropertyAndConvertToObj(val, "block", &blockObj) )
+		return JS_FALSE;
+
+	JSString *blockStr;
+	if(!substmt(blockObj, &blockStr, indent, true))
+		return JS_FALSE;
+
+	children.append(indent);
+	children.append(srcStr(JSSRCNAME_TRY));
+	children.append(blockStr);
+
+	jsval hVal;
+	if (!JS_GetProperty(cx, val, "handlers", &hVal))
+		return JS_FALSE;
+
+	JSObject *handlersObj;
+	if( hVal.isObject() ){
+		JSObject *hObj;
+		if( !JS_ValueToObject(cx, hVal, &hObj) )
+			return JS_FALSE;
+
+		if ( JS_IsArrayObject(cx, hObj) == JS_TRUE ){
+			handlersObj = hObj;
+		}
+		else{
+			handlersObj = JS_NewArrayObject(cx, 0, NULL);
+			
+			if( !JS_SetElement(cx, handlersObj, 0, &hVal) )
+				return JS_FALSE;
+
+			if( !JS_SetArrayLength(cx, handlersObj, 1) )
+				return JS_FALSE;
+		}
+	}
+	else{
+		handlersObj = JS_NewArrayObject(cx, 0, NULL);
+	}
+
+	uint32_t handlersLen;
+	if (!JS_GetArrayLength(cx, handlersObj, &handlersLen))
+		return JS_FALSE;
+
+	for (uint32_t i=0; i<handlersLen; ++i){
+		JSObject *handlerObj;
+		if( !getArrayElementAndConvertToObj(handlersObj, i, &handlerObj) )
+			return JS_FALSE;
+
+		JSObject *paramObj;
+		if( !getObjPropertyAndConvertToObj(handlerObj, "param", &paramObj) )
+			return JS_FALSE;
+
+		JSString *paramStr;
+		if( !unparse_expr(paramObj, &paramStr, JS_NewStringCopyZ(cx,"####"), 0, false) )
+			return JS_FALSE;
+
+		children.append(srcStr(JSSRCNAME_CATCH));
+		children.append(srcStr(JSSRCNAME_SPACE));
+		children.append(srcStr(JSSRCNAME_LP));
+		children.append(paramStr);
+
+		jsval guardVal;
+		if (!JS_GetProperty(cx, handlerObj, "guard", &guardVal))
+			return JS_FALSE;
+
+		if ( guardVal.isObject() ){
+			JSObject *guardObj;
+			if( !JS_ValueToObject(cx, guardVal, &guardObj) )
+				return JS_FALSE;
+
+			JSString *guardStr;
+			if( !unparse_expr(guardObj, &guardStr, indent, 0, false) )
+				return JS_FALSE;
+
+			children.append(srcStr(JSSRCNAME_IFSPACELP));
+			children.append(guardStr);
+			children.append(srcStr(JSSRCNAME_RP));
+		}
+
+		jsval finalizerVal;
+		if (!JS_GetProperty(cx, val, "finalizer", &finalizerVal))
+			return JS_FALSE;
+
+		bool more = ( finalizerVal.isObject() || i != (handlersLen-1) );
+		if ( more == true ){
+					
+			JSObject *bodyObj;
+			if( !getObjPropertyAndConvertToObj(handlerObj, "body", &bodyObj) )
+				return JS_FALSE;
+
+			JSString *bodyStr;
+			if(!substmt(bodyObj, &bodyStr, indent, more))
+				return JS_FALSE;
+
+			children.append(srcStr(JSSRCNAME_RP));
+			children.append(bodyStr);
+		}
+	}
+
+	jsval finalizerVal;
+	if (!JS_GetProperty(cx, val, "finalizer", &finalizerVal))
+		return JS_FALSE;
+
+	if( finalizerVal.isObject() ){
+		JSObject *finalizerObj;
+		if( !JS_ValueToObject(cx, finalizerVal, &finalizerObj) )
+			return JS_FALSE;
+
+		JSString *finalizerStr;
+		if(!substmt(finalizerObj, &finalizerStr, indent, false))
+			return JS_FALSE;
+
+		children.append(srcStr(JSSRCNAME_FINALLY));
+		children.append(finalizerStr);
+	}
+
+	*child = joinStringVector(&children, NULL, NULL, NULL);
 
 	return JS_TRUE;	
 }
@@ -1515,6 +1632,9 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"continue",
 		"break",
 		"throw ",
+		"try",
+		"catch",
+		"finally",
 		"with (",
 		
 	};
