@@ -6414,7 +6414,7 @@ Parser<ParseHandler>::primaryExpr(TokenKind tt)
 		case TOK_META_LQ:
 		{
 			/////////////////////////////
-			// AS statement step by step
+			// statement step by step
 
 			pn = handler.newStatementList(pc->blockid(), pos());
 			if (!pn)

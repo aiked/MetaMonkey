@@ -76,7 +76,7 @@ JSString::sizeOfExcludingThis(JSMallocSizeOfFun mallocSizeOf)
 }
 
 void
-JSString::dumpChars(const jschar *s, size_t n)
+JSString::dumpChars(const jschar *s, size_t n, bool whiteSpaces)
 {
     if (n == SIZE_MAX) {
         n = 0;
@@ -86,16 +86,30 @@ JSString::dumpChars(const jschar *s, size_t n)
 
     fputc('"', stderr);
     for (size_t i = 0; i < n; i++) {
-        if (s[i] == '\n')
-            fprintf(stderr, "\\n");
-        else if (s[i] == '\t')
-            fprintf(stderr, "\\t");
-        else if (s[i] >= 32 && s[i] < 127)
-            fputc(s[i], stderr);
-        else if (s[i] <= 255)
-            fprintf(stderr, "\\x%02x", (unsigned int) s[i]);
-        else
-            fprintf(stderr, "\\u%04x", (unsigned int) s[i]);
+		if( whiteSpaces ) {
+			if ( s[i] == '\n'){
+				fprintf(stderr, "\\n");
+				continue;
+			}
+			else if (s[i] == '\t'){
+				fprintf(stderr, "\\t");
+				continue;
+			}
+		}
+		else {
+			if ( s[i] == '\n' || s[i] == '\t'){
+				fputc(s[i], stderr);
+				continue;
+			}
+		}
+
+		if (s[i] >= 32 && s[i] < 127)
+			fputc(s[i], stderr);
+		else if (s[i] <= 255)
+			fprintf(stderr, "\\x%02x", (unsigned int) s[i]);
+		else
+			fprintf(stderr, "\\u%04x", (unsigned int) s[i]);
+		
     }
     fputc('"', stderr);
 }
@@ -110,7 +124,7 @@ JSString::dump()
         fprintf(stderr, "JSString* (%p) = jschar * (%p) = ",
                 (void *) this, (void *) chars);
 
-        extern void DumpChars(const jschar *s, size_t n);
+        extern void DumpChars(const jschar *s, size_t n, bool whiteSpaces = true);
         dumpChars(chars, length());
     } else {
         fprintf(stderr, "(oom in JSString::dump)");

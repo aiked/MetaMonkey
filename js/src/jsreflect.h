@@ -61,6 +61,8 @@ enum UnaryOperator {
     UNOP_ERR = -1,
 
     UNOP_DELETE = 0,
+	UNOP_META_INLINE,
+	UNOP_META_ESC,
     UNOP_NEG,
     UNOP_POS,
     UNOP_NOT,

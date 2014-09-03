@@ -77,6 +77,8 @@ char const * const js::binopNames[] = {
 
 char const * const js::unopNames[] = {
     "delete",  /* UNOP_DELETE */
+	"meta_inline",
+	"meta_esc",
     "-",       /* UNOP_NEG */
     "+",       /* UNOP_POS */
     "!",       /* UNOP_NOT */
@@ -192,6 +194,8 @@ class NodeHandler
      */
 
     virtual bool blockStatement(NodeVector &elts, TokenPos *pos, MutableHandleValue dst) = 0;
+
+	virtual bool metaQuaziStatement(NodeVector &elts, TokenPos *pos, MutableHandleValue dst) = 0;
 
     virtual bool expressionStatement(HandleValue expr, TokenPos *pos, MutableHandleValue dst) = 0;
 
@@ -655,6 +659,11 @@ class NodeBuilder  : public NodeHandler
 	bool blockStatement(NodeVector &elts, TokenPos *pos, MutableHandleValue dst)
 	{
 		return listNode(AST_BLOCK_STMT, "body", elts, pos, dst);
+	}
+
+	bool metaQuaziStatement(NodeVector &elts, TokenPos *pos, MutableHandleValue dst)
+	{
+		return listNode(AST_METAQUAZI_STMT, "body", elts, pos, dst);
 	}
 
 	bool expressionStatement(HandleValue expr, TokenPos *pos, MutableHandleValue dst)
@@ -1553,6 +1562,13 @@ class NodeToSrc  : public NodeHandler
 	  std::cout << "blockStatement\n";
 	  return true;
 	}
+
+	bool metaQuaziStatement(NodeVector &elts, TokenPos *pos, MutableHandleValue dst)
+	{
+	  std::cout << "metaQuaziStatement\n";
+	  return true;
+	}
+
 	bool expressionStatement(HandleValue expr, TokenPos *pos, MutableHandleValue dst)
 	{
 	  std::cout << "expressionStatement ;\n";
@@ -1848,6 +1864,7 @@ class ASTSerializer
                    MutableHandleValue dst);
     bool statement(ParseNode *pn, MutableHandleValue dst);
     bool blockStatement(ParseNode *pn, MutableHandleValue dst);
+	bool metaQuaziStatement(ParseNode *pn, MutableHandleValue dst);
     bool switchStatement(ParseNode *pn, MutableHandleValue dst);
     bool switchCase(ParseNode *pn, MutableHandleValue dst);
     bool tryStatement(ParseNode *pn, MutableHandleValue dst);
@@ -1963,8 +1980,15 @@ ASTSerializer::aop(JSOp op)
 UnaryOperator
 ASTSerializer::unop(ParseNodeKind kind, JSOp op)
 {
-    if (kind == PNK_DELETE)
-        return UNOP_DELETE;
+	// metadev
+	switch (kind) {
+	  case PNK_DELETE:
+		  return UNOP_DELETE;
+	  case PNK_METAINLINE:
+		  return UNOP_META_INLINE;
+	  case PNK_METAESC:
+		  return UNOP_META_ESC;
+	}
 
     switch (op) {
       case JSOP_NEG:
@@ -2083,6 +2107,17 @@ ASTSerializer::blockStatement(ParseNode *pn, MutableHandleValue dst)
     NodeVector stmts(cx);
     return statements(pn, stmts) &&
            nodeHandler->blockStatement(stmts, &pn->pn_pos, dst);
+}
+
+bool
+ASTSerializer::metaQuaziStatement(ParseNode *pn, MutableHandleValue dst)
+{
+    JS_ASSERT(pn->isKind(PNK_STATEMENTLIST));
+
+	ParseNode *next = pn->pn_head;
+    NodeVector stmts(cx);
+    return statements(next, stmts) &&
+           nodeHandler->metaQuaziStatement(stmts, &next->pn_pos, dst);
 }
 
 bool
@@ -2780,7 +2815,14 @@ ASTSerializer::expression(ParseNode *pn, MutableHandleValue dst)
         }
         return leftAssociate(pn, dst);
 
+	  // metadev
+	  case PNK_METAQUAZI: {
+		  return metaQuaziStatement(pn, dst);
+	  }
+
       case PNK_DELETE:
+	  case PNK_METAINLINE:
+	  case PNK_METAESC:
       case PNK_TYPEOF:
       case PNK_VOID:
       case PNK_NOT:
@@ -3340,7 +3382,8 @@ reflect_parse(JSContext *cx, uint32_t argc, jsval *vp)
             return JS_FALSE;
 
         loc = ToBoolean(prop);
-
+		// metadev TODO: call jsreflect with loc false
+		loc = false;
         if (loc) {
             /* config.source */
             RootedId sourceId(cx, NameToId(cx->names().source));

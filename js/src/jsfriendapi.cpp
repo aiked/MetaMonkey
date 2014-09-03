@@ -652,6 +652,7 @@ js_DumpObject(JSObject *obj)
     obj->dump();
 }
 
+
 struct JSDumpHeapTracer : public JSTracer
 {
     FILE   *output;

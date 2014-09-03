@@ -134,6 +134,29 @@ Parse(JSContext *cx, unsigned argc, jsval *vp)
 }
 
 
+
+static JSBool
+Inline(JSContext *cx, unsigned argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+    if (args.length() != 1 || !args[0].isObject()) {
+        JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
+                             "inline", "0", "s");
+        return JS_FALSE;
+    }
+
+	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
+    if (!obj) {
+        fprintf(stderr, "NULL\n");
+        return JS_FALSE;
+    }
+
+	args.rval().setObject(*obj);
+
+	return JS_TRUE;
+}
+
+
 //////////////////////////// unparse
 
 static JSBool
@@ -147,18 +170,19 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
     }
 
 	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
+
     if (!obj) {
         fprintf(stderr, "NULL\n");
         return JS_FALSE;
     }
-	
+	JSString *str;
 	unparse up(cx);
-	if (!up.unParse_start(obj))
+	if (!up.unParse_start(obj, &str))
 		return JS_FALSE;
 
-	//str->dump();
+	str->dumpChars(str->getChars(cx), str->length(), false);
 	//fprintf(stderr, objType.toString()->getChars() );
-	//js_DumpObject(obj);
+	
 	return JS_TRUE;
 }
 
@@ -171,6 +195,9 @@ static const JSFunctionSpecWithHelp builtinFunctions[] = {
 	JS_FN_HELP("parse", Parse, 1, 0,
 		"parse(code)",
 		"  Parses a string, potentially throwing."),
+	JS_FN_HELP("inline", Inline, 1, 0,
+		"inline(expr)",
+		"  return a javascript ast object that has generated from expr, null otherwise."),
     JS_FN_HELP(
 		"print", 
 		Print, 0, 0,
@@ -207,36 +234,15 @@ static int run (JSContext *cx) {
 
     /* Your application code here. This may include JSAPI calls to create your own custom JS objects and run scripts. */
 
-	//size_t lineno = 1;
-	//ScopedJSFreePtr<char> filename;
-	//const char *quaziSnippet =  "function foo(){print(4);} t=0;";
-	//uint32_t quaziSnippetLength = strlen(quaziSnippet);
 
-	////JSScript *script = JS_CompileScript(cx, global,	quaziSnippet, quaziSnippetLength, NULL, lineno);
-	//
-	//jsval	rval;
-	//JSBool	ok;
-
-	//ok = JS_EvaluateScript(
-	//	cx, 
-	//	global, 
-	//	quaziSnippet, 
-	//	strlen(quaziSnippet),
-	//	"test.js", 
-	//	1, 
-	//	&rval
-	//);
-
-	//JS::Value stringlify;
-	//if (!JS_CallFunctionName(cx, global, "foo", 0, NULL, &stringlify))
-	//   return false;
 
 //============================= JAST START ================================
 
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
-	const char *quaziSnippet =  "x=1; switch(x){ case 0: x=10;break; case 1: x=10;break; default: x=10;break; }";
-
+	const char *quaziSnippet =  "function foo(){ y=.<3;>.; x= .< 2; >.; ast = .< .~y + .~x >.; ast = {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'+', left:y.body[0].expression, right:x.body[0].expression}}]}; return ast; } x = .! foo();";
+	//const char *quaziSnippet =  "function foo(){ return .< 1; >.; } x = .! foo();";
+	//const char *quaziSnippet = "x = {t:3,q:'s', fun:function(){print(1);}, obj:{o:[]}};";
 	uint32_t quaziSnippetLength = strlen(quaziSnippet);
 	jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);
 	jsval	rval;
@@ -255,8 +261,8 @@ static int run (JSContext *cx) {
 
 	//std::cout << "\n\n_________________________________\n";
 
-	//char *source = "parse('x=.< print() + .~y; >.');";
-	//char *source = "Reflect.parse('x=1+print(5);');";
+	//char *source = "print(JSON.stringify( Reflect.parse('x = .< .< 1; >.; >.;') ) );";
+	////char *source = "Reflect.parse('x=1+print(5);');";
 	//frontend::metaBeginParse::markAsStart();
 	//ok = JS_EvaluateScript(
 	//	cx, 
@@ -268,6 +274,37 @@ static int run (JSContext *cx) {
 	//	&rval
 	//);
 	//std::cout << "\n_________________________________\n";
+
+
+//============================= Check json.stringify START ================================
+	//uint32_t lineno = 1;
+	//ScopedJSFreePtr<char> filename;
+	//const char *quaziSnippet =  "{t:3,q:'s', fun:function(){print(1);}, obj:{o:[]}}";
+
+	//JSString *quaziStr = JS_NewStringCopyZ(cx, quaziSnippet);
+	//jsval quaziVal = STRING_TO_JSVAL(quaziStr);
+
+	//jsval stringifyProp;
+	//if (!JS_GetProperty(cx, global, "JSON", &stringifyProp)){
+	//	JS_ReportError(cx, "object has not property (%s)", "JSON");
+	//	return JS_FALSE;
+	//}
+
+	//JSObject *stringifyObj;
+	//if( !JS_ValueToObject(cx, stringifyProp, &stringifyObj) ){
+	//	JS_ReportError(cx, "object property (%s) is not an object", "JSON");
+	//	return JS_FALSE;
+	//}
+
+	//JS::Value args[] = { quaziVal  };
+	//JS::Value stringlify;
+	//if (!JS_CallFunctionName(cx, stringifyObj, "stringify", 1, args, &stringlify))
+	//   return false;
+
+	//JSString *stringlifyStr = JS_ValueToString(cx, stringlify);
+	//std::cout << JS_EncodeString(cx, stringlifyStr);
+//============================= Check json.stringify END ================================
+
     return 0;
 }
 

@@ -422,7 +422,7 @@ class JSString : public js::gc::Cell
 
     static inline js::ThingRootKind rootKind() { return js::THING_ROOT_STRING; }
 
-	static void dumpChars(const jschar *s, size_t len);
+	static void dumpChars(const jschar *s, size_t len, bool whiteSpaces = true);
 
     void dump();
     

@@ -27,11 +27,14 @@ struct ConstCharStarHasher
 	}
 };
 
+
 class unparse{
   private:
 	JSContext *cx;
 	JSString *indentChar;
 	JSString *fourHash;
+
+	JSObject *jsonGlobalObj;
 
 	typedef JSBool (unparse::*stringifyStmtHandler)
 		(JSObject *val, JSString **child, JSString *indent);
@@ -46,6 +49,8 @@ class unparse{
 	stringToIntMap precedence;
 	stringifyStmtHandlerMap stringifyStmtHandlerMapInst;
 	stringifyExprHandlerMap stringifyExprHandlerMapInst;
+
+	Vector<JSString*> inlineEvaluateCode;
 
 	enum JSSRCNAME{
 		JSSRCNAME_START = -1,
@@ -110,7 +115,8 @@ class unparse{
 	JSBool expr_call(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
 	JSBool expr_new(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
 	JSBool expr_this(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_member(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_member(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);	
+	JSBool expr_metaQuazi(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
 	JSBool expr_unary(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
 	JSBool expr_logic(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
 	JSBool expr_assign(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
@@ -143,6 +149,17 @@ class unparse{
 	///////////////////////
 
 	///////////////////////
+	// inline evaluator
+
+	JSBool inlineEvalAppendCode(JSString *code);
+	JSBool inlineEvalExecInline(JSString *code, jsval *inlineRetVal);
+
+	///////////////////////
+	// object stringify
+	JSBool stringifyObject(JSObject *obj, JSString **s);
+
+
+	///////////////////////
 	// helpers
 
 	JSString* prefixSuffixConcatString(JSString *sep, Vector<JSString*> *strs, 
@@ -161,6 +178,7 @@ class unparse{
 
 	JSBool isBadIdentifier(JSObject *val);
 
+	//JSString *unparse::trimRight(con);
 	JSString *unparse::joinString(size_t num, ...);
 	JSString *unparse::joinStringVector(Vector<JSString*> *strs, 
 		JSString* sep, JSString* prf, JSString* suf, bool reverse = false);
@@ -298,7 +316,7 @@ class unparse{
 	template<class ValueApplier>
 	JSBool unparse_values(JSObject *obj, Vector<JSString*> *children, ValueApplier applier, bool noIn);
 	JSBool unparse_sourceElement(JSObject *val, JSString **child, JSString *indent);
-	JSBool unParse_start(JSObject *obj);
+	JSBool unParse_start(JSObject *obj, JSString **s);
 };
 
 } /* js */

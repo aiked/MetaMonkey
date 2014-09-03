@@ -13,3 +13,22 @@
 	SpiderMonkey. To be enabled required a flag we did not used.
 
 -	search entire solution for METADEV
+
+============================================================
+
+additions to reflect.parse object for meta tags
+
+.!, .~
+same as UnaryExpression
+    type: "UnaryExpression";
+    operator: meta_inline | meta_esc;
+    prefix: boolean;
+    argument: Expression;
+
+.< >.
+same as BlockStatement
+    type: "MetaQuaziStatement";
+    body: [ {
+		"type": "BlockStatement",
+		"body": [ Statement ]
+	} ];
