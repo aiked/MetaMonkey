@@ -598,6 +598,7 @@ JSBool unparse::expr_logic(JSObject *val, JSString **child, JSString *indent, in
 	if(prec==0){
 		const char * chars = (const char *) opStr->getChars(cx);
 		JS_ReportError(cx, "unsupposed precedence operator (%s)", chars);
+		return JS_FALSE;
 	}
 	bool parens = (opStr->equals("in") && noIn) || ( cprec>-1 && (size_t) cprec>=prec);
     if (parens)
@@ -946,7 +947,7 @@ JSBool unparse::stmt_if(JSObject *val, JSString **child, JSString *indent){
 	children.append(ifCondStr);
 	children.append(srcStr(JSSRCNAME_RP));
 	children.append(ifSubStmtStr);
-
+	
 	if(gotElse){
 		JSObject *alternateObj;
 		if( !getObjPropertyAndConvertToObj(val, "alternate", &alternateObj) )
@@ -1753,13 +1754,12 @@ JSBool unparse::substmt(JSObject *obj, JSString **s, JSString *indent, bool more
 	if(typeStr->equals("BlockStatement")){
 		if (!unparse_sourceElement(obj, &body, indent))
 			return JS_FALSE;
-
 		if(more){
-			*s = JS_NewDependentString(cx, body, indent->length(), body->length() - 1);
+			*s = JS_NewDependentString(cx, body, indent->length(), body->length() - indent->length() - 1);
 			*s = joinString(2, *s, srcStr(JSSRCNAME_SPACE)); 
 		}
 		else{
-			*s = JS_NewDependentString(cx, body, indent->length(), body->length());
+			*s = JS_NewDependentString(cx, body, indent->length(), body->length() - indent->length());
 		}
 		*s = joinString(2, srcStr(JSSRCNAME_SPACE), *s); 
 
@@ -2040,6 +2040,7 @@ JSBool unparse::functionDeclaration(JSString *funcInitStr, JSString **s,
 	children.append(bodyStr);
 
 	*s = joinStringVector(&children, NULL, NULL, NULL );
+	
 	inlineEvalAppendCode(*s);
 
 	return JS_TRUE;

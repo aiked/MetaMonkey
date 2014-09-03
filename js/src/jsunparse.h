@@ -156,7 +156,7 @@ class unparse{
 
 	///////////////////////
 	// object stringify
-	JSBool stringifyObject(JSObject *obj, JSString **s);
+	JSBool stringifyObject(JSObject *val);
 
 
 	///////////////////////
@@ -189,13 +189,13 @@ class unparse{
 	JSBool unparse::getArrayElementAndConvertToObj(JSObject *arrayObj, 
 		const uint32_t index, JSObject **objVal);
 
-	inline size_t getPrecedence(const char *key){
+	inline size_t getPrecedence(char *key){
 		stringToIntMap::Ptr ptr = precedence.lookup(key);
 		return ptr.found() ? ptr->value: 0;
 	}
 
 	inline size_t getPrecedence(JSString *key){
-		const char * chars = (const char *) key->getChars(cx);
+		char *chars = JS_EncodeString(cx, key);
 		return getPrecedence(chars);
 	}
 

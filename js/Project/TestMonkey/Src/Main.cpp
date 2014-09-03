@@ -240,9 +240,10 @@ static int run (JSContext *cx) {
 
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
-	const char *quaziSnippet =  "function foo(){ y=.<3;>.; x= .< 2; >.; ast = .< .~y + .~x >.; ast = {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'+', left:y.body[0].expression, right:x.body[0].expression}}]}; return ast; } x = .! foo();";
+	//const char *quaziSnippet =  "function foo(){ y=.<3;>.; x= .< 2; >.; ast = .< .~y + .~x >.; ast = {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'+', left:y.body[0].expression, right:x.body[0].expression}}]}; return ast; } x = .! foo();";
 	//const char *quaziSnippet =  "function foo(){ return .< 1; >.; } x = .! foo();";
-	//const char *quaziSnippet = "x = {t:3,q:'s', fun:function(){print(1);}, obj:{o:[]}};";
+	const char *quaziSnippet = 
+		"function power(x,n){	if(n==1) {return x;}else {return {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'*', left:x.body[0].expression, right: (power(x, n-1)).body[0].expression }}]};} } a = .! power(.<x;>., 4); ";
 	uint32_t quaziSnippetLength = strlen(quaziSnippet);
 	jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);
 	jsval	rval;
