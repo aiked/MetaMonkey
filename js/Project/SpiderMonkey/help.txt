@@ -47,18 +47,22 @@ JS_NewStringCopyZ(cx,"init");
 Vector<JSString*> children(cx);
 *child = joinStringVector(&children, NULL, NULL, NULL);
 --------------------------------------------------------------------------------------
-var s = indent + "try" + substmt(n.block, indent, true);
-var h = n.handlers;
-var handlers = h === null ? [] : "length" in h ? h : [h];
-for (var i = 0; i < handlers.length; i++) {
-    var c = handlers[i];
-    s += 'catch (' + expr(c.param, '####', 0, false);
-    if (c.guard !== null)
-        s +=  " if (" + expr(c.guard, indent, 0, false) + ")";
+e=[]; for(i=0; i<tests.length; ++i) e[i] ='"' + tests[i].replace(/(\r\n|\n|\r)/gm, '').replace(/(\")/gm, '\\"') + '"\n'; e.join()
 
-    var more = (n.finalizer !== null || i !== handlers.length - 1);
-    s += ")" + substmt(c.body, indent, more);
+{
+    var s = indent + "try" + substmt(n.block, indent, true);
+    var h = n.handlers;
+    var handlers = h === null ? [] : "length" in h ? h : [h];
+    
+	for (var i = 0; i < handlers.length; i++) {
+        var c = handlers[i];
+        s += 'catch (' + expr(c.param, '####', 0, false);
+        if (c.guard !== null)
+            s +=  " if (" + expr(c.guard, indent, 0, false) + ")";
+        var more = (n.finalizer !== null || i !== handlers.length - 1);
+        s += ")" + substmt(c.body, indent, more);
+    }
+    if (n.finalizer)
+        s += "finally" + substmt(n.finalizer, indent, false);
+    return s;
 }
-if (n.finalizer)
-    s += "finally" + substmt(n.finalizer, indent, false);
-return s;

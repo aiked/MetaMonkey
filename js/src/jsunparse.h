@@ -71,6 +71,7 @@ class unparse{
 		JSSRCNAME_COLON,
 		JSSRCNAME_COLONSPACE,
 		JSSRCNAME_HASH,
+		JSSRCNAME_HASHES,
 		JSSRCNAME_QM,
 		JSSRCNAME_IFSPACELP,
 		JSSRCNAME_RETURN,
@@ -176,7 +177,7 @@ class unparse{
 	JSBool functionDeclaration(JSString *funcInitStr, JSString **s, 
 								jsval id, JSObject *val, JSString *indent);
 
-	JSBool isBadIdentifier(JSObject *val);
+	JSBool isBadIdentifier(JSObject *val, JSBool *isBadôáëï);
 
 	//JSString *unparse::trimRight(con);
 	JSString *unparse::joinString(size_t num, ...);
@@ -266,31 +267,20 @@ class unparse{
 			if( !uprs->unparse_expr(idObj, &pattStr, uprs->fourHash, 3, false) )
 				return JS_FALSE;
 
-			jsval initVal;
-			if (!JS_GetProperty(cx, nodeObj, "init", &initVal)){
-				JS_ReportError(cx, "object has not key: init");
+			JSObject *initObj;
+			if( !uprs->getObjPropertyAndConvertToObj(nodeObj, "init", &initObj) )
 				return JS_FALSE;
-			}
 
-			JSType initValType = JS_TypeOfValue(cx, initVal);
-			if( initValType==JSTYPE_NULL ){
-				*child = pattStr;
-			}
-			else{
-				JS_ASSERT( initValType==JSTYPE_OBJECT );
-				JSObject *initObj;
-
-				if( !JS_ValueToObject(cx, initVal, &initObj) ){
-					JS_ReportError(cx, "object property (init) is not an object");
-					return JS_FALSE;
-				}
-
+			if( initObj ){
 				JSString *rvalStr;
 				if( !uprs->unparse_expr(initObj, &rvalStr, indent, 2, noIn) )
 					return JS_FALSE;
-				// pattStr = rvalStr
+
 				*child = uprs->joinString(5, pattStr, uprs->srcStr(JSSRCNAME_SPACE), 
-					uprs->srcStr(JSSRCNAME_ASSIGN),	uprs->srcStr(JSSRCNAME_SPACE), rvalStr);
+					uprs->srcStr(JSSRCNAME_ASSIGN),	uprs->srcStr(JSSRCNAME_SPACE), rvalStr);			
+			}
+			else{
+				*child = pattStr;
 			}
 			return *child!=NULL;
 

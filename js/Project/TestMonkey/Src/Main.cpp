@@ -175,12 +175,13 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
         fprintf(stderr, "NULL\n");
         return JS_FALSE;
     }
-	JSString *str;
+	JSString *str = NULL;
 	unparse up(cx);
 	if (!up.unParse_start(obj, &str))
 		return JS_FALSE;
 
-	str->dumpChars(str->getChars(cx), str->length(), false);
+	if( str && str->length() != 0 )
+		str->dumpChars(str->getChars(cx), str->length(), false);
 	//fprintf(stderr, objType.toString()->getChars() );
 	
 	return JS_TRUE;
@@ -262,146 +263,102 @@ static int run (JSContext *cx) {
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
 
-	const char* tests[] = { "x;\n",
-							"null;\n",
-							"true;\n",
-							"false;\n",
-							"-0;\n",
-							"x = y;\n",
-							"void 0;\n",
-							"void y;\n",
-							"void f();\n",
-							"[];\n",
-							"({});\n",
-							"({1e999: 0});\n",
-
-							"({get \"a b\"() {\n \
-							     return this;\n' \
-							 }});\n",
-
-							"({get 1() {\n \
-							     return this;\n \
-							 }});\n",
-
-							"[,, 2];\n",
-							"[, 1,,];\n",
-							"[1,,, 2,,,];\n",
-							"[,,,];\n",
-							"[0, 1, 2, \"x\"];\n",
-
-							"x.y.z;\n",
-							"x[y[z]];\n",
-							"x[\"y z\"];\n",
-
-							"(0).toString();\n",
-							"f()();\n",
-							"f((x, y));\n",
-							"f(x = 3);\n",
-							"x.y();\n",
-							"f(1, 2, 3, null, (g(), h));\n",
-							"new (x.y);\n",
-							"new (x());\n",
-							"(new x).y;\n",
-							"new (x().y);\n",
-							"a * x + b * y;\n",
-							"a * (x + b) * y;\n",
-							"a + (b + c);\n",
-							"a + b + c;\n",
-	
-							"x.y = z;\n",
-							"get(id).text = f();\n",
-							"[,] = x;\n",
-	
-	
-							// Reconstituting constant-folded NaNs and Infinities
-							"x = 1e999 + y;\n",
-							"x = y / -1e999;\n",
-							"x = 0 / 0;\n",
-							"x = (-1e999).toString();\n",
-	
-							"if (a == b)\n \
-							     x();\n \
-							 else\n \
-							     y();\n",
-
-							"if (a == b) {\n \
-							     x();\n \
-							 } else {\n \
-							     y();\n \
-							 }\n",
-
-							"if (a == b)\n \
-							     if (b == c)\n \
-							         x();\n \
-							     else\n \
-							         y();\n",
-
-							"while (a == b)\n \
-							     c();\n",
-
-							"if (a)\n \
-							     while (b)\n \
-							         ;\n \
-							 else\n \
-							    c();\n",
-
-							"if (a)\n \
-							     while (b) {\n \
-							         ;\n \
-							     }\n \
-							 else\n \
-							     c();\n",
-
-							"for (;;)\n \
-							     ;\n",
-
-							"for (let i = 0; i < a.length; i++) {\n \
-							     b[i] = a[i];\n \
-							 }\n",
-
-							"for (t = (i in x); t; t = t[i])\n ;\n",
-
-							"for (let t = (i in x); t; t = t[i])\n \
-							    ;\n",
-
-							"for (t = 1 << (i in x); t < 100; t++)\n \
-							     ;\n",
-
-							"for (var i in arr)\n \
-							     dump(arr[i]);\n",
-
-							"for ([k, v] in items(x))\n \
-							     dump(k + \": \" + v);\n",
-
-							"if (x) {\n \
-							     switch (f(a)) {\n \
-							     case f(b):\n \
-							     case \"12\":\n \
-							         throw exc;\n \
-							     default:\n \
-							         fall_through();\n \
-							     case 99:\n \
-							         succeed();\n \
-							     }\n \
-							 }\n",
-	
-							"var x;\n",
-							"var x, y;\n",
-							"var x = 1, y = x;\n",
-							"var x = y = 1;\n",
-							"var x = f, g;\n",
-							"var x = (f, g);\n",
-							"var [x] = a;\n",
-							"var [] = x;\n",
-							"var [, x] = y;\n",
-							"var [[a, b], [c, d]] = x;\n",
-							"var {} = x;\n",
-							"var {x: x} = x;\n",
-							"var {x: a, y: b} = x;\n",
-							"var {1: a, 2: b} = x;\n",
-							"var {1: [], 2: b} = x;\n",
-							"var {\"a b\": x} = y;\n",
-							"const a = 3;\n",
+	const char* tests[] = { 
+//"x;"
+//,"null;"
+//,"true;"
+//,"false;"
+//,"-0;"
+//,"x = y;"
+//,"void 0;"
+//,"void y;"
+//,"void f();"
+//,"[];"
+//,"({});"
+//,"({1e999: 0});"
+//,"({get \"a b\"() {    return this;}});"
+//,"({get 1() {    return this;}});"
+//,"[,, 2];"
+//,"[, 1,,];"
+//,"[1,,, 2,,,];"
+//,"[,,,];"
+//,"[0, 1, 2, \"x\"];"
+//,"x.y.z;"
+//,"x[y[z]];"
+//,"x[\"y z\"];"
+//,"(0).toString();"
+//,"f()();"
+//,"f((x, y));"
+//,"f(x = 3);"
+//,"x.y();"
+//,"f(1, 2, 3, null, (g(), h));"
+//,"new (x.y);"
+//,"new (x());"
+//,"(new x).y;"
+//,"new (x().y);"
+//,"a * x + b * y;"
+//,"a * (x + b) * y;"
+//,"a + (b + c);"
+//,"a + b + c;"
+//,"x.y = z;"
+//,"get(id).text = f();"
+//,"[,] = x;"
+//,"x = 1e999 + y;"
+//,"x = y / -1e999;"
+//,"x = 0 / 0;"
+//,"x = (-1e999).toString();"
+//,"if (a == b)    x();else    y();"
+//,"if (a == b) {    x();} else {    y();}"
+//,"if (a == b)    if (b == c)        x();    else        y();"
+//,"while (a == b)    c();"
+//,"if (a)    while (b)        ;else    c();"
+//,"if (a)    while (b) {        ;    }else    c();"
+//,"for (;;)    ;"
+//,"for (var i = 0; i < a.length; i++) {    b[i] = a[i];}"
+//,"for (t = (i in x); t; t = t[i])    ;"
+//,"for (var t = (i in x); t; t = t[i])    ;"
+//,"for (t = 1 << (i in x); t < 100; t++)    ;"
+//,"for (var i in arr)    dump(arr[i]);"
+//,"for ([k, v] in items(x))    dump(k + \": \" + v);"
+//,"if (x) {    switch (f(a)) {    case f(b):    case \"12\":        throw exc;    default:        fall_through();    case 99:        succeed();    }}"
+//,"var x;"
+//,"var x, y;"
+//,"var x = 1, y = x;"
+//,"var x = y = 1;"
+//,"var x = f, g;"
+//,"var x = (f, g);"
+//,"var [x] = a;"
+//,"var [] = x;"
+//,"var [, x] = y;"
+//,"var [[a, b], [c, d]] = x;"
+//,"var {} = x;"
+//,"var {x: x} = x;"
+//,"var {x: a, y: b} = x;"
+//,"var {1: a, 2: b} = x;"
+//,"var {1: [], 2: b} = x;"
+//,"var {\"a b\": x} = y;"
+//,"const a = 3;"
+//,"try {    f();} finally {    cleanup();}"
+//,"try {    f();} catch (x) {    cope(x);} finally {    cleanup();}"
+//,"function f() {    g();}"
+//,"\"use strict\";x = 1;"
+//,"function f() {    \"use strict\";    x = 1;}"
+//,"(function () {    \"use strict\";    x = 1;});"
+//,"(function () {    go();}());"
+//,"(function () {}.x);"
+//,"(function name() {}.x);"
+//,"(function () {}.x = 1);"
+//,"(function name() {}.x = 1);"
+//,"(function () {}.x, function () {}.y);"
+//,"(function () {} + x) * y;"
+//,"(function () {} * x + y);"
+//,"({a: f()});"
+//,"({a: my_a} = f());"
+//,"options(\"tracejit\");try {} catch (e) {}"
+//,"function test() {    var s1 = evalcx(\"lazy\");    expect = function () {        test();    }(s1);}"
+//,"try {    var a = new Array(100000);    var i = a.length;    new i(eval(\"var obj = new Object(); obj.split = String.prototype.split;\"));} catch (e) {}"
+//,"test3();function test3() {    try {        eval(\"for(var y in ['', ''])\");    } catch (ex) {    }    new test3;}    new test3;"
+"e=[]; for(i=0; i<tests.length; ++i) e[i] ='\"' + tests[i].replace(/(\\r\\n|\\n|\\r)/gm, '').replace(/(\\\")*/, '\\\"') + '\"\\n'; e.join()", ""
 	};
 
 	int testsLen = sizeof(tests)/sizeof(tests[0]);
@@ -411,19 +368,21 @@ static int run (JSContext *cx) {
 		jschar *testChars = InflateUTF8String(cx, tests[i], &testLen);
 		jsval	rval;
 		
-		printf(" =========== initial string =====================\n");
-		printf("%s\n",tests[i]);
-		printf("\n=========== generated string =====================");
-
-		if (!reflect_parse_from_string(cx, testChars, testLen, &rval))
+		printf("=========== initial string =====================\n");
+		printf("%s",tests[i]);
+		printf("=========== generated string =====================\n");
+		
+		if (!reflect_parse_from_string(cx, testChars, testLen, &rval)){
+			printf("error: reflect_parse_from_string failed @ MAIN\n");
 			return JS_FALSE;
+		}
 
 		JS::Value args[] = { rval  };
 		JS::Value stringlify;
 		if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
 		   return false;
 
-		printf(" ==================================================\n\n");
+		printf("\n==================================================\n\n\n");
 	}
 
 //============================= JAST TEST END ============================
