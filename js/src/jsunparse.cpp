@@ -524,7 +524,7 @@ JSBool unparse::expr_metaQuazi(JSObject *val, JSString **child, JSString *indent
 	JS::Value args[] = { objVal  };
 	JS::Value stringlifyStr;
 	if (!JS_CallFunctionName(cx, jsonGlobalObj, "stringify", 1, args, &stringlifyStr))
-	   return false;
+	   return JS_FALSE;
 
 	*child = JS_ValueToString(cx, stringlifyStr);
 
@@ -550,7 +550,7 @@ JSBool unparse::expr_unary(JSObject *val, JSString **child, JSString *indent, in
 		if (!up.unparse_expr(argumentObj, &argumentStr, indentChar, 15, false))
 			return JS_FALSE;
 
-		jsval	inlineRetVal;
+		jsval inlineRetVal;
 		if (!inlineEvalExecInline(argumentStr, &inlineRetVal))
 			return JS_FALSE;
 
