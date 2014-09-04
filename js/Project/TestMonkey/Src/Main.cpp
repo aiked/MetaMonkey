@@ -238,25 +238,195 @@ static int run (JSContext *cx) {
 
 //============================= JAST START ================================
 
-	uint32_t lineno = 1;
-	ScopedJSFreePtr<char> filename;
-	//const char *quaziSnippet =  "function foo(){ y=.<3;>.; x= .< 2; >.; ast = .< .~y + .~x >.; ast = {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'+', left:y.body[0].expression, right:x.body[0].expression}}]}; return ast; } x = .! foo();";
-	//const char *quaziSnippet =  "function foo(){ return .< 1; >.; } x = .! foo();";
-	const char *quaziSnippet = 
-		"function power(x,n){	if(n==1) {return x;}else {return {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'*', left:x.body[0].expression, right: (power(x, n-1)).body[0].expression }}]};} } a = .! power(.<x;>., 4); ";
-	uint32_t quaziSnippetLength = strlen(quaziSnippet);
-	jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);
-	jsval	rval;
-	if (!reflect_parse_from_string(cx, jsQuaziSnippet, quaziSnippetLength, &rval))
-		return JS_FALSE;
+	//uint32_t lineno = 1;
+	//ScopedJSFreePtr<char> filename;
+	////const char *quaziSnippet =  "function foo(){ y=.<3;>.; x= .< 2; >.; ast = .< .~y + .~x >.; ast = {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'+', left:y.body[0].expression, right:x.body[0].expression}}]}; return ast; } x = .! foo();";
+	////const char *quaziSnippet =  "function foo(){ return .< 1; >.; } x = .! foo();";
+	//const char *quaziSnippet = 
+	//	"function power(x,n){	if(n==1) {return x;}else {return {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'*', left:x.body[0].expression, right: (power(x, n-1)).body[0].expression }}]};} } a = .! power(.<x;>., 4); ";
+	//uint32_t quaziSnippetLength = strlen(quaziSnippet);
+	//jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);
+	//jsval	rval;
+	//
+	//if (!reflect_parse_from_string(cx, jsQuaziSnippet, quaziSnippetLength, &rval))
+	//	return JS_FALSE;
 
-	JS::Value args[] = { rval  };
-	JS::Value stringlify;
-	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
-	   return false;
+	//JS::Value args[] = { rval  };
+	//JS::Value stringlify;
+	//if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
+	//   return false;
 
 //============================= JAST END ================================
 
+//============================= JAST TEST START =========================
+	uint32_t lineno = 1;
+	ScopedJSFreePtr<char> filename;
+
+	const char* tests[] = { "x;\n",
+							"null;\n",
+							"true;\n",
+							"false;\n",
+							"-0;\n",
+							"x = y;\n",
+							"void 0;\n",
+							"void y;\n",
+							"void f();\n",
+							"[];\n",
+							"({});\n",
+							"({1e999: 0});\n",
+
+							"({get \"a b\"() {\n \
+							     return this;\n' \
+							 }});\n",
+
+							"({get 1() {\n \
+							     return this;\n \
+							 }});\n",
+
+							"[,, 2];\n",
+							"[, 1,,];\n",
+							"[1,,, 2,,,];\n",
+							"[,,,];\n",
+							"[0, 1, 2, \"x\"];\n",
+
+							"x.y.z;\n",
+							"x[y[z]];\n",
+							"x[\"y z\"];\n",
+
+							"(0).toString();\n",
+							"f()();\n",
+							"f((x, y));\n",
+							"f(x = 3);\n",
+							"x.y();\n",
+							"f(1, 2, 3, null, (g(), h));\n",
+							"new (x.y);\n",
+							"new (x());\n",
+							"(new x).y;\n",
+							"new (x().y);\n",
+							"a * x + b * y;\n",
+							"a * (x + b) * y;\n",
+							"a + (b + c);\n",
+							"a + b + c;\n",
+	
+							"x.y = z;\n",
+							"get(id).text = f();\n",
+							"[,] = x;\n",
+	
+	
+							// Reconstituting constant-folded NaNs and Infinities
+							"x = 1e999 + y;\n",
+							"x = y / -1e999;\n",
+							"x = 0 / 0;\n",
+							"x = (-1e999).toString();\n",
+	
+							"if (a == b)\n \
+							     x();\n \
+							 else\n \
+							     y();\n",
+
+							"if (a == b) {\n \
+							     x();\n \
+							 } else {\n \
+							     y();\n \
+							 }\n",
+
+							"if (a == b)\n \
+							     if (b == c)\n \
+							         x();\n \
+							     else\n \
+							         y();\n",
+
+							"while (a == b)\n \
+							     c();\n",
+
+							"if (a)\n \
+							     while (b)\n \
+							         ;\n \
+							 else\n \
+							    c();\n",
+
+							"if (a)\n \
+							     while (b) {\n \
+							         ;\n \
+							     }\n \
+							 else\n \
+							     c();\n",
+
+							"for (;;)\n \
+							     ;\n",
+
+							"for (let i = 0; i < a.length; i++) {\n \
+							     b[i] = a[i];\n \
+							 }\n",
+
+							"for (t = (i in x); t; t = t[i])\n ;\n",
+
+							"for (let t = (i in x); t; t = t[i])\n \
+							    ;\n",
+
+							"for (t = 1 << (i in x); t < 100; t++)\n \
+							     ;\n",
+
+							"for (var i in arr)\n \
+							     dump(arr[i]);\n",
+
+							"for ([k, v] in items(x))\n \
+							     dump(k + \": \" + v);\n",
+
+							"if (x) {\n \
+							     switch (f(a)) {\n \
+							     case f(b):\n \
+							     case \"12\":\n \
+							         throw exc;\n \
+							     default:\n \
+							         fall_through();\n \
+							     case 99:\n \
+							         succeed();\n \
+							     }\n \
+							 }\n",
+	
+							"var x;\n",
+							"var x, y;\n",
+							"var x = 1, y = x;\n",
+							"var x = y = 1;\n",
+							"var x = f, g;\n",
+							"var x = (f, g);\n",
+							"var [x] = a;\n",
+							"var [] = x;\n",
+							"var [, x] = y;\n",
+							"var [[a, b], [c, d]] = x;\n",
+							"var {} = x;\n",
+							"var {x: x} = x;\n",
+							"var {x: a, y: b} = x;\n",
+							"var {1: a, 2: b} = x;\n",
+							"var {1: [], 2: b} = x;\n",
+							"var {\"a b\": x} = y;\n",
+							"const a = 3;\n",
+	};
+
+	int testsLen = sizeof(tests)/sizeof(tests[0]);
+
+	for(int i=0; i<testsLen; ++i){
+		uint32_t testLen = strlen(tests[i]);
+		jschar *testChars = InflateUTF8String(cx, tests[i], &testLen);
+		jsval	rval;
+		
+		printf(" =========== initial string =====================\n");
+		printf("%s\n",tests[i]);
+		printf("\n=========== generated string =====================");
+
+		if (!reflect_parse_from_string(cx, testChars, testLen, &rval))
+			return JS_FALSE;
+
+		JS::Value args[] = { rval  };
+		JS::Value stringlify;
+		if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
+		   return false;
+
+		printf(" ==================================================\n\n");
+	}
+
+//============================= JAST TEST END ============================
 	//jsval	rval;
 	//JSBool	ok;
 
