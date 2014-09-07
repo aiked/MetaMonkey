@@ -183,7 +183,7 @@ JSBool unparse::expr_let(JSObject *val, JSString **child, JSString *indent, int 
 	if( !unparse_expr(bodyObj, &expressionStr, indent, 2, false) )
 		return JS_FALSE;
 
-	*child = joinString(5, JS_NewStringCopyZ(cx,"var ("), headStr,
+	*child = joinString(5, srcStr(JSSRCNAME_VARSPACELP), headStr,
 							srcStr(JSSRCNAME_RP), srcStr(JSSRCNAME_SPACE), expressionStr );
 		
 	if( !wrapExpr(child, cprec, 3) )
@@ -422,7 +422,7 @@ JSBool unparse::expr_new(JSObject *val, JSString **child, JSString *indent, int 
 }
 
 JSBool unparse::expr_this(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
-	*child = JS_NewStringCopyZ(cx,"this");
+	*child = srcStr(JSSRCNAME_THIS);
 
 	return JS_TRUE;
 }
@@ -506,7 +506,7 @@ JSBool unparse::expr_unary(JSObject *val, JSString **child, JSString *indent, in
 	if ( operatorStr->equals("meta_inline") ){
 
 		unparse up(cx);
-		if (!up.unparse_expr(argumentObj, &argumentStr, indentChar, 15, false))
+		if (!up.unparse_expr(argumentObj, &argumentStr, srcStr(JSSRCNAME_FIVESPACES), 15, false))
 			return JS_FALSE;
 
 		jsval	inlineRetVal;
@@ -728,10 +728,8 @@ JSBool unparse::expr_objpattern(JSObject *val, JSString **child, JSString *inden
 		if( !getObjPropertyAndConvertToObj(propObj, "value", &valueObj) )
 			return JS_FALSE;
 
-		JSString *hashesStr = JS_NewStringCopyZ(cx,"####");
-
 		JSString *keyStr, *valueStr;
-		if( !unparse_expr(keyObj, &keyStr, hashesStr, 18, false) )
+		if( !unparse_expr(keyObj, &keyStr, srcStr(JSSRCNAME_HASHES), 18, false) )
 			return JS_FALSE;
 		if( !unparse_expr(valueObj, &valueStr, indent, 2, false) )
 			return JS_FALSE;
@@ -754,16 +752,10 @@ JSBool unparse::expr_objpattern(JSObject *val, JSString **child, JSString *inden
 //metadev
 JSBool unparse::expr_metaQuazi(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
 
-	JSString *programStr = JS_NewStringCopyZ(cx, "Program");
-	jsval programVal = STRING_TO_JSVAL(programStr);
+	jsval programVal = STRING_TO_JSVAL( srcStr(JSSRCNAME_PROGRAM) );
 
-//	JSObject *bodyObj;
 	if(!JS_SetProperty(cx, val, "type", &programVal))
 		return JS_FALSE;
-
-	//JSObject *bodyObj;
-	//if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
-	//	return JS_FALSE;
 
 	jsval objVal = OBJECT_TO_JSVAL(val);
 
@@ -878,7 +870,7 @@ JSBool unparse::stmt_let(JSObject *val, JSString **child, JSString *indent){
 	Vector<JSString*> children(cx);
 
 	children.append(indent);
-	children.append(JS_NewStringCopyZ(cx,"var ("));
+	children.append(srcStr(JSSRCNAME_VARSPACELP));
 	children.append(headStr);
 	children.append(srcStr(JSSRCNAME_RP));
 	children.append(bodyStr);
@@ -937,8 +929,7 @@ JSBool unparse::stmt_if(JSObject *val, JSString **child, JSString *indent){
 		if(!substmt(alternateObj, &elseSubStmtStr, indent, false))
 			return JS_FALSE;
 
-		JSString *elseStr = JS_NewStringCopyZ(cx, "else");
-		children.append(elseStr);
+		children.append(srcStr(JSSRCNAME_ELSE));
 		children.append(elseSubStmtStr);
 	}
 
@@ -1289,7 +1280,7 @@ JSBool unparse::stmt_switch(JSObject *val, JSString **child, JSString *indent){
 	children.append(srcStr(JSSRCNAME_NL));
 
 	JSString *deeperStr;
-	deeperStr = joinString(2, indent, indentChar);
+	deeperStr = joinString(2, indent, srcStr(JSSRCNAME_FIVESPACES));
 
 	JSObject *casesObj;
 	if( !getObjPropertyAndConvertToObj(val, "cases", &casesObj) )
@@ -1462,7 +1453,7 @@ JSBool unparse::stmt_try(JSObject *val, JSString **child, JSString *indent){
 
 JSBool unparse::stmt_debugger(JSObject *val, JSString **child, JSString *indent){
 	
-	*child = joinString(2, indent, JS_NewStringCopyZ(cx,"debugger;"));
+	*child = joinString(2, indent, srcStr(JSSRCNAME_DEBUGGERSEMI));
 
 	return JS_TRUE;	
 }
@@ -1494,8 +1485,6 @@ JSBool unparse::stmt_functiondeclaration(JSObject *val, JSString **child, JSStri
 unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), standarJsSrcNames(x), 
 	stringifyStmtHandlerMapInst(x), inlineEvaluateCode(x), cx(x)
 {
-	indentChar = JS_NewStringCopyZ(cx, "    ");
-	fourHash = JS_NewStringCopyZ(cx, "####");
 
 	JSObject *globalObj = cx->global();
 	if( !getObjPropertyAndConvertToObj(globalObj, "JSON", &jsonGlobalObj) )
@@ -1576,13 +1565,15 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 	precedence.put("%", 14);
 
 	char *standardNames[] = {
-		" ", 
+		" ",
+		"    ",
 		"do", 
 		"while (", 
 		"(", ")", 
 		"{", "}",
 		"[", "]",
 		";",
+		" );",
 		"?",
 		"\n", 
 		";\n",
@@ -1595,6 +1586,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"####",
 		"\"",
 		"if (",
+		"else",
 		"return",
 		"function",
 		"=",
@@ -1614,7 +1606,12 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"catch",
 		"finally",
 		"with (",
-		
+		"var (",
+		"this",
+		"debugger;",
+		"inlineCall",
+		"Program",
+		" at "
 	};
 
 	for( size_t i=0; i<JSSRCNAME_END; ++i ){
@@ -1638,9 +1635,7 @@ JSBool unparse::inlineEvalAppendCode(JSString *code)
 JSBool unparse::inlineEvalExecInline(JSString *code, jsval *inlineRetVal)
 {
 	JSString *snippetCode = joinStringVector(&inlineEvaluateCode, NULL, NULL, NULL);
-	JSString* inlineCall = JS_NewStringCopyZ(cx, " inline( ");
-	JSString* closeInlineCall = JS_NewStringCopyZ(cx, " );");
-	JSString *evaluatedCode = joinString(4, snippetCode, inlineCall, code, closeInlineCall);
+	JSString *evaluatedCode = joinString(4, snippetCode, srcStr(JSSRCNAME_INLINECALL), code, srcStr(JSSRCNAME_SPACERPSEMI));
 
 	char *source = JS_EncodeString(cx, evaluatedCode);
 	std::cout<< "\n\ninline: \n===================================================\n" 
@@ -1706,7 +1701,7 @@ JSBool unparse::substmt(JSObject *obj, JSString **s, JSString *indent, bool more
 
 	}
 	else{
-		indent = joinString(2, indent, indentChar);
+		indent = joinString(2, indent, srcStr(JSSRCNAME_FIVESPACES));
 		if (!unparse_sourceElement(obj, &body, indent))
 			return JS_FALSE;
 
@@ -1738,7 +1733,7 @@ JSBool unparse::params(JSObject *values, JSString **s, JSString *indent)
 {
 	Vector<JSString*> children(cx);
 
-	paramsValueApplier ava(fourHash);
+	paramsValueApplier ava(srcStr(JSSRCNAME_HASHES));
 	if ( !unparse_values(values, &children, ava, false) )
 		return JS_FALSE;
 
@@ -1774,7 +1769,7 @@ JSBool unparse::unexpected(JSObject *node, JSString **s){
 		if( !getObjPropertyAndConvertToString(locStartObj, "line", &startLineStr) )
 			return JS_FALSE;
 
-		children.append(JS_NewStringCopyZ(cx," at "));
+		children.append(srcStr(JSSRCNAME_SPACEATSPACE));
 		children.append(sourceStr);
 		children.append(srcStr(JSSRCNAME_COLON));
 	}
@@ -1930,7 +1925,7 @@ JSBool unparse::functionDeclaration(JSString *funcInitStr, JSString **s,
 			return JS_FALSE;
 		}
 
-		if( !unparse_expr(idObj, &funcNameStr, fourHash, 18, false) ){
+		if( !unparse_expr(idObj, &funcNameStr, srcStr(JSSRCNAME_HASHES), 18, false) ){
 			return JS_FALSE;
 		}
 	}
@@ -2169,7 +2164,7 @@ JSBool unparse::unparse_values(JSObject *obj, Vector<JSString*> *children, Value
 		}
 
 		JSString *child;
-		if (!applier.apply(this, nodeObj, &child, indent, indentChar, noIn))
+		if (!applier.apply(this, nodeObj, &child, indent, srcStr(JSSRCNAME_FIVESPACES), noIn))
 			return JS_FALSE;
 		
 		children->append(child);
