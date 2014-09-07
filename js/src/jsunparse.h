@@ -75,6 +75,7 @@ class unparse{
 		JSSRCNAME_HASH,
 		JSSRCNAME_HASHES,
 		JSSRCNAME_QM,
+		JSSRCNAME_QMSINGLE,
 		JSSRCNAME_IFSPACELP,
 		JSSRCNAME_ELSE,
 		JSSRCNAME_RETURN,
@@ -102,6 +103,12 @@ class unparse{
 		JSSRCNAME_INLINECALL,
 		JSSRCNAME_PROGRAM,
 		JSSRCNAME_SPACEATSPACE,
+		JSSRCNAME_NULL,
+		JSSRCNAME_UNDEFINED,
+		JSSRCNAME_TRUE,
+		JSSRCNAME_FALSE,
+		JSSRCNAME_INVALID,
+		JSSRCNAME_NOJSID,
 
 		JSSRCNAME_END
 	};
@@ -164,9 +171,14 @@ class unparse{
 	JSBool inlineEvalAppendCode(JSString *code);
 	JSBool inlineEvalExecInline(JSString *code, jsval *inlineRetVal);
 
+	public:
 	///////////////////////
 	// object stringify
-	JSBool stringifyObject(JSObject *val);
+	JSBool stringifyObject(JSObject *obj, JSString **s);
+	JSBool stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **s);
+	JSBool stringifyObjectValue(const Value &v, JSString **s);
+
+	private:
 
 
 	///////////////////////

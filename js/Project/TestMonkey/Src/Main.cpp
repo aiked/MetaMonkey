@@ -175,8 +175,16 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
         fprintf(stderr, "NULL\n");
         return JS_FALSE;
     }
+
 	JSString *str = NULL;
 	unparse up(cx);
+	printf("\n=============obj dump================\n\n\n");
+	obj->dump();
+	printf("\n=============our dump :)============================\n\n\n");
+	JSString *ourDump;
+	up.stringifyObject(obj, &ourDump);
+	fprintf(stderr,"%s", JS_EncodeString(cx,ourDump));
+	printf("\n=============================================\n\n\n");
 	if (!up.unParse_start(obj, &str))
 		return JS_FALSE;
 
@@ -361,16 +369,17 @@ static int run (JSContext *cx) {
 "e=[]; for(i=0; i<tests.length; ++i) e[i] ='\"' + tests[i].replace(/(\\r\\n|\\n|\\r)/gm, '').replace(/(\\\")*/, '\\\"') + '\"\\n'; e.join()", ""
 	};
 
-	int testsLen = sizeof(tests)/sizeof(tests[0]);
+	//int testsLen = sizeof(tests)/sizeof(tests[0]);
 
-	for(int i=0; i<testsLen; ++i){
-		uint32_t testLen = strlen(tests[i]);
-		jschar *testChars = InflateUTF8String(cx, tests[i], &testLen);
+	//for(int i=0; i<testsLen; ++i){
+		const char * test = "x = {t:2, r:'hi', x:20};";
+		uint32_t testLen = strlen(test);
+		jschar *testChars = InflateUTF8String(cx, test, &testLen);
 		jsval	rval;
 		
-		printf("=========== initial string =====================\n");
-		printf("%s",tests[i]);
-		printf("=========== generated string =====================\n");
+		//printf("=========== initial string =====================\n");
+		//printf("%s",tests[i]);
+		//printf("=========== generated string =====================\n");
 		
 		if (!reflect_parse_from_string(cx, testChars, testLen, &rval)){
 			printf("error: reflect_parse_from_string failed @ MAIN\n");
@@ -383,7 +392,7 @@ static int run (JSContext *cx) {
 		   return false;
 
 		printf("\n==================================================\n\n\n");
-	}
+	//}
 
 //============================= JAST TEST END ============================
 	//jsval	rval;
@@ -407,9 +416,8 @@ static int run (JSContext *cx) {
 
 
 //============================= Check json.stringify START ================================
-	//uint32_t lineno = 1;
-	//ScopedJSFreePtr<char> filename;
-	//const char *quaziSnippet =  "{t:3,q:'s', fun:function(){print(1);}, obj:{o:[]}}";
+
+	//const char *quaziSnippet =  "{t:3,q:'s', obj:{o:[]}}";
 
 	//JSString *quaziStr = JS_NewStringCopyZ(cx, quaziSnippet);
 	//jsval quaziVal = STRING_TO_JSVAL(quaziStr);

@@ -1585,6 +1585,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"#",
 		"####",
 		"\"",
+		"\'",
 		"if (",
 		"else",
 		"return",
@@ -1611,7 +1612,13 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"debugger;",
 		"inlineCall",
 		"Program",
-		" at "
+		" at ",
+		"null",
+		"undefined",
+		"true",
+		"false",
+		"invalid",
+		"unknown jsid",
 	};
 
 	for( size_t i=0; i<JSSRCNAME_END; ++i ){
@@ -1651,8 +1658,132 @@ JSBool unparse::inlineEvalExecInline(JSString *code, jsval *inlineRetVal)
 ///////////////////////
 // object stringify
 
-JSBool stringifyObject(JSObject *obj, JSString **s)
+JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 {
+	Vector<JSString*> children(cx);
+
+    if (v.isNull())
+		children.append(srcStr(JSSRCNAME_NULL));
+    else if (v.isUndefined())
+        children.append(srcStr(JSSRCNAME_UNDEFINED));
+    else if (v.isString()){
+		children.append(srcStr(JSSRCNAME_QM));
+		children.append(v.toString());
+		children.append(srcStr(JSSRCNAME_QM));
+
+	} else if (v.isDouble()){
+		jsval val = JS_NumberValue( (double)v.toDouble() );
+		JSString *valStr = JS_ValueToString(cx, val);
+		if (!s)
+			return JS_FALSE;
+		children.append(valStr);
+	} else if (v.isInt32()){
+		jsval val = JS_NumberValue( (double)v.toInt32() );
+		JSString *valStr = JS_ValueToString(cx, val);
+		if (!s)
+			return JS_FALSE;
+		children.append(valStr);
+	} else if (v.isObject() && v.toObject().is<JSFunction>()) {
+		JS_ASSERT(false);
+    } else if (v.isObject()) {
+		JSObject *obj = &v.toObject();
+		if( JS_IsArrayObject(cx, obj) ){
+
+			uint32_t arrayLen;
+			if (!JS_GetArrayLength(cx, obj, &arrayLen))
+				return JS_FALSE;
+
+			children.append(srcStr(JSSRCNAME_LB));
+			for(uint32_t i=0; i<arrayLen; ++i) {
+				JSObject *nodeObj = NULL;
+				if( !getArrayElementAndConvertToObj( obj, i, &nodeObj) )
+					return JS_FALSE;
+
+				JSString *objStr;
+				stringifyObject( nodeObj, &objStr);
+				children.append(objStr);
+				
+				if( i != arrayLen-1 )
+					children.append(srcStr(JSSRCNAME_COMMASPACE));
+			}
+			children.append(srcStr(JSSRCNAME_RB));
+		} else {
+			JSString *objStr;
+			stringifyObject( obj, &objStr);
+			children.append(objStr);
+		}
+    } else if (v.isBoolean()) {
+        if (v.toBoolean())
+            children.append(srcStr(JSSRCNAME_TRUE));
+        else
+            children.append(srcStr(JSSRCNAME_FALSE));
+    } else if (v.isMagic()) {
+		JS_ASSERT(false);
+    } else {
+        JS_ASSERT(false);
+    }
+
+	*s = joinStringVector(&children, NULL, NULL, NULL);
+
+	return JS_TRUE;
+}
+
+JSBool unparse::stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **s)
+{
+	Vector<JSString*> children(cx);
+	jsid id = shape.propid();
+
+    if (JSID_IS_ATOM(id)){
+		children.append(JSID_TO_STRING(id));
+		children.append(srcStr(JSSRCNAME_COLON));
+	} else if (JSID_IS_INT(id)){
+		jsval val = JS_NumberValue( (double)JSID_TO_INT(id) );
+
+		JSString *valStr = JS_ValueToString(cx, val);
+		if (!s)
+			return JS_FALSE;
+
+		children.append(valStr);
+	}
+    else
+		children.append(srcStr(JSSRCNAME_NOJSID));
+
+	uint32_t slot = shape.hasSlot() ? shape.maybeSlot() : SHAPE_INVALID_SLOT;
+    if (shape.hasSlot()) {
+		JSString *objStr;
+        stringifyObjectValue(obj->getSlot(slot), &objStr);
+		children.append(objStr);
+    } else if (slot != SHAPE_INVALID_SLOT) {
+        children.append(srcStr(JSSRCNAME_INVALID));
+    }
+    //children.append(srcStr(JSSRCNAME_NL));
+
+	*s = joinStringVector(&children, NULL, NULL, NULL);
+
+	return JS_TRUE;
+}
+
+
+JSBool unparse::stringifyObject(JSObject *obj, JSString **s)
+{
+	Vector<JSString*> children(cx);
+    if (obj->isNative()) {
+        children.append(srcStr(JSSRCNAME_LC));
+        Vector<Shape *, 8, SystemAllocPolicy> props;
+        for (Shape::Range<NoGC> r(obj->lastProperty()); !r.empty(); r.popFront())
+            props.append(&r.front());
+        for (size_t i = props.length(); i-- != 0;){
+			JSString *propertyStr;
+            stringifyObjectProperty(obj, *props[i], &propertyStr);
+			children.append(propertyStr);
+			if( i != 0 )
+				children.append(srcStr(JSSRCNAME_COMMASPACE));
+		}
+		children.append(srcStr(JSSRCNAME_RC));
+    }
+
+	*s = joinStringVector(&children, NULL, NULL, NULL);
+
 	return JS_TRUE;
 }
 
