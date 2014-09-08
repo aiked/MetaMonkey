@@ -16,7 +16,7 @@ using namespace js;
 JSBool unparse::expr_array(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
 	JSObject *arrayObj;
-	if( !getObjPropertyAndConvertToObj(val, "elements", &arrayObj) )
+	if( !JS_GetPropertyToObj(cx, val, "elements", &arrayObj) )
 		return JS_FALSE;
 
 	uint32_t arrayLen;
@@ -29,7 +29,7 @@ JSBool unparse::expr_array(JSObject *val, JSString **child, JSString *indent, in
 	for(uint32_t i=0; i<arrayLen; ++i) {
 		
 		JSObject *nodeObj = NULL;
-		if( !getArrayElementAndConvertToObj(arrayObj, i, &nodeObj) )
+		if( !JS_GetArrayElementToObj(cx, arrayObj, i, &nodeObj) )
 			return JS_FALSE;
 
 		if (nodeObj){
@@ -57,7 +57,7 @@ JSBool unparse::expr_array(JSObject *val, JSString **child, JSString *indent, in
 JSBool unparse::expr_obj(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
 	JSObject *propertiesObj;
-	if( !getObjPropertyAndConvertToObj(val, "properties", &propertiesObj) )
+	if( !JS_GetPropertyToObj(cx, val, "properties", &propertiesObj) )
 		return JS_FALSE;
 
 	uint32_t propertiesLen;
@@ -70,19 +70,19 @@ JSBool unparse::expr_obj(JSObject *val, JSString **child, JSString *indent, int 
 	for (uint32_t i=0; i<propertiesLen; ++i){
 
 		JSObject *propObj;
-		if( !getArrayElementAndConvertToObj(propertiesObj, i, &propObj) )
+		if( !JS_GetArrayElementToObj(cx, propertiesObj, i, &propObj) )
 			return JS_FALSE;
 
 		JSString *kindStr;
-		if( !getObjPropertyAndConvertToString(propObj, "kind", &kindStr) )
+		if( !JS_GetPropertyToString(cx, propObj, "kind", &kindStr) )
 			return JS_FALSE;
 
 		if ( kindStr->equals("init") ){
 			
 			JSObject *keyObj, *valueObj;
-			if( !getObjPropertyAndConvertToObj(propObj, "key", &keyObj) )
+			if( !JS_GetPropertyToObj(cx, propObj, "key", &keyObj) )
 				return JS_FALSE;
-			if( !getObjPropertyAndConvertToObj(propObj, "value", &valueObj) )
+			if( !JS_GetPropertyToObj(cx, propObj, "value", &valueObj) )
 				return JS_FALSE;
 
 			JSString *initKeyStr, *initValueStr;
@@ -104,7 +104,7 @@ JSBool unparse::expr_obj(JSObject *val, JSString **child, JSString *indent, int 
 				return JS_FALSE;
 
 			JSObject *valueObj;
-			if( !getObjPropertyAndConvertToObj(propObj, "value", &valueObj) )
+			if( !JS_GetPropertyToObj(cx, propObj, "value", &valueObj) )
 				return JS_FALSE;
 
 			JSString *functionStr;
@@ -137,11 +137,11 @@ JSBool unparse::expr_obj(JSObject *val, JSString **child, JSString *indent, int 
 JSBool unparse::expr_graph(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
 	JSString *indexStr;
-	if( !getObjPropertyAndConvertToString(val, "index", &indexStr) )
+	if( !JS_GetPropertyToString(cx, val, "index", &indexStr) )
 		return JS_FALSE;
 
 	JSObject *expressionObj;
-	if( !getObjPropertyAndConvertToObj(val, "expression", &expressionObj) )
+	if( !JS_GetPropertyToObj(cx, val, "expression", &expressionObj) )
 		return JS_FALSE;
 
 	JSString *expressionStr;
@@ -157,7 +157,7 @@ JSBool unparse::expr_graph(JSObject *val, JSString **child, JSString *indent, in
 JSBool unparse::expr_graphIndx(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
 	JSString *indexStr;
-	if( !getObjPropertyAndConvertToString(val, "index", &indexStr) )
+	if( !JS_GetPropertyToString(cx, val, "index", &indexStr) )
 		return JS_FALSE;
 
 	*child = joinString(3, srcStr(JSSRCNAME_HASH), indexStr, srcStr(JSSRCNAME_HASH) );
@@ -168,7 +168,7 @@ JSBool unparse::expr_graphIndx(JSObject *val, JSString **child, JSString *indent
 JSBool unparse::expr_let(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
 	JSObject *headObj; 
-	if( !getObjPropertyAndConvertToObj(val, "head", &headObj) )
+	if( !JS_GetPropertyToObj(cx, val, "head", &headObj) )
 		return JS_FALSE;
 
 	JSObject *bodyObj;
@@ -254,7 +254,7 @@ JSBool unparse::expr_sequence(JSObject *val, JSString **child, JSString *indent,
 	for (uint32_t i=0; i<expressionsLen; ++i){
 
 		JSObject *propObj;
-		if( !getArrayElementAndConvertToObj(expressionsObj, i, &propObj) )
+		if( !JS_GetArrayElementToObj(cx, expressionsObj, i, &propObj) )
 			return JS_FALSE;
 
 		JSString *exprStr;
@@ -314,7 +314,7 @@ JSBool unparse::expr_cond(JSObject *val, JSString **child, JSString *indent, int
 JSBool unparse::expr_indent(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn)
 {
 	JSString *indentifier;
-	if( !getObjPropertyAndConvertToString(val, "name", &indentifier) )
+	if( !JS_GetPropertyToString(cx, val, "name", &indentifier) )
 		return JS_FALSE;
 
 	if(indentifier->equals("NaN")){
@@ -360,7 +360,7 @@ JSBool unparse::expr_literal(JSObject *val, JSString **child, JSString *indent, 
 				return JS_FALSE;
 			}
 
-			if(valObj->isRegExpStatics()){
+			if( valObj && valObj->isRegExpStatics()){
 				*child = JS_ValueToString(cx, value);
 				return JS_TRUE;
 			}
@@ -530,7 +530,7 @@ JSBool unparse::expr_unary(JSObject *val, JSString **child, JSString *indent, in
 		return JS_FALSE;
 
 	JSString *operatorStr;
-	if( !getObjPropertyAndConvertToString(val, "operator", &operatorStr) )
+	if( !JS_GetPropertyToString(cx, val, "operator", &operatorStr) )
 		return JS_FALSE;
 
 	JSString *argumentStr, *opStr;
@@ -586,7 +586,7 @@ JSBool unparse::expr_unary(JSObject *val, JSString **child, JSString *indent, in
 JSBool unparse::expr_logic(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn){
 
 	JSString *opStr;
-	if( !getObjPropertyAndConvertToString(val, "operator", &opStr) )
+	if( !JS_GetPropertyToString(cx, val, "operator", &opStr) )
 		return JS_FALSE;
 
 	size_t prec = getPrecedence(opStr);
@@ -618,11 +618,11 @@ JSBool unparse::expr_logic(JSObject *val, JSString **child, JSString *indent, in
 	
 	do{
 		JSString *lChildTypeStr;
-		if( !getObjPropertyAndConvertToString(val, "type", &lChildTypeStr) )
+		if( !JS_GetPropertyToString(cx, val, "type", &lChildTypeStr) )
 			return JS_FALSE;
 
 		JSString *valTypeStr;
-		if( !getObjPropertyAndConvertToString(val, "type", &valTypeStr) )
+		if( !JS_GetPropertyToString(cx, val, "type", &valTypeStr) )
 			return JS_FALSE;
 
 		int32_t typeEqual;
@@ -635,7 +635,7 @@ JSBool unparse::expr_logic(JSObject *val, JSString **child, JSString *indent, in
 			break;
 		
 		JSString *lChildOpStr;
-		if( !getObjPropertyAndConvertToString(lChildObj, "operator", &lChildOpStr) )
+		if( !JS_GetPropertyToString(cx, lChildObj, "operator", &lChildOpStr) )
 			return JS_FALSE;
 
 		size_t childPrec = getPrecedence(lChildOpStr);
@@ -696,7 +696,7 @@ JSBool unparse::expr_assign(JSObject *val, JSString **child, JSString *indent, i
 		return JS_FALSE;
 
 	JSString *opStr;
-	if( !getObjPropertyAndConvertToString(val, "operator", &opStr) )
+	if( !JS_GetPropertyToString(cx, val, "operator", &opStr) )
 		return JS_FALSE;
 
 	*child = joinString(5, leftStr, srcStr(JSSRCNAME_SPACE), 
@@ -751,7 +751,7 @@ JSBool unparse::expr_objpattern(JSObject *val, JSString **child, JSString *inden
 	for (uint32_t i=0; i<propertiesLen; ++i){
 
 		JSObject *propObj;
-		if( !getArrayElementAndConvertToObj(propertiesObj, i, &propObj) )
+		if( !JS_GetArrayElementToObj(cx, propertiesObj, i, &propObj) )
 			return JS_FALSE;
 
 		JSObject *keyObj, *valueObj;
@@ -821,7 +821,7 @@ JSBool unparse::stmt_block(JSObject *val, JSString **child, JSString *indent){
 
 JSBool unparse::stmt_variableDeclaration(JSObject *val, JSString **child, JSString *indent){
 	JSString *kindStr;
-	if( !getObjPropertyAndConvertToString(val, "kind", &kindStr) )
+	if( !JS_GetPropertyToString(cx, val, "kind", &kindStr) )
 		return JS_FALSE;
 
 	JSObject *declObj;
@@ -1008,13 +1008,13 @@ JSBool unparse::stmt_for(JSObject *val, JSString **child, JSString *indent){
 		}
 
 		JSString *initTypeStr;
-		if( !getObjPropertyAndConvertToString(initObj, "type", &initTypeStr) )
+		if( !JS_GetPropertyToString(cx, initObj, "type", &initTypeStr) )
 			return JS_FALSE;
 
 		if(initTypeStr->equals("VariableDeclaration")){
 
 			JSString *initKindStr;
-			if( !getObjPropertyAndConvertToString(initObj, "kind", &initKindStr) )
+			if( !JS_GetPropertyToString(cx, initObj, "kind", &initKindStr) )
 				return JS_FALSE;
 
 			JSObject *declObj;
@@ -1161,7 +1161,7 @@ JSBool unparse::stmt_continue(JSObject *val, JSString **child, JSString *indent)
 			return JS_FALSE;
 
 		JSString *nameStr;
-		if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
+		if( !JS_GetPropertyToString(cx, labelObj, "name", &nameStr) )
 			return JS_FALSE;
 
 		children.append(srcStr(JSSRCNAME_SPACE));
@@ -1190,7 +1190,7 @@ JSBool unparse::stmt_break(JSObject *val, JSString **child, JSString *indent){
 			return JS_FALSE;
 
 		JSString *nameStr;
-		if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
+		if( !JS_GetPropertyToString(cx, labelObj, "name", &nameStr) )
 			return JS_FALSE;
 
 		children.append(srcStr(JSSRCNAME_SPACE));
@@ -1267,7 +1267,7 @@ JSBool unparse::stmt_labeled(JSObject *val, JSString **child, JSString *indent){
 		return JS_FALSE;
 
 	JSString *nameStr;
-	if( !getObjPropertyAndConvertToString(labelObj, "name", &nameStr) )
+	if( !JS_GetPropertyToString(cx, labelObj, "name", &nameStr) )
 		return JS_FALSE;
 
 	JSObject *bodyObj;
@@ -1319,7 +1319,7 @@ JSBool unparse::stmt_switch(JSObject *val, JSString **child, JSString *indent){
 	for (uint32_t i=0; i<casesLen; ++i){
 
 		JSObject *caseObj;
-		if( !getArrayElementAndConvertToObj(casesObj, i, &caseObj) )
+		if( !JS_GetArrayElementToObj(cx, casesObj, i, &caseObj) )
 			return JS_FALSE;
 
 		children.append(indent);
@@ -1357,7 +1357,7 @@ JSBool unparse::stmt_switch(JSObject *val, JSString **child, JSString *indent){
 
 		for (uint32_t j=0; j<stmtsLen; ++j){
 			JSObject *stmtObj;
-			if( !getArrayElementAndConvertToObj(stmtsObj, j, &stmtObj) )
+			if( !JS_GetArrayElementToObj(cx, stmtsObj, j, &stmtObj) )
 				return JS_FALSE;
 
 			JSString *stmtStr;
@@ -1728,7 +1728,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 			children.append(srcStr(JSSRCNAME_LB));
 			for(uint32_t i=0; i<arrayLen; ++i) {
 				JSObject *nodeObj = NULL;
-				if( !getArrayElementAndConvertToObj( obj, i, &nodeObj) )
+				if( !JS_GetArrayElementToObj(cx,  obj, i, &nodeObj) )
 					return JS_FALSE;
 
 				JSString *objStr;
@@ -1785,18 +1785,18 @@ JSBool unparse::stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **
 JSBool unparse::stringifyObject(JSObject *obj, JSString **s)
 {
 	JSString *typeStr;
-	if( !getObjPropertyAndConvertToString(obj, "type", &typeStr) )
+	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
 		return JS_FALSE;
 
 	if( typeStr && typeStr->equals("UnaryExpression") ){
 		JSString *opStr;
-		if( !getObjPropertyAndConvertToString(obj, "operator", &opStr) )
+		if( !JS_GetPropertyToString(cx, obj, "operator", &opStr) )
 			return JS_FALSE;
 
 		if(opStr && opStr->equals("meta_esc")){
 
 			JSObject *argObj;
-			if( !getObjPropertyAndConvertToObj(obj, "argument", &argObj ) )
+			if( !JS_GetPropertyToObj(cx, obj, "argument", &argObj ) )
 				return JS_FALSE;
 
 			JSString *argStr;
@@ -1864,7 +1864,7 @@ JSBool unparse::wrapExpr(JSString **s, int cprec, int xprec)
 JSBool unparse::substmt(JSObject *obj, JSString **s, JSString *indent, bool more)
 {
 	JSString *typeStr;
-	if( !getObjPropertyAndConvertToString(obj, "type", &typeStr) )
+	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
 		return JS_FALSE;
 
 	JSString *body;
@@ -1935,19 +1935,19 @@ JSBool unparse::unexpected(JSObject *node, JSString **s){
 	Vector<JSString*> children(cx);
 
 	JSString *typeStr;
-	if( !getObjPropertyAndConvertToString(node, "type", &typeStr) )
+	if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
 		return JS_FALSE;
 
 	JSObject *locObj, *locStartObj;
-	if( getObjPropertyAndConvertToObj(node,"loc", &locObj ) ){
+	if( JS_GetPropertyToObj(cx, node,"loc", &locObj ) ){
 
-		if( !getObjPropertyAndConvertToObj(locObj, "start", &locStartObj) )
+		if( !JS_GetPropertyToObj(cx, locObj, "start", &locStartObj) )
 			return JS_FALSE;
 
 		JSString *sourceStr, *startLineStr;
-		if( !getObjPropertyAndConvertToString(locObj, "source", &sourceStr) )
+		if( !JS_GetPropertyToString(cx, locObj, "source", &sourceStr) )
 			return JS_FALSE;
-		if( !getObjPropertyAndConvertToString(locStartObj, "line", &startLineStr) )
+		if( !JS_GetPropertyToString(cx, locStartObj, "line", &startLineStr) )
 			return JS_FALSE;
 
 		children.append(srcStr(JSSRCNAME_SPACEATSPACE));
@@ -1973,12 +1973,12 @@ JSBool unparse::forHead(JSObject *val, JSString **s, JSString *indent){
 		return JS_FALSE;
 
 	JSString *typeStr;
-	if( !getObjPropertyAndConvertToString(leftObj, "type", &typeStr) )
+	if( !JS_GetPropertyToString(cx, leftObj, "type", &typeStr) )
 		return JS_FALSE;
 
 	if( typeStr->equals("VariableDeclaration") ){
 		JSString *kindStr;
-		if( !getObjPropertyAndConvertToString(leftObj, "kind", &kindStr) )
+		if( !JS_GetPropertyToString(cx, leftObj, "kind", &kindStr) )
 			return JS_FALSE;
 
 		JSObject *declarObj;
@@ -2058,7 +2058,7 @@ JSBool unparse::comprehension(JSObject *val, JSString **s, JSString *indent){
 
 	for( uint32_t i=0; i<blocksLen; ++i ){
 		JSObject *blocksNodeObj;
-		if( !getArrayElementAndConvertToObj(blocksObj, i, &blocksNodeObj) )
+		if( !JS_GetArrayElementToObj(cx, blocksObj, i, &blocksNodeObj) )
 			return JS_FALSE;
 
 		children.append(srcStr(JSSRCNAME_SPACE));
@@ -2119,7 +2119,7 @@ JSBool unparse::functionDeclaration(JSString *funcInitStr, JSString **s,
 	}
 
 	JSObject *bodyObj;
-	if( !getObjPropertyAndConvertToObj(val, "body", &bodyObj) )
+	if( !JS_GetPropertyToObj(cx, val, "body", &bodyObj) )
 		return JS_FALSE;
 
 	JSString *bodyStr;
@@ -2147,7 +2147,7 @@ JSBool unparse::functionDeclaration(JSString *funcInitStr, JSString **s,
 	}
 
 	JSObject *paramsObj;
-	if( !getObjPropertyAndConvertToObj(val, "params", &paramsObj) )
+	if( !JS_GetPropertyToObj(cx, val, "params", &paramsObj) )
 		return JS_FALSE;
 
 	JSString *paramsStr;
@@ -2181,7 +2181,7 @@ JSString* unparse::prefixSuffixConcatString(JSString *sep, Vector<JSString*> *st
 
 JSBool unparse::isBadIdentifier(JSObject *val, JSBool *isBad){
 	JSString *typeStr;
-	if( !getObjPropertyAndConvertToString(val, "type", &typeStr) )
+	if( !JS_GetPropertyToString(cx, val, "type", &typeStr) )
 		return JS_FALSE;
 
 	if (!typeStr->equals("Identifier")){
@@ -2190,7 +2190,7 @@ JSBool unparse::isBadIdentifier(JSObject *val, JSBool *isBad){
 	}
 	
 	JSString *nameStr;
-	if( !getObjPropertyAndConvertToString(val, "name", &nameStr) )
+	if( !JS_GetPropertyToString(cx, val, "name", &nameStr) )
 		return JS_FALSE;
 
 	std::regex regx ("^[_$A-Za-z][_$A-Za-z0-9]*$");
@@ -2243,65 +2243,12 @@ JSString * unparse::joinStringVector(Vector<JSString*> *strs,
 	return joinString(3, prf, str, suf);
 }
 
-JSBool unparse::getObjPropertyAndConvertToObj(JSObject *obj, const char *key, 
-	JSObject **objVal)
-{
-	jsval val;
-	if (!JS_GetProperty(cx, obj, key, &val)){
-		JS_ReportError(cx, "object has not property (%s)", key);
-		return JS_FALSE;
-	}
-
-	if( !JS_ValueToObject(cx, val, objVal) ){
-		JS_ReportError(cx, "object property (%s) is not an object", key);
-		return JS_FALSE;
-	}
-
-	return JS_TRUE;
-}
-
-JSBool unparse::getObjPropertyAndConvertToString(JSObject *obj, const char *key, 
-	JSString **strVal)
-{
-	jsval val;
-	if (!JS_GetProperty(cx, obj, key, &val)){
-		JS_ReportError(cx, "object has not property (%s)", key);
-		return JS_FALSE;
-	}
-
-	JSString *s = JS_ValueToString(cx, val);
-	if (!s){
-		JS_ReportError(cx, "cannot convert value to string");
-		return JS_FALSE;
-	}
-	*strVal = s;
-
-	return JS_TRUE;
-}
-
-JSBool unparse::getArrayElementAndConvertToObj(JSObject *arrayObj, const uint32_t index, 
-	JSObject **objVal)
-{
-	jsval node;
-	if (!JS_GetElement(cx, arrayObj, index, &node)){
-		JS_ReportError(cx, "Array does not have index %d", index);
-		return JS_FALSE;
-	}
-
-	if( !JS_ValueToObject(cx, node, objVal) ){
-		JS_ReportError(cx, "Array has not object as value @ index: %d", index);
-		return JS_FALSE;
-	}
-
-	return JS_TRUE;
-}
-
 //////////////////////////////
 
 JSBool unparse::unparse_expr(JSObject *exprVal, JSString **s, JSString *indent, int cprec, bool noIn)
 {
 	JSString *typeStr;
-	if( !getObjPropertyAndConvertToString(exprVal, "type", &typeStr) )
+	if( !JS_GetPropertyToString(cx, exprVal, "type", &typeStr) )
 		return JS_FALSE;
 
 	const char *typeChars = JS_EncodeString(cx, typeStr);
@@ -2358,7 +2305,7 @@ JSBool unparse::unparse_values(JSObject *obj, Vector<JSString*> *children, Value
 JSBool unparse::unparse_sourceElement(JSObject *val, JSString **child, JSString *indent)
 {
 	JSString *typeStr;
-	if( !getObjPropertyAndConvertToString(val, "type", &typeStr) )
+	if( !JS_GetPropertyToString(cx, val, "type", &typeStr) )
 		return JS_FALSE;
 
 	const char *typeChars = JS_EncodeString(cx, typeStr);
@@ -2379,7 +2326,7 @@ JSBool unparse::unparse_sourceElement(JSObject *val, JSString **child, JSString 
 JSBool unparse::unParse_start(JSObject *obj, JSString **s)
 {	
 	JSString *objTypeStr;
-	if( !getObjPropertyAndConvertToString(obj, "type", &objTypeStr) )
+	if( !JS_GetPropertyToString(cx, obj, "type", &objTypeStr) )
 		return JS_FALSE;
 	
 	if ( !objTypeStr->equals("Program") ) {
@@ -2388,7 +2335,7 @@ JSBool unparse::unParse_start(JSObject *obj, JSString **s)
 	}
 
 	JSObject *bodyObj;
-	if( !getObjPropertyAndConvertToObj(obj, "body", &bodyObj) )
+	if( !JS_GetPropertyToObj(cx, obj, "body", &bodyObj) )
 		return JS_FALSE;
 
 	Vector<JSString*> children(cx);

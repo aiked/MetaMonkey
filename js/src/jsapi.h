@@ -3476,7 +3476,7 @@ extern JS_PUBLIC_API(JSBool)
 JS_GetOwnPropertyDescriptor(JSContext *cx, JSObject *obj, jsid id, jsval *vp);
 
 extern JS_PUBLIC_API(JSBool)
-JS_GetProperty(JSContext *cx, JSObject *obj, const char *name, JSString *vp);
+JS_GetProperty(JSContext *cx, JSObject *obj, const char *name, jsval *vp);
 
 //metadev
 extern JS_PUBLIC_API(JSBool)

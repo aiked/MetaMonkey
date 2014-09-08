@@ -1,6 +1,8 @@
 
 ////////////////////////////////////////////////////////////////////
 #include <iostream>
+#include <fstream>
+#include <string>
 
 #include "jsreflect.h"
 #include "jsapi.h"
@@ -149,24 +151,45 @@ Escape(JSContext *cx, unsigned argc, jsval *vp)
         return JS_FALSE;
     }
 
-	jsval typeVal;
-	if (!JS_GetProperty(cx, obj, "type", &typeVal)){
-		JS_ReportError(cx, "object has not property (%s)", "type");
+	JSString *typeStr;
+	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
 		return JS_FALSE;
-	}
-
-	JSString *typeStr = JS_ValueToString(cx, typeVal);
-	if (!typeStr){
-		JS_ReportError(cx, "cannot convert value to string");
-		return JS_FALSE;
-	}
 	
 	if ( !typeStr->equals("Program") ) {
 		JS_ReportError(cx, "object type is not program");
 		return JS_FALSE;
 	}
 
-	args.rval().setBoolean(true);
+	JSObject *bodyObj;
+	if( !JS_GetPropertyToObj(cx, obj, "body", &bodyObj) )
+		return JS_FALSE;
+
+	if ( !JS_IsArrayObject(cx, bodyObj ) ) {
+		JS_ReportError(cx, "object type is not program");
+		return JS_FALSE;
+	}
+
+	uint32_t lengthp;
+	if (!JS_GetArrayLength(cx, bodyObj, &lengthp))
+		return JS_FALSE;
+
+	if( lengthp==1 ){
+		JSObject *nodeObj;
+		if (!JS_GetArrayElementToObj(cx, bodyObj, 0, &nodeObj)){
+			JS_ReportError(cx, "array has not index: %d", 0);
+			return JS_FALSE;
+		}
+
+		JSObject *nodeExpreObj;;
+		if( !JS_GetPropertyToObj(cx, nodeObj, "expression", &nodeExpreObj) )
+			return JS_FALSE;
+
+		args.rval().setObject(*nodeExpreObj);
+	}else{
+		args.rval().setNull();
+	}
+
+	return JS_TRUE;
 }
 
 static JSBool
@@ -212,20 +235,12 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 
 	JSString *str = NULL;
 	unparse up(cx);
-	//printf("\n=============obj dump================\n\n\n");
-	//obj->dump();
-	//printf("\n=============our dump :)============================\n\n\n");
-	//JSString *ourDump;
-	//up.stringifyObject(obj, &ourDump);
-	//fprintf(stderr,"%s", JS_EncodeString(cx,ourDump));
-	//printf("\n=============================================\n\n\n");
+
 	if (!up.unParse_start(obj, &str))
 		return JS_FALSE;
 
-	if( str && str->length() != 0 )
-		str->dumpChars(str->getChars(cx), str->length(), false);
-	//fprintf(stderr, objType.toString()->getChars() );
-	
+	vp->setString(str);
+
 	return JS_TRUE;
 }
 
@@ -255,7 +270,16 @@ static const JSFunctionSpecWithHelp builtinFunctions[] = {
 
 ////////////////////////////////////////////////////////////////////
 
-static int run (JSContext *cx) {
+
+static int readFile( const char *filename, std::string *source){
+	std::ifstream file(filename);
+	source->assign((std::istreambuf_iterator<char>(file)), 
+		std::istreambuf_iterator<char>());
+
+	return 0;
+}
+
+static int run (JSContext *cx, const char *source) {
     /* Enter a request before running anything in the context */
     JSAutoRequest ar(cx);
 
@@ -263,220 +287,36 @@ static int run (JSContext *cx) {
     JSObject *global = JS_NewGlobalObject(cx, &global_class, nullptr);
     if (!global)
         return 1;
-
-
     /* Set the context's global */
     JSAutoCompartment ac(cx, global);
     JS_SetGlobalObject(cx, global);
 
 	if (!JS_InitReflect(cx, global))
 		return 1;
-
     /* Populate the global object with the standard globals, like Object and Array and builtin functions */
     if (!JS_InitStandardClasses(cx, global)							||
 		!JS_DefineFunctionsWithHelp(cx, global, builtinFunctions)	||
         !JS_DefineProfilingFunctions(cx, global))
 		return 1;
 
-    /* Your application code here. This may include JSAPI calls to create your own custom JS objects and run scripts. */
-
-
-
-//============================= JAST START ================================
-
+//============================= START ================================
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
-	const char *quaziSnippet =  "function foo(){ y=.<3;>.; x= .< 2; >.; ast = .< .~y + .~x; >.; /* ast = {type:'Program', body:[{ type:'ExpressionStatement', expression:{type:'BinaryExpression', operator:'+', left:y.body[0].expression, right:x.body[0].expression}}]};*/ return .< 1; >.; } x = .! foo();";
-	//const char *quaziSnippet =  "function foo(){ return .< .~y + .~x; >.; } x = .! foo();";
-	uint32_t quaziSnippetLength = strlen(quaziSnippet);
-	jschar *jsQuaziSnippet = InflateUTF8String(cx, quaziSnippet, &quaziSnippetLength);
+	uint32_t sourceLen = strlen(source);
+	jschar *sourceChar = InflateUTF8String(cx, source, &sourceLen);
 	jsval	rval;
-	if (!reflect_parse_from_string(cx, jsQuaziSnippet, quaziSnippetLength, &rval))
+
+	if (!reflect_parse_from_string(cx, sourceChar, sourceLen, &rval))
 		return JS_FALSE;
 
 	JS::Value args[] = { rval  };
-	JS::Value stringlify;
-	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
+	JS::Value stringify;
+	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringify))
 	   return false;
 
-//============================= JAST END ================================
-
-//============================= JAST TEST START =========================
-	//uint32_t lineno = 1;
-	//ScopedJSFreePtr<char> filename;
-
-	//const char* tests[] = { 
-//"x;"
-//,"null;"
-//,"true;"
-//,"false;"
-//,"-0;"
-//,"x = y;"
-//,"void 0;"
-//,"void y;"
-//,"void f();"
-//,"[];"
-//,"({});"
-//,"({1e999: 0});"
-//,"({get \"a b\"() {    return this;}});"
-//,"({get 1() {    return this;}});"
-//,"[,, 2];"
-//,"[, 1,,];"
-//,"[1,,, 2,,,];"
-//,"[,,,];"
-//,"[0, 1, 2, \"x\"];"
-//,"x.y.z;"
-//,"x[y[z]];"
-//,"x[\"y z\"];"
-//,"(0).toString();"
-//,"f()();"
-//,"f((x, y));"
-//,"f(x = 3);"
-//,"x.y();"
-//,"f(1, 2, 3, null, (g(), h));"
-//,"new (x.y);"
-//,"new (x());"
-//,"(new x).y;"
-//,"new (x().y);"
-//,"a * x + b * y;"
-//,"a * (x + b) * y;"
-//,"a + (b + c);"
-//,"a + b + c;"
-//,"x.y = z;"
-//,"get(id).text = f();"
-//,"[,] = x;"
-//,"x = 1e999 + y;"
-//,"x = y / -1e999;"
-//,"x = 0 / 0;"
-//,"x = (-1e999).toString();"
-//,"if (a == b)    x();else    y();"
-//,"if (a == b) {    x();} else {    y();}"
-//,"if (a == b)    if (b == c)        x();    else        y();"
-//,"while (a == b)    c();"
-//,"if (a)    while (b)        ;else    c();"
-//,"if (a)    while (b) {        ;    }else    c();"
-//,"for (;;)    ;"
-//,"for (var i = 0; i < a.length; i++) {    b[i] = a[i];}"
-//,"for (t = (i in x); t; t = t[i])    ;"
-//,"for (var t = (i in x); t; t = t[i])    ;"
-//,"for (t = 1 << (i in x); t < 100; t++)    ;"
-//,"for (var i in arr)    dump(arr[i]);"
-//,"for ([k, v] in items(x))    dump(k + \": \" + v);" 
-//,"if (x) {    switch (f(a)) {    case f(b):    case \"12\":        throw exc;    default:        fall_through();    case 99:        succeed();    }}"
-//,"var x;"
-//,"var x, y;"
-//,"var x = 1, y = x;"
-//,"var x = y = 1;"
-//,"var x = f, g;"
-//,"var x = (f, g);"
-//,"var [x] = a;"
-//,"var [] = x;"
-//,"var [, x] = y;"
-//,"var [[a, b], [c, d]] = x;"
-//,"var {} = x;"
-//,"var {x: x} = x;"
-//,"var {x: a, y: b} = x;"
-//,"var {1: a, 2: b} = x;"
-//,"var {1: [], 2: b} = x;"
-//,"var {\"a b\": x} = y;"
-//,"const a = 3;"
-//,"try {    f();} finally {    cleanup();}"
-//,"try {    f();} catch (x) {    cope(x);} finally {    cleanup();}"
-//,"function f() {    g();}"
-//,"\"use strict\";x = 1;"
-//,"function f() {    \"use strict\";    x = 1;}"
-//,"(function () {    \"use strict\";    x = 1;});"
-//,"(function () {    go();}());"
-//,"(function () {}.x);"
-//,"(function name() {}.x);"
-//,"(function () {}.x = 1);"
-//,"(function name() {}.x = 1);"
-//,"(function () {}.x, function () {}.y);"
-//,"(function () {} + x) * y;"
-//,"(function () {} * x + y);"
-//,"({a: f()});"
-//,"({a: my_a} = f());"
-//,"options(\"tracejit\");try {} catch (e) {}"
-//,"function test() {    var s1 = evalcx(\"lazy\");    expect = function () {        test();    }(s1);}"
-//,"try {    var a = new Array(100000);    var i = a.length;    new i(eval(\"var obj = new Object(); obj.split = String.prototype.split;\"));} catch (e) {}"
-//,"test3();function test3() {    try {        eval(\"for(var y in ['', ''])\");    } catch (ex) {    }    new test3;}    new test3;"
-//,"e=[]; for(i=0; i<tests.length; ++i) e[i] ='\"' + tests[i].replace(/(\\r\\n|\\n|\\r)/gm, '').replace(/(\\\")*/, '\\\"') + '\"\\n'; e.join()", "" <- ... regular expression is empty
-	//	"replace(/(\\r\\n|\\n|\\r)/gm); q ='asdas';"	
-	//};
-
-	//int testsLen = sizeof(tests)/sizeof(tests[0]);
-
-	//for(int i=0; i<testsLen; ++i){
-	//	const char * test = "x = {t:2, r:'hi', x:20};";
-	//	uint32_t testLen = strlen(tests[i]);
-	//	jschar *testChars = InflateUTF8String(cx, tests[i], &testLen);
-	//	jsval	rval;
-	//	
-	//	printf("=========== initial string =====================\n");
-	//	printf("%s",tests[i]);
-	//	printf("\n=========== generated string =====================\n");
-	//	
-	//	if (!reflect_parse_from_string(cx, testChars, testLen, &rval)){
-	//		printf("error: reflect_parse_from_string failed @ MAIN\n");
-	//		return JS_FALSE;
-	//	}
-
-	//	JS::Value args[] = { rval  };
-	//	JS::Value stringlify;
-	//	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringlify))
-	//	   return false;
-
-	//	printf("\n==================================================\n\n\n");
-	//}
-
-//============================= JAST TEST END ============================
-	//jsval	rval;
-	//JSBool	ok;
-
-	//std::cout << "\n\n_________________________________\n";
-
-	//char *source = "print(JSON.stringify( Reflect.parse('x = .< .< 1; >.; >.;') ) );";
-	////char *source = "Reflect.parse('x=1+print(5);');";
-	//frontend::metaBeginParse::markAsStart();
-	//ok = JS_EvaluateScript(
-	//	cx, 
-	//	global, 
-	//	source, 
-	//	strlen(source),
-	//	"test.js", 
-	//	1, 
-	//	&rval
-	//);
-	//std::cout << "\n_________________________________\n";
-
-
-//============================= Check json.stringify START ================================
-
-	//const char *quaziSnippet =  "{t:3,q:'s', obj:{o:[]}}";
-
-	//JSString *quaziStr = JS_NewStringCopyZ(cx, quaziSnippet);
-	//jsval quaziVal = STRING_TO_JSVAL(quaziStr);
-
-	//jsval stringifyProp;
-	//if (!JS_GetProperty(cx, global, "JSON", &stringifyProp)){
-	//	JS_ReportError(cx, "object has not property (%s)", "JSON");
-	//	return JS_FALSE;
-	//}
-
-	//JSObject *stringifyObj;
-	//if( !JS_ValueToObject(cx, stringifyProp, &stringifyObj) ){
-	//	JS_ReportError(cx, "object property (%s) is not an object", "JSON");
-	//	return JS_FALSE;
-	//}
-
-	//JS::Value args[] = { quaziVal  };
-	//JS::Value stringlify;
-	//if (!JS_CallFunctionName(cx, stringifyObj, "stringify", 1, args, &stringlify))
-	//   return false;
-
-	//JSString *stringlifyStr = JS_ValueToString(cx, stringlify);
-	//std::cout << JS_EncodeString(cx, stringlifyStr);
-//============================= Check json.stringify END ================================
+	std::cout << JS_EncodeString(cx, stringify.toString() ) << std::endl;
+	
+//============================= END =================================
 
     return 0;
 }
@@ -496,7 +336,16 @@ int main(int argc, const char *argv[]) {
     JS_SetOptions(cx, JSOPTION_VAROBJFIX);
     JS_SetErrorReporter(cx, reportError);
 
-    int status = run(cx);
+	std::string sourceText; 
+	readFile("Src/jqueryTest.js", &sourceText);
+	
+	if (!sourceText.length()){
+		std::cout << "File fail\n";
+		return 1;
+	}
+	//std::cout << sourceText <<std::endl;
+
+	int status = run(cx, sourceText.c_str() );
 
     JS_DestroyContext(cx);
     JS_DestroyRuntime(rt);

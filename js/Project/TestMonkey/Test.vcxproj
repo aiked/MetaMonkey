@@ -82,6 +82,11 @@
       <Project>{36228cdc-48fa-4349-b753-f64cafef0996}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Src\jquery.js" />
+    <None Include="Src\jqueryTest.js" />
+    <None Include="Src\testfile.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

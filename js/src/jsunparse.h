@@ -208,11 +208,6 @@ class unparse{
 	JSString *unparse::joinStringVector(Vector<JSString*> *strs, 
 		JSString* sep, JSString* prf, JSString* suf, bool reverse = false);
 
-	JSBool unparse::getObjPropertyAndConvertToString(JSObject *obj, 
-		const char *key, JSString **strVal);
-	JSBool unparse::getArrayElementAndConvertToObj(JSObject *arrayObj, 
-		const uint32_t index, JSObject **objVal);
-
 	inline size_t getPrecedence(char *key){
 		stringToIntMap::Ptr ptr = precedence.lookup(key);
 		return ptr.found() ? ptr->value: 0;
@@ -273,7 +268,7 @@ class unparse{
 		{
 			JSContext *cx = uprs->cx;
 			JSString *typeStr;
-			if( !uprs->getObjPropertyAndConvertToString(nodeObj, "type", &typeStr) )
+			if( !JS_GetPropertyToString(cx, nodeObj, "type", &typeStr) )
 				return JS_FALSE;
 
 			if(!typeStr->equals("VariableDeclarator")){
