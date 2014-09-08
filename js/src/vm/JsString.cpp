@@ -84,7 +84,7 @@ JSString::dumpChars(const jschar *s, size_t n, bool whiteSpaces)
             n++;
     }
 
-    fputc('"', stderr);
+    //fputc('"', stderr);
     for (size_t i = 0; i < n; i++) {
         if (s[i] == '\n')
             fprintf(stderr, "\n");
@@ -98,7 +98,7 @@ JSString::dumpChars(const jschar *s, size_t n, bool whiteSpaces)
             fprintf(stderr, "\\u%04x", (unsigned int) s[i]);
 		
     }
-    fputc('"', stderr);
+    //fputc('"', stderr);
 }
 
 

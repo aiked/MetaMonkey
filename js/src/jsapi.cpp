@@ -4132,6 +4132,61 @@ JS_GetProperty(JSContext *cx, JSObject *objArg, const char *name, jsval *vp)
     return atom && JS_GetPropertyById(cx, obj, AtomToId(atom), vp);
 }
 
+//metadev
+JS_PUBLIC_API(JSBool)
+JS_GetPropertyToString(JSContext *cx, JSObject *obj, const char *name, JSString **vp)
+{
+	jsval val;
+	if (!JS_GetProperty(cx, obj, name, &val)){
+		JS_ReportError(cx, "object has not property (%s)", name);
+		return JS_FALSE;
+	}
+
+	*vp = JS_ValueToString(cx, val);
+	if (!(*vp)){
+		JS_ReportError(cx, "cannot convert value to string");
+		return JS_FALSE;
+	}
+
+	return JS_TRUE;
+}
+
+extern JS_PUBLIC_API(JSBool)
+JS_GetPropertyToObj(JSContext *cx, JSObject *obj, const char *name, JSObject **vp)
+{
+	jsval val;
+	if (!JS_GetProperty(cx, obj, name, &val)){
+		JS_ReportError(cx, "object has not property (%s)", name);
+		return JS_FALSE;
+	}
+
+	if( !JS_ValueToObject(cx, val, vp) ){
+		JS_ReportError(cx, "object property (%s) is not an object", name);
+		return JS_FALSE;
+	}
+
+	return JS_TRUE;
+}
+
+extern JS_PUBLIC_API(JSBool) 
+JS_GetArrayElementToObj(JSContext *cx, JSObject *arrayObj, 	const uint32_t index, JSObject **objVal)
+{
+	jsval node;
+	if (!JS_GetElement(cx, arrayObj, index, &node)){
+		JS_ReportError(cx, "Array does not have index %d", index);
+		return JS_FALSE;
+	}
+
+	if( !JS_ValueToObject(cx, node, objVal) ){
+		JS_ReportError(cx, "Array has not object as value @ index: %d", index);
+		return JS_FALSE;
+	}
+
+	return JS_TRUE;
+}
+
+
+
 JS_PUBLIC_API(JSBool)
 JS_GetPropertyDefault(JSContext *cx, JSObject *objArg, const char *name, jsval defArg, jsval *vp)
 {

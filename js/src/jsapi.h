@@ -3476,7 +3476,18 @@ extern JS_PUBLIC_API(JSBool)
 JS_GetOwnPropertyDescriptor(JSContext *cx, JSObject *obj, jsid id, jsval *vp);
 
 extern JS_PUBLIC_API(JSBool)
-JS_GetProperty(JSContext *cx, JSObject *obj, const char *name, jsval *vp);
+JS_GetProperty(JSContext *cx, JSObject *obj, const char *name, JSString *vp);
+
+//metadev
+extern JS_PUBLIC_API(JSBool)
+JS_GetPropertyToString(JSContext *cx, JSObject *obj, const char *name, JSString **vp);
+
+extern JS_PUBLIC_API(JSBool)
+JS_GetPropertyToObj(JSContext *cx, JSObject *obj, const char *name, JSObject **vp);
+
+extern JS_PUBLIC_API(JSBool) 
+JS_GetArrayElementToObj(JSContext *cx, JSObject *arrayObj, 	const uint32_t index, JSObject **objVal);
+
 
 extern JS_PUBLIC_API(JSBool)
 JS_GetPropertyDefault(JSContext *cx, JSObject *obj, const char *name, jsval def, jsval *vp);

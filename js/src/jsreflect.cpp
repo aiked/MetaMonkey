@@ -3478,7 +3478,7 @@ reflect_parse_from_string(JSContext *cx, jschar *jsQuaziSnippet, uint32_t quaziS
     Parser<FullParseHandler> parser(cx, options, jsQuaziSnippet, quaziSnippetLength,
                                     /* foldConstants = */ false, NULL, NULL);
 	RootedObject builder(cx);
-	bool loc = true;
+	bool loc = false;
 	ASTSerializer serialize(cx, loc, filename, lineno, NODEBUILDER_TO_JS_OBJ);
     if (!serialize.init(builder)){
         return JS_FALSE;

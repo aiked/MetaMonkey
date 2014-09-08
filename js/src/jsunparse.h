@@ -56,12 +56,14 @@ class unparse{
 		JSSRCNAME_START = -1,
 
 		JSSRCNAME_SPACE = 0,
+		JSSRCNAME_FIVESPACES,
 		JSSRCNAME_DO,
 		JSSRCNAME_WHILESPACELP,
 		JSSRCNAME_LP, JSSRCNAME_RP,
 		JSSRCNAME_LC, JSSRCNAME_RC,
 		JSSRCNAME_LB, JSSRCNAME_RB,
 		JSSRCNAME_SEMI,
+		JSSRCNAME_SPACERPSEMI,
 		JSSRCNAME_QUESTION,
 		JSSRCNAME_NL,
 		JSSRCNAME_SEMINL,
@@ -71,8 +73,11 @@ class unparse{
 		JSSRCNAME_COLON,
 		JSSRCNAME_COLONSPACE,
 		JSSRCNAME_HASH,
+		JSSRCNAME_HASHES,
 		JSSRCNAME_QM,
+		JSSRCNAME_QMSINGLE,
 		JSSRCNAME_IFSPACELP,
+		JSSRCNAME_ELSE,
 		JSSRCNAME_RETURN,
 		JSSRCNAME_FUNCTION,
 		JSSRCNAME_ASSIGN,
@@ -92,7 +97,22 @@ class unparse{
 		JSSRCNAME_CATCH,
 		JSSRCNAME_FINALLY,
 		JSSRCNAME_WITHSPACELP,
-		
+		JSSRCNAME_VARSPACELP,
+		JSSRCNAME_THIS,
+		JSSRCNAME_DEBUGGERSEMI,
+		JSSRCNAME_INLINECALL,
+		JSSRCNAME_ESCAPECALL,
+		JSSRCNAME_PROGRAM,
+		JSSRCNAME_SPACEATSPACE,
+		JSSRCNAME_NULL,
+		JSSRCNAME_UNDEFINED,
+		JSSRCNAME_TRUE,
+		JSSRCNAME_FALSE,
+		JSSRCNAME_INVALID,
+		JSSRCNAME_ZERODIVZERO,
+		JSSRCNAME_MAXNUM,
+		JSSRCNAME_MINNUM,
+
 		JSSRCNAME_END
 	};
 
@@ -154,9 +174,14 @@ class unparse{
 	JSBool inlineEvalAppendCode(JSString *code);
 	JSBool inlineEvalExecInline(JSString *code, jsval *inlineRetVal);
 
+	public:
 	///////////////////////
 	// object stringify
-	JSBool stringifyObject(JSObject *val);
+	JSBool stringifyObject(JSObject *obj, JSString **s);
+	JSBool stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **propKey, JSString **propVal);
+	JSBool stringifyObjectValue(const Value &v, JSString **s);
+
+	private:
 
 
 	///////////////////////
@@ -176,14 +201,13 @@ class unparse{
 	JSBool functionDeclaration(JSString *funcInitStr, JSString **s, 
 								jsval id, JSObject *val, JSString *indent);
 
-	JSBool isBadIdentifier(JSObject *val);
+	JSBool isBadIdentifier(JSObject *val, JSBool *isBadÙ·ÎÔ);
 
 	//JSString *unparse::trimRight(con);
 	JSString *unparse::joinString(size_t num, ...);
 	JSString *unparse::joinStringVector(Vector<JSString*> *strs, 
 		JSString* sep, JSString* prf, JSString* suf, bool reverse = false);
-	JSBool unparse::getObjPropertyAndConvertToObj(JSObject *obj, 
-		const char *key, JSObject **objVal);
+
 	JSBool unparse::getObjPropertyAndConvertToString(JSObject *obj, 
 		const char *key, JSString **strVal);
 	JSBool unparse::getArrayElementAndConvertToObj(JSObject *arrayObj, 
@@ -259,38 +283,27 @@ class unparse{
 			}
 
 			JSObject *idObj;
-			if( !uprs->getObjPropertyAndConvertToObj(nodeObj, "id", &idObj) )
+			if( !JS_GetPropertyToObj(cx, nodeObj, "id", &idObj) )
 				return JS_FALSE;
 
 			JSString *pattStr;
 			if( !uprs->unparse_expr(idObj, &pattStr, uprs->fourHash, 3, false) )
 				return JS_FALSE;
 
-			jsval initVal;
-			if (!JS_GetProperty(cx, nodeObj, "init", &initVal)){
-				JS_ReportError(cx, "object has not key: init");
+			JSObject *initObj;
+			if( !JS_GetPropertyToObj(cx, nodeObj, "init", &initObj) )
 				return JS_FALSE;
-			}
 
-			JSType initValType = JS_TypeOfValue(cx, initVal);
-			if( initValType==JSTYPE_NULL ){
-				*child = pattStr;
-			}
-			else{
-				JS_ASSERT( initValType==JSTYPE_OBJECT );
-				JSObject *initObj;
-
-				if( !JS_ValueToObject(cx, initVal, &initObj) ){
-					JS_ReportError(cx, "object property (init) is not an object");
-					return JS_FALSE;
-				}
-
+			if( initObj ){
 				JSString *rvalStr;
 				if( !uprs->unparse_expr(initObj, &rvalStr, indent, 2, noIn) )
 					return JS_FALSE;
-				// pattStr = rvalStr
+
 				*child = uprs->joinString(5, pattStr, uprs->srcStr(JSSRCNAME_SPACE), 
-					uprs->srcStr(JSSRCNAME_ASSIGN),	uprs->srcStr(JSSRCNAME_SPACE), rvalStr);
+					uprs->srcStr(JSSRCNAME_ASSIGN),	uprs->srcStr(JSSRCNAME_SPACE), rvalStr);			
+			}
+			else{
+				*child = pattStr;
 			}
 			return *child!=NULL;
 
