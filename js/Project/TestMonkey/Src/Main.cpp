@@ -23,9 +23,11 @@
 #endif
 
 using namespace js;
+using namespace JS;
 
 
 ////////////////////////////////////////////////////////////////////
+
 
 /* The class of the global object. */
 static JSClass global_class = { "global",
@@ -270,16 +272,7 @@ static const JSFunctionSpecWithHelp builtinFunctions[] = {
 
 ////////////////////////////////////////////////////////////////////
 
-
-static int readFile( const char *filename, std::string *source){
-	std::ifstream file(filename);
-	source->assign((std::istreambuf_iterator<char>(file)), 
-		std::istreambuf_iterator<char>());
-
-	return 0;
-}
-
-static int run (JSContext *cx, const char *source) {
+static int run (JSContext *cx) {
     /* Enter a request before running anything in the context */
     JSAutoRequest ar(cx);
 
@@ -299,24 +292,54 @@ static int run (JSContext *cx, const char *source) {
         !JS_DefineProfilingFunctions(cx, global))
 		return 1;
 
+
+	const char *inputFileName = "Src/jqueryTest.js";
+	const char *outputFileName = "Src/jqueryTestOut.js";
+
+    fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
+
+    FileContents buffer(cx);
+	{
+		AutoFile file;
+		if (!file.open(cx, inputFileName) || !file.readAll(cx, buffer))
+			return 1;
+	}
+	
+	size_t length = buffer.length();
+    jschar *chars = InflateUTF8String(cx, buffer.begin(), &length);
+    if (!chars)
+        return 1;
+
 //============================= START ================================
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
-	uint32_t sourceLen = strlen(source);
-	jschar *sourceChar = InflateUTF8String(cx, source, &sourceLen);
 	jsval	rval;
 
-	if (!reflect_parse_from_string(cx, sourceChar, sourceLen, &rval))
+	fprintf(stderr, "converting src to ast...\n");
+
+	if (!reflect_parse_from_string(cx, chars, length, &rval))
 		return JS_FALSE;
 
+	fprintf(stderr, "converting ast to src...\n");
 	JS::Value args[] = { rval  };
 	JS::Value stringify;
 	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringify))
 	   return false;
 
-	std::cout << JS_EncodeString(cx, stringify.toString() ) << std::endl;
-	
 //============================= END =================================
+
+	fprintf(stderr, "saving \"%s\"...\n", outputFileName);
+	{
+		char * retVal = JS_EncodeString(cx, stringify.toString() );
+		AutoFile file;
+		if (!file.open(cx, outputFileName, "w") || !file.writeAll(cx, retVal))
+			return 1;
+		js_free(retVal);
+	}
+
+	js_free(chars);
+
+	fprintf(stderr, "done.\n\n");
 
     return 0;
 }
@@ -336,16 +359,7 @@ int main(int argc, const char *argv[]) {
     JS_SetOptions(cx, JSOPTION_VAROBJFIX);
     JS_SetErrorReporter(cx, reportError);
 
-	std::string sourceText; 
-	readFile("Src/jqueryTest.js", &sourceText);
-	
-	if (!sourceText.length()){
-		std::cout << "File fail\n";
-		return 1;
-	}
-	//std::cout << sourceText <<std::endl;
-
-	int status = run(cx, sourceText.c_str() );
+	int status = run(cx);
 
     JS_DestroyContext(cx);
     JS_DestroyRuntime(rt);

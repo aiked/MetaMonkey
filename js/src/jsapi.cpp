@@ -151,6 +151,8 @@ const HandleId JS::JSID_EMPTYHANDLE = HandleId::fromMarkedLocation(&emptyIdValue
 JS_STATIC_ASSERT((jschar)-1 > 0);
 JS_STATIC_ASSERT(sizeof(jschar) == 2);
 
+
+
 JS_PUBLIC_API(int64_t)
 JS_Now()
 {
@@ -5037,6 +5039,7 @@ struct AutoLastFrameCheck
     MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER
 };
 
+
 /* Use the fastest available getc. */
 #if defined(HAVE_GETC_UNLOCKED)
 # define fast_getc getc_unlocked
@@ -5046,10 +5049,10 @@ struct AutoLastFrameCheck
 # define fast_getc getc
 #endif
 
-typedef Vector<char, 8, TempAllocPolicy> FileContents;
+
 
 static bool
-ReadCompleteFile(JSContext *cx, FILE *fp, FileContents &buffer)
+ReadCompleteFile(JSContext *cx, FILE *fp, JS::FileContents &buffer)
 {
     /* Get the complete length of the file, if possible. */
     struct stat st;
@@ -5076,38 +5079,30 @@ ReadCompleteFile(JSContext *cx, FILE *fp, FileContents &buffer)
     return true;
 }
 
-class AutoFile
+bool JS::AutoFile::writeAll(JSContext *cx, const char *content)
 {
-    FILE *fp_;
-  public:
-    AutoFile()
-      : fp_(NULL)
-    {}
-    ~AutoFile()
-    {
-        if (fp_ && fp_ != stdin)
-            fclose(fp_);
-    }
-    FILE *fp() const { return fp_; }
-    bool open(JSContext *cx, const char *filename);
-    bool readAll(JSContext *cx, FileContents &buffer)
-    {
-        JS_ASSERT(fp_);
-        return ReadCompleteFile(cx, fp_, buffer);
-    }
-};
+	JS_ASSERT(fp_);
 
+	fprintf(fp_, "%s", content);
+	return true;
+}
+
+bool JS::AutoFile::readAll(JSContext *cx, FileContents &buffer)
+{
+    JS_ASSERT(fp_);
+    return ReadCompleteFile(cx, fp_, buffer);
+}
 /*
  * Open a source file for reading. Supports "-" and NULL to mean stdin. The
  * return value must be fclosed unless it is stdin.
  */
 bool
-AutoFile::open(JSContext *cx, const char *filename)
+JS::AutoFile::open(JSContext *cx, const char *filename, const char *mode)
 {
     if (!filename || strcmp(filename, "-") == 0) {
         fp_ = stdin;
     } else {
-        fp_ = fopen(filename, "r");
+        fp_ = fopen(filename, mode);
         if (!fp_) {
             JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_CANT_OPEN,
                                  filename, "No such file or directory");
@@ -5116,7 +5111,6 @@ AutoFile::open(JSContext *cx, const char *filename)
     }
     return true;
 }
-
 
 JS::CompileOptions::CompileOptions(JSContext *cx, JSVersion version)
     : principals(NULL),

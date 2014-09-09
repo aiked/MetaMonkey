@@ -36,6 +36,7 @@
 
 namespace JS {
 
+
 typedef mozilla::RangedPtr<const jschar> CharPtr;
 
 class StableCharPtr : public CharPtr {
@@ -5145,6 +5146,32 @@ extern JS_PUBLIC_DATA(const HandleId) JSID_VOIDHANDLE;
 extern JS_PUBLIC_DATA(const HandleId) JSID_EMPTYHANDLE;
 
 } /* namespace JS */
+
+namespace JS {
+
+//metadev
+using namespace js;
+typedef Vector<char, 8, TempAllocPolicy> FileContents;
+
+class AutoFile
+{
+	FILE *fp_;
+	public:
+	AutoFile()
+		: fp_(NULL)
+	{}
+	~AutoFile()
+	{
+		if (fp_ && fp_ != stdin)
+			fclose(fp_);
+	}
+	FILE *fp() const { return fp_; }
+	bool open(JSContext *cx, const char *filename, const char *mode = "r");
+	bool readAll(JSContext *cx, FileContents &buffer);
+	bool writeAll(JSContext *cx, const char *content);
+};
+
+}
 
 namespace js {
 
