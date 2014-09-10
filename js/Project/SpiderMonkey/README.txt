@@ -32,3 +32,9 @@ same as BlockStatement
 		"type": "BlockStatement",
 		"body": [ Statement ]
 	} ];
+
+
+============================================================
+
+
+function foo2(){ return .< q; z; >.; } a = .! .< function foo(){ .~foo2() }; >.;

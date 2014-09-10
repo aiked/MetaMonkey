@@ -5,6 +5,8 @@
 
 /* JS shell. */
 
+#if 0
+
 #include <errno.h>
 #include <locale.h>
 #include <math.h>
@@ -40,6 +42,7 @@
 #include "jsworkers.h"
 #include "jswrapper.h"
 #include "jsperf.h"
+#include "jsunparse.h"
 
 #include "builtin/TestingFunctions.h"
 #include "frontend/BytecodeEmitter.h"
@@ -3566,6 +3569,115 @@ GetSelfHostedValue(JSContext *cx, unsigned argc, jsval *vp)
     return cx->runtime()->cloneSelfHostedValue(cx, srcName, args.rval());
 }
 
+//metadev
+
+static JSBool
+unParse(JSContext *cx, unsigned argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+    if (args.length() != 1 || !args[0].isObject()) {
+        JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
+                             "unparse", "0", "s");
+        return JS_FALSE;
+    }
+
+	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
+
+    if (!obj) {
+        fprintf(stderr, "NULL\n");
+        return JS_FALSE;
+    }
+
+	JSString *str = NULL;
+	unparse up(cx);
+
+	if (!up.unParse_start(obj, &str))
+		return JS_FALSE;
+
+	vp->setString(str);
+
+	return JS_TRUE;
+}
+
+static JSBool
+Escape(JSContext *cx, unsigned argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+    if (args.length() != 1 || !args[0].isObject()) {
+        JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
+                             "escape", "0", "s");
+        return JS_FALSE;
+    }
+
+	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
+    if (!obj) {
+        fprintf(stderr, "NULL\n");
+        return JS_FALSE;
+    }
+
+	JSString *typeStr;
+	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
+		return JS_FALSE;
+	
+	if ( !typeStr->equals("Program") ) {
+		JS_ReportError(cx, "object type is not program");
+		return JS_FALSE;
+	}
+
+	JSObject *bodyObj;
+	if( !JS_GetPropertyToObj(cx, obj, "body", &bodyObj) )
+		return JS_FALSE;
+
+	if ( !JS_IsArrayObject(cx, bodyObj ) ) {
+		JS_ReportError(cx, "object type is not program");
+		return JS_FALSE;
+	}
+
+	uint32_t lengthp;
+	if (!JS_GetArrayLength(cx, bodyObj, &lengthp))
+		return JS_FALSE;
+
+	if( lengthp==1 ){
+		JSObject *nodeObj;
+		if (!JS_GetArrayElementToObj(cx, bodyObj, 0, &nodeObj)){
+			JS_ReportError(cx, "array has not index: %d", 0);
+			return JS_FALSE;
+		}
+
+		JSObject *nodeExpreObj;;
+		if( !JS_GetPropertyToObj(cx, nodeObj, "expression", &nodeExpreObj) )
+			return JS_FALSE;
+
+		args.rval().setObject(*nodeExpreObj);
+	}else{
+		args.rval().setNull();
+	}
+
+	return JS_TRUE;
+}
+
+static JSBool
+Inline(JSContext *cx, unsigned argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+    if (args.length() != 1 || !args[0].isObject()) {
+        JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
+                             "inline", "0", "s");
+        return JS_FALSE;
+    }
+
+	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
+    if (!obj) {
+        fprintf(stderr, "NULL\n");
+        return JS_FALSE;
+    }
+
+	args.rval().setObject(*obj);
+
+	return JS_TRUE;
+}
+
+
 static const JSFunctionSpecWithHelp shell_functions[] = {
     JS_FN_HELP("version", Version, 0, 0,
 "version([number])",
@@ -3890,6 +4002,17 @@ static const JSFunctionSpecWithHelp fuzzing_unsafe_functions[] = {
     JS_FN_HELP("untrap", Untrap, 2, 0,
 "untrap(fun[, pc])",
 "  Remove a trap."),
+
+	//metadev
+	JS_FN_HELP("unparse", unParse, 1, 0,
+		"unparse(astObj)",
+		"  Unparses a astObject to string, potentially throwing."),
+	JS_FN_HELP("inline", Inline, 1, 0,
+		"inline(expr)",
+		"  return a javascript ast object that has generated from expr, null otherwise."),
+	JS_FN_HELP("escape", Escape, 1, 0,
+		"escape(expr)",
+		"  return the innet ast of a program ast"),
 
     JS_FS_HELP_END
 };
@@ -5394,3 +5517,6 @@ main(int argc, char **argv, char **envp)
     JS_ShutDown();
     return result;
 }
+
+
+#endif

@@ -30,6 +30,7 @@
 #include <windef.h>
 #include <winbase.h>
 #include <mmsystem.h> /* for timeBegin/EndPeriod */
+#pragma comment(lib, "winmm.lib")
 /* VC++ 8.0 or later */
 #if _MSC_VER >= 1400
 #define NS_HAVE_INVALID_PARAMETER_HANDLER 1

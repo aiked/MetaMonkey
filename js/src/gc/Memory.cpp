@@ -22,6 +22,7 @@ DecommitEnabled(JSRuntime *rt)
 #if defined(XP_WIN)
 #include "jswin.h"
 #include <psapi.h>
+#pragma comment(lib, "psapi.lib")
 
 void
 gc::InitMemorySubsystem(JSRuntime *rt)
