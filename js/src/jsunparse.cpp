@@ -1635,7 +1635,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"this",
 		"debugger;",
 		"inline( ",
-		"escape( ",
+		"meta_escape( ",
 		"Program",
 		" at ",
 		"null",
@@ -1751,6 +1751,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				JSString *objStr;
 				stringifyObject( nodeObj, &objStr);
 				children.append(objStr);
+
 				
 				if( i != arrayLen-1 )
 					children.append(srcStr(JSSRCNAME_COMMASPACE));
@@ -1759,6 +1760,8 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 		} else {
 			JSString *objStr;
 			stringifyObject( obj, &objStr);
+
+
 			children.append(objStr);
 		}
     } else if (v.isBoolean()) {

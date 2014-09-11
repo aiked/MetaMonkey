@@ -37,4 +37,4 @@ same as BlockStatement
 ============================================================
 
 
-function foo2(){ return .< q; z; >.; } a = .! .< function foo(){ .~foo2() }; >.;
+function foo2(){ return .< q; z+q; >.; } a = .! .< function foo(){ .~foo2() }; >.;

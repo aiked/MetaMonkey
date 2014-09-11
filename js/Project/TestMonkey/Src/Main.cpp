@@ -3598,12 +3598,12 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 }
 
 static JSBool
-Escape(JSContext *cx, unsigned argc, jsval *vp)
+Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
     if (args.length() != 1 || !args[0].isObject()) {
         JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
-                             "escape", "0", "s");
+                             "Meta_escape", "0", "s");
         return JS_FALSE;
     }
 	
@@ -4010,8 +4010,8 @@ static const JSFunctionSpecWithHelp fuzzing_unsafe_functions[] = {
 		"inline(expr)",
 		"  return a javascript ast object that has generated from expr, null otherwise."),
 
-	JS_FN_HELP("escape", Escape, 1, 0,
-		"escape(expr)",
+	JS_FN_HELP("meta_escape", Meta_escape, 1, 0,
+		"meta_escape(expr)",
 		"  return the innet ast of a program ast"),
 
 		JS_FN_HELP("untrap", Untrap, 2, 0,
