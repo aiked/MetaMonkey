@@ -3761,6 +3761,10 @@ static const JSFunctionSpecWithHelp shell_functions[] = {
 "throwError()",
 "  Throw an error from JS_ReportError."),
 
+    JS_FN_HELP("dumpObject", DumpObject, 1, 0,
+"dumpObject()",
+"  Dump an internal representation of an object."),
+
 #ifdef DEBUG
     JS_FN_HELP("disassemble", DisassembleToString, 1, 0,
 "disassemble([fun])",
@@ -3785,9 +3789,7 @@ static const JSFunctionSpecWithHelp shell_functions[] = {
 "dumpHeap([fileName[, start[, toFind[, maxDepth[, toIgnore]]]]])",
 "  Interface to JS_DumpHeap with output sent to file."),
 
-    JS_FN_HELP("dumpObject", DumpObject, 1, 0,
-"dumpObject()",
-"  Dump an internal representation of an object."),
+
 
     JS_FN_HELP("notes", Notes, 1, 0,
 "notes([fun])",
@@ -5231,6 +5233,65 @@ ProcessArgs(JSContext *cx, JSObject *obj_, OptionParser *op)
     return gExitCode ? gExitCode : EXIT_SUCCESS;
 }
 
+
+static int run (JSContext *cx, JSObject *global) {
+	using namespace JS;
+
+	const char *inputFileName = "Src/GUIGen/GUIGen.js";
+	const char *outputFileName = "Src/GUIGen/jqueryTestOut.js";
+
+    fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
+
+    FileContents buffer(cx);
+	{
+		AutoFile file;
+		if (!file.open(cx, inputFileName) || !file.readAll(cx, buffer))
+			return 1;
+	}
+	
+	size_t length = buffer.length();
+    jschar *chars = InflateUTF8String(cx, buffer.begin(), &length);
+    if (!chars)
+        return 1;
+
+//============================= START ================================
+	uint32_t lineno = 1;
+	ScopedJSFreePtr<char> filename;
+	jsval	rval;
+
+	fprintf(stderr, "converting src to ast...\n");
+
+	if (!reflect_parse_from_string(cx, chars, length, &rval)){
+		fprintf(stderr, "reflection parse error\n");
+		return JS_FALSE;
+	}
+
+	fprintf(stderr, "converting ast to src...\n");
+	JS::Value args[] = { rval  };
+	JS::Value stringify;
+	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringify)){
+		fprintf(stderr, "unparse error\n");
+		return JS_FALSE;
+	}
+
+//============================= END =================================
+
+	fprintf(stderr, "saving \"%s\"...\n", outputFileName);
+	{
+		char * retVal = JS_EncodeString(cx, stringify.toString() );
+		AutoFile file;
+		if (!file.open(cx, outputFileName, "w") || !file.writeAll(cx, retVal))
+			return 1;
+		js_free(retVal);
+	}
+
+	js_free(chars);
+
+	fprintf(stderr, "done.\n\n");
+	
+    return 0;
+}
+
 int
 Shell(JSContext *cx, OptionParser *op, char **envp)
 {
@@ -5261,7 +5322,9 @@ Shell(JSContext *cx, OptionParser *op, char **envp)
         return 1;
     JS_SetPrivate(envobj, envp);
 
-    int result = ProcessArgs(cx, glob, op);
+    //int result = ProcessArgs(cx, glob, op);
+	int result = run(cx, glob);
+	system("@pause");
 
     if (enableDisassemblyDumps)
         JS_DumpCompartmentPCCounts(cx);

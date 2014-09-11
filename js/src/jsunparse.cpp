@@ -551,6 +551,9 @@ JSBool unparse::expr_unary(JSObject *val, JSString **child, JSString *indent, in
 
 		if (!unParse_start(inlineObj, child))
 			return JS_FALSE;
+
+		file.writeAll(cx, JS_EncodeString(cx, *child));
+		file.writeAll(cx, "\n==================================================\n");
 	}
 	else {
 		
@@ -1511,6 +1514,12 @@ JSBool unparse::stmt_functiondeclaration(JSObject *val, JSString **child, JSStri
 unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), standarJsSrcNames(x), 
 	stringifyStmtHandlerMapInst(x), inlineEvaluateCode(x), cx(x)
 {
+	const char *outputFileName = "Src/GUIGen/stanging.js";
+	using namespace JS;
+
+	if (!file.open(cx, outputFileName, "w"))
+		JS_ReportError(cx, "cannot open (%s) for staging log", outputFileName);
+	
 
 	JSObject *globalObj = cx->global();
 	if( !JS_GetPropertyToObj(cx, globalObj, "JSON", &jsonGlobalObj) )
@@ -1659,6 +1668,10 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 	}
 }
 
+unparse::~unparse(){
+
+}
+
 ///////////////////////////////
 // inline evaluator
 
@@ -1674,9 +1687,12 @@ JSBool unparse::inlineEvalExecInline(JSString *code, jsval *inlineRetVal)
 	JSString *evaluatedCode = joinString(4, snippetCode, srcStr(JSSRCNAME_INLINECALL), code, srcStr(JSSRCNAME_SPACERPSEMI));
 
 	char *source = JS_EncodeString(cx, evaluatedCode);
-	std::cout<< "\n\ninline: \n===================================================\n" 
-			<< source 
-			<< "\n===================================================\n\n";
+	//std::cout<< "\n\ninline: \n===================================================\n" 
+	//		<< source 
+	//		<< "\n===================================================\n\n";
+	file.writeAll(cx, "\n===================RUNNING========================\n");
+	file.writeAll(cx, source);
+	file.writeAll(cx, "\n===================RESULT==========================\n");
 	if (!JS_EvaluateScript(cx, cx->global(), source, strlen(source),
 							"inlineEval.js", 1, inlineRetVal))
 		return JS_FALSE;
@@ -2165,8 +2181,9 @@ JSBool unparse::functionDeclaration(JSString *funcInitStr, JSString **s,
 
 	*s = joinStringVector(&children, NULL, NULL, NULL );
 	
-	inlineEvalAppendCode(*s);
-
+	if(!isIdNull){
+		inlineEvalAppendCode(*s);
+	}
 	return JS_TRUE;
 }
 

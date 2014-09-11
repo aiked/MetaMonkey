@@ -34,6 +34,8 @@ class unparse{
 	JSString *indentChar;
 	JSString *fourHash;
 
+	JS::AutoFile file;
+
 	JSObject *jsonGlobalObj;
 
 	typedef JSBool (unparse::*stringifyStmtHandler)
@@ -319,6 +321,7 @@ class unparse{
 
   public:
 	unparse(JSContext *x);
+	~unparse();
 
 	JSBool unparse_expr(JSObject *exprVal, JSString **s, JSString *indent, int cprec, bool noIn);
 	template<class ValueApplier>

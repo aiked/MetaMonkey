@@ -6422,7 +6422,7 @@ Parser<ParseHandler>::primaryExpr(TokenKind tt)
 
 			while(!tokenStream.matchToken(TOK_META_RQ, TSF_OPERAND)) {
 				Node next = statement(true); 
-				if (!pn)
+				if (!next)
 					return null();
 
 				handler.addStatementToList(pn, next, pc);

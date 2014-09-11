@@ -9,10 +9,124 @@
 				<option>0</option>
 				<flag>wxALL|wxEXPAND</flag>
 				<border>5</border>
-				<object class="wxTextCtrl" name="m_textCtrl1">
+				<object class="wxTextCtrl" name="c_input">
 					<size>-1,50</size>
 					<value></value>
 					<maxlength>0</maxlength>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_1">
+							<label>1</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_2">
+							<label>2</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_3">
+							<label>3</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_clear">
+							<label>C</label>
+							<default>0</default>
+						</object>
+					</object>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_4">
+							<label>4</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_5">
+							<label>5</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_6">
+							<label>6</label>
+							<default>0</default>
+						</object>
+					</object>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_7">
+							<label>7</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_8">
+							<label>8</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_9">
+							<label>9</label>
+							<default>0</default>
+						</object>
+					</object>
 				</object>
 			</object>
 			<object class="sizeritem">
@@ -25,8 +139,8 @@
 						<option>0</option>
 						<flag>wxALL</flag>
 						<border>5</border>
-						<object class="wxButton" name="m_button3">
-							<label>MyButton</label>
+						<object class="wxButton" name="c_plus">
+							<label>+</label>
 							<default>0</default>
 						</object>
 					</object>
@@ -34,16 +148,34 @@
 						<option>0</option>
 						<flag>wxALL</flag>
 						<border>5</border>
-						<object class="wxButton" name="m_button4">
-							<label>MyButton</label>
+						<object class="wxButton" name="c_minus">
+							<label>-</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_multi">
+							<label>*</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_div">
+							<label>/</label>
 							<default>0</default>
 						</object>
 					</object>
 				</object>
 			</object>
 			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxEXPAND</flag>
+				<option>0</option>
+				<flag></flag>
 				<border>5</border>
 				<object class="wxBoxSizer">
 					<orient>wxHORIZONTAL</orient>
@@ -51,17 +183,8 @@
 						<option>0</option>
 						<flag>wxALL</flag>
 						<border>5</border>
-						<object class="wxButton" name="m_button11">
-							<label>MyButton</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="m_button12">
-							<label>MyButton</label>
+						<object class="wxButton" name="c_result">
+							<label>=</label>
 							<default>0</default>
 						</object>
 					</object>
