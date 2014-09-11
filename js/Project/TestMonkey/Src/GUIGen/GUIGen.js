@@ -19,17 +19,19 @@ function astToHtml(xrcFileName, handlers){
 	function Ast_appendHandlerToBody(root, handlers, id){
 			var actionAst;
 			var handler = handlers[id];
-			if( handler.evt ){
-				actionAst = .< elem[ '' ] = .~handler.action; >.;
-				actionAst.body[0].expression.left.property.value = handler.evt;
-				// .~handler.action; not working
-				actionAst.body[0].expression.right = handler.action.body[0].expression;
-			}else{
-				actionAst = .< ( .~handler.action )(elem); >.;
-				// .~handler.action; not working
-				actionAst.body[0].expression.callee = handler.action.body[0].expression;
+			if(handler){
+				if( handler.evt ){
+					actionAst = .< elem[ '' ] = .~handler.action; >.;
+					actionAst.body[0].expression.left.property.value = handler.evt;
+					// .~handler.action; not working
+					actionAst.body[0].expression.right = handler.action.body[0].expression;
+				}else{
+					actionAst = .< ( .~handler.action )(elem); >.;
+					// .~handler.action; not working
+					actionAst.body[0].expression.callee = handler.action.body[0].expression;
+				}
+				root.splice(root.length-2, 0, Ast_esc(actionAst, true) );
 			}
-			root.splice(root.length-2, 0, Ast_esc(actionAst, true) );
 	}
 
 	load("F:\\japostol\\projects\\not\\not\\js\\Project\\TestMonkey\\Src\\GUIGen\\xparse.js");
@@ -75,7 +77,6 @@ function astToHtml(xrcFileName, handlers){
 	var xrcToAst = {
 
 		parseItems: {
-			parent: null,
 			wxBoxSizer: function(obj, parent){
 				var orient = getElemByName(obj, "orient");
 				var sizeritems = obj.contents;
@@ -87,25 +88,25 @@ function astToHtml(xrcFileName, handlers){
 						divChild.setAttribute('class', '');
 
 						parent.appendChild(divChild);
-					})();
+					})(.~parent);
 
-					 >.;
+				 >.;
 
 			var retValBody = Ast_GetBody(retVal);
 			// divChild.setAttribute('class','"+ getElemValue(orient) +"');  );
 			retValBody[1].expression.arguments[1].value = getElemValue(orient) === 'wxHORIZONTAL' ? 'c-row' : 'c-col';
 			// divChild;
-			var divrootVar = retValBody[0].declarations[0].id;
+			//var divrootVar = retValBody[0].declarations[0].id;
 
 			for (var i=0; i<sizeritems.length; ++i) {
 				var sizeritem = sizeritems[i];
 				if( sizeritem.type == "element" && sizeritem.name == "object"){
-					var item = this.parent.parseSizerItem(sizeritem, divrootVar);
+					var item = this.parseSizerItem(sizeritem, .< divChild; >. );
 					retValBody.splice(2 + i, 0, Ast_esc(item, true) ); 			
 				}
 			}
 
-			Ast_PushArg(retVal, parent);
+			//Ast_PushArg(retVal, parent);
 
 			return retVal;
 			},
@@ -122,7 +123,7 @@ function astToHtml(xrcFileName, handlers){
 				 			elem.setAttribute('value',''); 
 				 			elem.readOnly = true;
 				 			parent.appendChild( elem );
-				 		})();
+				 		})(.~parent);
 					>.;
 			
 				// textarea.setAttribute('value','');
@@ -131,7 +132,7 @@ function astToHtml(xrcFileName, handlers){
 				retValBody[2].expression.arguments[1].value = getElemValue(value);
 
 				Ast_appendHandlerToBody(retValBody, handlers, id);
-				Ast_PushArg(retVal, parent);
+				//Ast_PushArg(retVal, parent);
 
 				return retVal;
 			},
@@ -160,6 +161,15 @@ function astToHtml(xrcFileName, handlers){
 				return retVal;
 			},
 
+			parseSizerItem: function (obj, parent){
+				var option = getElemByName(obj, "option");
+				var flag = getElemByName(obj, "flag");
+				var border = getElemByName(obj, "border");
+				var object = getElemByName(obj, "object");
+				var item = this.callParser(object, parent);
+				return item; //+ ".setAttribute('flag','"+ getElemValue(flag) +"');";
+			},
+
 			callParser: function(obj, parent){
 				var classType = getAttrByName(obj, "class");
 				var func = this[classType];
@@ -169,20 +179,14 @@ function astToHtml(xrcFileName, handlers){
 			}
 		}, 
 
-		parseSizerItem: function (obj, parent, extra){
-			var option = getElemByName(obj, "option");
-			var flag = getElemByName(obj, "flag");
-			var border = getElemByName(obj, "border");
-			var object = getElemByName(obj, "object");
-			var item = this.parseItems.callParser(object, parent);
-			return item; //+ ".setAttribute('flag','"+ getElemValue(flag) +"');";
-		},
-
 		parsePanel: function(obj, parent){
 			var style = getElemByName(obj, "style")
 			var size = getElemByName(obj, "size");
 			var object = getElemByName(obj, "object");
-
+			//parent.body[0].expression
+			print(escape(parent));
+			print( JSON.stringify( escape(parent) ) );
+			print(parent);
 			var retVal = .< 
 
 				(function(parent){
@@ -196,18 +200,17 @@ function astToHtml(xrcFileName, handlers){
 			var retValBody = Ast_GetBody(retVal);
 
 			// divPanel;
-			var divrootVar = retValBody[0].declarations[0].id;
+			//var divrootVar = retValBody[0].declarations[0].id;
 
-			var items = this.parseItems.callParser(object, divrootVar);
-			retValBody.splice(1, 0, Ast_esc(items, true) ); 
+			// var items = this.parseItems.callParser(object, .< divPanel; >.);
+			// retValBody.splice(1, 0, Ast_esc(items, true) ); 
 
-			Ast_PushArg(retVal, parent);
+			Ast_PushArg(retVal, escape(parent));
 
 			return retVal;
 		},
 
 		startParser: function(obj){
-			this.parseItems.parent = this;
 
 			var retVal = .< 
 
@@ -222,8 +225,8 @@ function astToHtml(xrcFileName, handlers){
 			var retValBody = Ast_GetBody(retVal);
 
 			// divroot;
-			var divrootVar = retValBody[0].declarations[0].id;
-			var items = this.parsePanel(obj, divrootVar);
+			//var divrootVar = retValBody[0].declarations[0].id;
+			var items = this.parsePanel(obj, .< divroot; >.);
 
 			retValBody.splice(1, 0, Ast_esc(items, true) );	
 
@@ -238,49 +241,90 @@ var calculatorLogic = {
 	textArea: null
 };
 
-function getHandlers(){
+// function generateNumberHandlers( handlers ){
+// 	for(var i=0; i<10; ++i){
+// 		var astprops = .< 
+// 				({ 'k': { evt: 'onclick', action: 
+// 						.< 
+
+// 						( function(){
+// 							calculatorLogic.textArea.value += '';
+// 						} ); 
+
+// 						>. }
+// 		 		}); 
+// 			>.;
+// 		var astprop = astprops.body[0].expression.properties[0];
+// 		astprop.key.value = "c_" + i;
+
+//  		astprop.value.properties[1].value.body[0].expression.body
+//  			.body[0].expression.right.value = i + "";
+
+//  		handlers.body[0].expression.properties.push(
+//  			astprop
+//  		);
+// 	}
+// }
+
+// function getHandlers(){
+
+
+
+// 	var handlers =  .< ({
+// 		'c_clear' : { evt: 'onclick', action: .< ( function(elem){
+// 			calculatorLogic.textArea.value = "";
+// 		} ); >. } ,
+// 		'c_input' : { action: .< ( function(elem){
+// 			calculatorLogic.textArea = elem;
+// 		} ); >. } ,
+
+// 		'c_plus' : { evt: 'onclick', action: .< ( function(){
+// 			calculatorLogic.textArea.value += '+';
+// 		} ); >. } ,
+
+// 		'c_minus' : { evt: 'onclick', action: .< ( function(){
+// 			calculatorLogic.textArea.value += '-';
+// 		} ); >. } ,
+
+// 		'c_multi' : { evt: 'onclick', action: .< ( function(){
+// 			calculatorLogic.textArea.value += '*';
+// 		} ); >. } ,
+
+// 		'c_div' : { evt: 'onclick', action: .< ( function(){
+// 			calculatorLogic.textArea.value += '/';
+// 		} ); >. } ,
+
+// 		'c_result' : { evt: 'onclick', action: .< ( function(){
+
+// 			var result;
+// 			try{
+// 				result = eval( calculatorLogic.textArea.value );
+// 			}catch(e){
+// 				result = calculatorLogic.textArea.value = "Error"
+// 			}
+// 			calculatorLogic.textArea.value += ' = ' + result; 
+
+// 		} ); >. }
+// 	}); 
+
+// 	>.;
+
+// 	generateNumberHandlers(handlers);
+
+// 	return handlers;
+// }
+
+// function generateHandlers(){
+// 	return .!getHandlers();
+// }
+
+function getHandlers2(){
 	return {
 		'c_clear' : { evt: 'onclick', action: .< ( function(elem){
 			calculatorLogic.textArea.value = "";
 		} ); >. } ,
 		'c_input' : { action: .< ( function(elem){
 			calculatorLogic.textArea = elem;
-		} ); >. } ,
-
-		'c_1' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '1';
-		} ); >. } ,
-
-		'c_2' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '2';
-		} ); >. } ,
-
-		'c_3' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '3';
-		} ); >. } ,
-
-		'c_4' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '4';
-		} ); >. } ,
-
-		'c_5' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '5';
-		} ); >. } ,
-
-		'c_6' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '6';
-		} ); >. } ,
-
-		'c_7' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '7';
-		} ); >. } ,
-
-		'c_8' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '8';
-		} ); >. } ,
-
-		'c_9' : { evt: 'onclick', action: .< ( function(){
-			calculatorLogic.textArea.value += '9';
 		} ); >. } ,
 
 		'c_plus' : { evt: 'onclick', action: .< ( function(){
@@ -313,11 +357,11 @@ function getHandlers(){
 	};
 }
 
-
 var calculatorUI = .!astToHtml(
 		"F:\\japostol\\projects\\not\\not\\js\\Project\\TestMonkey\\Src\\GUIGen\\calculator.xrc",
-		getHandlers()
+		getHandlers2()
 	);
 
 var calIdSelector = document.getElementById('calContent');
 calIdSelector.appendChild(calculatorUI);
+

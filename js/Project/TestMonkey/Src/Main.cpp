@@ -3606,7 +3606,7 @@ Escape(JSContext *cx, unsigned argc, jsval *vp)
                              "escape", "0", "s");
         return JS_FALSE;
     }
-
+	
 	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
     if (!obj) {
         fprintf(stderr, "NULL\n");
@@ -3635,7 +3635,7 @@ Escape(JSContext *cx, unsigned argc, jsval *vp)
 	if (!JS_GetArrayLength(cx, bodyObj, &lengthp))
 		return JS_FALSE;
 
-	if( lengthp==1 ){
+	if( lengthp>0 ){
 		JSObject *nodeObj;
 		if (!JS_GetArrayElementToObj(cx, bodyObj, 0, &nodeObj)){
 			JS_ReportError(cx, "array has not index: %d", 0);
@@ -3999,20 +3999,24 @@ static const JSFunctionSpecWithHelp fuzzing_unsafe_functions[] = {
 "trap([fun, [pc,]] exp)",
 "  Trap bytecode execution."),
 
-    JS_FN_HELP("untrap", Untrap, 2, 0,
-"untrap(fun[, pc])",
-"  Remove a trap."),
+
 
 	//metadev
 	JS_FN_HELP("unparse", unParse, 1, 0,
 		"unparse(astObj)",
 		"  Unparses a astObject to string, potentially throwing."),
+
 	JS_FN_HELP("inline", Inline, 1, 0,
 		"inline(expr)",
 		"  return a javascript ast object that has generated from expr, null otherwise."),
+
 	JS_FN_HELP("escape", Escape, 1, 0,
 		"escape(expr)",
 		"  return the innet ast of a program ast"),
+
+		JS_FN_HELP("untrap", Untrap, 2, 0,
+	"untrap(fun[, pc])",
+	"  Remove a trap."),
 
     JS_FS_HELP_END
 };

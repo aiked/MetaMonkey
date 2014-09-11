@@ -38,6 +38,8 @@ class unparse{
 
 	JSObject *jsonGlobalObj;
 
+	
+
 	typedef JSBool (unparse::*stringifyStmtHandler)
 		(JSObject *val, JSString **child, JSString *indent);
 	typedef HashMap<const char *, stringifyStmtHandler, ConstCharStarHasher> stringifyStmtHandlerMap;
@@ -174,7 +176,7 @@ class unparse{
 	// inline evaluator
 
 	JSBool inlineEvalAppendCode(JSString *code);
-	JSBool inlineEvalExecInline(JSString *code, jsval *inlineRetVal);
+	JSBool inlineEvalExecInline(JSString *code, JSString **child);
 
 	public:
 	///////////////////////

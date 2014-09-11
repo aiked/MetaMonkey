@@ -541,19 +541,8 @@ JSBool unparse::expr_unary(JSObject *val, JSString **child, JSString *indent, in
 		if (!up.unparse_expr(argumentObj, &argumentStr, srcStr(JSSRCNAME_FIVESPACES), 15, false))
 			return JS_FALSE;
 
-		jsval inlineRetVal;
-		if (!inlineEvalExecInline(argumentStr, &inlineRetVal))
+		if (!inlineEvalExecInline(argumentStr, child))
 			return JS_FALSE;
-
-		JSObject *inlineObj;
-		if (!JS_ValueToObject(cx, inlineRetVal, &inlineObj))
-			return JS_FALSE;
-
-		if (!unParse_start(inlineObj, child))
-			return JS_FALSE;
-
-		file.writeAll(cx, JS_EncodeString(cx, *child));
-		file.writeAll(cx, "\n==================================================\n");
 	}
 	else {
 		
@@ -1681,21 +1670,33 @@ JSBool unparse::inlineEvalAppendCode(JSString *code)
 			&& inlineEvaluateCode.append(srcStr(JSSRCNAME_NL));
 }
 
-JSBool unparse::inlineEvalExecInline(JSString *code, jsval *inlineRetVal)
+JSBool unparse::inlineEvalExecInline(JSString *code, JSString **child)
 {
 	JSString *snippetCode = joinStringVector(&inlineEvaluateCode, NULL, NULL, NULL);
 	JSString *evaluatedCode = joinString(4, snippetCode, srcStr(JSSRCNAME_INLINECALL), code, srcStr(JSSRCNAME_SPACERPSEMI));
 
 	char *source = JS_EncodeString(cx, evaluatedCode);
-	//std::cout<< "\n\ninline: \n===================================================\n" 
-	//		<< source 
-	//		<< "\n===================================================\n\n";
+
 	file.writeAll(cx, "\n===================RUNNING========================\n");
 	file.writeAll(cx, source);
 	file.writeAll(cx, "\n===================RESULT==========================\n");
+	
+	jsval inlineRetVal;
 	if (!JS_EvaluateScript(cx, cx->global(), source, strlen(source),
-							"inlineEval.js", 1, inlineRetVal))
+							"inlineEval.js", 1, &inlineRetVal))
 		return JS_FALSE;
+
+	JSObject *inlineObj;
+	if (!JS_ValueToObject(cx, inlineRetVal, &inlineObj))
+		return JS_FALSE;
+
+	if (!unParse_start(inlineObj, child))
+		return JS_FALSE;
+
+	if(*child){
+		file.writeAll(cx, JS_EncodeString(cx, *child));
+		file.writeAll(cx, "\n==================================================\n");
+	}
 
 	return JS_TRUE;
 }

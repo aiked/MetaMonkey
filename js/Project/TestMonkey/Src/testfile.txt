@@ -1,5 +1,25 @@
-function power(x,n){	
-if(n==1) {return x;}
-else { return .< .~x * .~power(x, n-1); >.; } 
-} 
-a = .! power(.<x-1;>., 5); 
+usability of escape operator
+
+var arg = .< 1; >.;
+
+.< 
+
+	(function(){
+		var divroot = document.createElement('div');
+
+		return divroot;
+	})( .~arg );
+
+>.;
+
+From 
+type: callExpression 
+arguments:[ expr1, esc, expr2 ]
+
+need expression 
+
+expression statement
+body[0].expression
+
+varDeclaration // var x;
+body[0].declarations[0].id

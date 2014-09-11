@@ -5082,8 +5082,8 @@ ReadCompleteFile(JSContext *cx, FILE *fp, JS::FileContents &buffer)
 bool JS::AutoFile::writeAll(JSContext *cx, const char *content)
 {
 	JS_ASSERT(fp_);
-
 	fprintf(fp_, "%s", content);
+
 	return true;
 }
 
