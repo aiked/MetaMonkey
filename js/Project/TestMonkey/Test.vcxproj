@@ -76,7 +76,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main.cpp" />
-    <ClCompile Include="Src\Staging.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpiderMonkey\SpiderMonkey\SpiderMonkey.vcxproj">

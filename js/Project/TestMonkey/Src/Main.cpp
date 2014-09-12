@@ -5241,8 +5241,8 @@ ProcessArgs(JSContext *cx, JSObject *obj_, OptionParser *op)
 static int run (JSContext *cx, JSObject *global) {
 	using namespace JS;
 
-	const char *inputFileName = "Src/examples/DSL/dsl.js";
-	const char *outputFileName = "Src/examples/DSL/stagged.js";
+	const char *inputFileName = "Src/test.js";
+	const char *outputFileName = "Src/ramoooon.js";
 
     fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
 

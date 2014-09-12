@@ -186,7 +186,7 @@ class unparse{
 	JSBool stringifyObject(JSObject *obj, JSString **s);
 	JSBool stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **propKey, JSString **propVal);
 	JSBool stringifyObjectValue(const Value &v, JSString **s);
-
+	
 	private:
 
 
@@ -207,7 +207,8 @@ class unparse{
 	JSBool functionDeclaration(JSString *funcInitStr, JSString **s, 
 								jsval id, JSObject *val, JSString *indent);
 
-	JSBool isBadIdentifier(JSObject *val, JSBool *isBadÙ·ÎÔ);
+	JSBool isBadIdentifier(JSObject *val, JSBool *isBad);
+	JSBool objectContainEscape(JSObject *obj, bool *retval, JSObject **retObj);
 
 	//JSString *unparse::trimRight(con);
 	JSString *unparse::joinString(size_t num, ...);
