@@ -633,6 +633,7 @@
     <ClInclude Include="..\..\..\src\yarr\YarrSyntaxChecker.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\help.txt" />
     <None Include="..\README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

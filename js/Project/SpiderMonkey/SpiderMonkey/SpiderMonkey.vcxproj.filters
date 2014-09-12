@@ -1780,5 +1780,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
+    <None Include="..\help.txt" />
   </ItemGroup>
 </Project>

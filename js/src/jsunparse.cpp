@@ -1645,7 +1645,9 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"invalid",
 		"0 / 0",
 		"1e999",
-		"-1e999"
+		"-1e999",
+		"index",
+		"expr"
 	};
 
 	for( size_t i=0; i<JSSRCNAME_END; ++i ){
@@ -1738,30 +1740,83 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 		JSObject *obj = &v.toObject();
 		if( JS_IsArrayObject(cx, obj) ){
 
+			Vector<JSString*> arrayElements(cx);
+			Vector<JSString*> escapeElements(cx);
+
 			uint32_t arrayLen;
 			if (!JS_GetArrayLength(cx, obj, &arrayLen))
 				return JS_FALSE;
 
-			children.append(srcStr(JSSRCNAME_LB));
+			arrayElements.append(srcStr(JSSRCNAME_LB));
 			for(uint32_t i=0; i<arrayLen; ++i) {
 				JSObject *nodeObj = NULL;
 				if( !JS_GetArrayElementToObj(cx,  obj, i, &nodeObj) )
 					return JS_FALSE;
 
-				JSString *objStr;
-				stringifyObject( nodeObj, &objStr);
-				children.append(objStr);
+				// Check nodeObj for type:Unary && operator:meta_esc
+				// will return index:exprStr
+				JSString *typeStr;
+				if( !JS_GetPropertyToString(cx, nodeObj, "type", &typeStr) )
+					return JS_FALSE;
 
-				
-				if( i != arrayLen-1 )
-					children.append(srcStr(JSSRCNAME_COMMASPACE));
+				if( typeStr && typeStr->equals("UnaryExpression") ){
+					JSString *opStr;
+					if( !JS_GetPropertyToString(cx, nodeObj, "operator", &opStr) )
+						return JS_FALSE;
+					sssssss
+					if(opStr && opStr->equals("meta_esc")){
+						JSObject *argObj;
+						if( !JS_GetPropertyToObj(cx, obj, "argument", &argObj ) )
+							return JS_FALSE;
+
+						JSString *argStr;
+						if( !unparse_expr(argObj, &argStr, srcStr(JSSRCNAME_FIVESPACES), 15, false) )
+							return JS_FALSE;
+
+						JSString *indexStr, *exprStr;
+						jsval indexNumVal = JS_NumberValue( (double)i );
+						JSString *indexNumStr = JS_ValueToString(cx, indexNumVal);
+
+						indexStr = joinString(3, srcStr(JSSRCNAME_INDEX), srcStr(JSSRCNAME_COLON), indexNumStr);
+						exprStr = joinString(3, srcStr(JSSRCNAME_EXPR), srcStr(JSSRCNAME_COLON), argStr);
+
+						JSString *escapeElementStr;
+						escapeElementStr = joinString(5, srcStr(JSSRCNAME_LC), indexStr, srcStr(JSSRCNAME_COMMA),
+													exprStr, srcStr(JSSRCNAME_RC));
+
+						escapeElements.append(escapeElementsStr);
+					}
+				} else {
+					JSString *objStr;
+					stringifyObject( nodeObj, &objStr);
+					arrayElements.append(objStr);
+				}
+
 			}
-			children.append(srcStr(JSSRCNAME_RB));
+			
+			JSString *retArray;
+			*retArray = joinStringVector(&arrayElements, srcStr(JSSRCNAME_COMMA), srcStr(JSSRCNAME_LB), 
+										srcStr(JSSRCNAME_RB));
+			// Join all the Vector and generate the final body
+			if ( escapeElements.empty() ){
+				children.append(retArray);
+			} else {
+				JSString *retEscape;
+				*retEscape = joinStringVector(&escapeElements, srcStr(JSSRCNAME_COMMA), srcStr(JSSRCNAME_LB), 
+										srcStr(JSSRCNAME_RB));
+
+				children.append(srcStr(JSSRCNAME_ESCAPECALL)); 
+				children.append(srcStr(JSSRCNAME_TRUE));
+				children.append(srcStr(JSSRCNAME_COMMA));
+				children.append(retArray);
+				children.append(srcStr(JSSRCNAME_COMMA));
+				children.append(retEscape);
+				children.append(srcStr(JSSRCNAME_FALSE));
+				children.append(srcStr(JSSRCNAME_RP));
+			}
 		} else {
 			JSString *objStr;
 			stringifyObject( obj, &objStr);
-
-
 			children.append(objStr);
 		}
     } else if (v.isBoolean()) {
@@ -1775,6 +1830,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
     }
 
 	*s = joinStringVector(&children, NULL, NULL, NULL);
+
 
 	return JS_TRUE;
 }
@@ -1801,35 +1857,13 @@ JSBool unparse::stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **
 	return JS_TRUE;
 }
 
-
 JSBool unparse::stringifyObject(JSObject *obj, JSString **s)
 {
 	JSString *typeStr;
 	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
-		return JS_FALSE;
-
-	if( typeStr && typeStr->equals("UnaryExpression") ){
-		JSString *opStr;
-		if( !JS_GetPropertyToString(cx, obj, "operator", &opStr) )
-			return JS_FALSE;
-
-		if(opStr && opStr->equals("meta_esc")){
-
-			JSObject *argObj;
-			if( !JS_GetPropertyToObj(cx, obj, "argument", &argObj ) )
-				return JS_FALSE;
-
-			JSString *argStr;
-			if( !unparse_expr(argObj, &argStr, srcStr(JSSRCNAME_FIVESPACES), 15, false) )
-				return JS_FALSE;
-
-			*s = joinString(3, srcStr(JSSRCNAME_ESCAPECALL), argStr, srcStr(JSSRCNAME_RP));
-
-			return JS_TRUE;
-		}
-	}
-
-	Vector<JSString*> children(cx);
+		return JS_FALSE;s
+		s
+	Vector<JSString*> children(cxs);
     if (obj->isNative()) {
         children.append(srcStr(JSSRCNAME_LC));
         Vector<Shape *, 8, SystemAllocPolicy> props;
