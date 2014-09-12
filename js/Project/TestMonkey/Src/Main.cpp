@@ -3588,7 +3588,6 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 
 	JSString *str = NULL;
 	unparse up(cx);
-
 	if (!up.unParse_start(obj, &str))
 		return JS_FALSE;
 
@@ -4945,6 +4944,7 @@ NewGlobalObject(JSContext *cx, JSObject *sameZoneAs)
 #endif
         if (!JS_InitReflect(cx, glob))
             return NULL;
+
         if (!JS_DefineDebuggerObject(cx, glob))
             return NULL;
         //if (!JS::RegisterPerfMeasurement(cx, glob))
@@ -5241,8 +5241,8 @@ ProcessArgs(JSContext *cx, JSObject *obj_, OptionParser *op)
 static int run (JSContext *cx, JSObject *global) {
 	using namespace JS;
 
-	const char *inputFileName = "Src/examples/loop/main.js";
-	const char *outputFileName = "Src/examples/loop/stagged.js";
+	const char *inputFileName = "Src/examples/DSL/dsl.js";
+	const char *outputFileName = "Src/examples/DSL/stagged.js";
 
     fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
 

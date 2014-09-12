@@ -55,7 +55,7 @@ function metaForEach(opts, code){
 
 
 
-var fruits = ['ananas', 'aple', 'lemon', 'banana'];
+var fruits = ['pineaple', 'aple', 'lemon', 'banana'];
 
 var msg = "";
 

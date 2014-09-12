@@ -1,59 +1,110 @@
 
 ===================RUNNING========================
-function metaForEach(opts, code) {
-    var collectionVar = opts.collection;
-    var elementVar = opts.element;
-    var indexVar = opts.index;
-    var firstLoopVar = opts.firstLoop;
-    var lastLoopVar = opts.lastLoop;
-    var forAst = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"CallExpression", callee:{loc:null, type:"FunctionExpression", id:null, params:[], defaults:[], body:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ForInStatement", left:{loc:null, type:"Identifier", name:"k"}, right:meta_escape( collectionVar), body:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"=", left:{loc:null, type:"Identifier", name:"v"}, right:{loc:null, type:"MemberExpression", object:meta_escape( collectionVar), property:meta_escape( indexVar), computed:true}}}]}, each:false}, {loc:null, type:"EmptyStatement"}]}, rest:null, generator:false, expression:false}, arguments:[]}}]};
-    var funcBody = forAst.body[0].expression.callee.body.body;
-    funcBody[0].left = indexVar.body[0].expression;
-    funcBody[0].body.body[0].expression.left = elementVar.body[0].expression;
-    funcBody[0].body.body = funcBody[0].body.body.concat(code.body);
-    var forPosInBody = 0;
-    if (firstLoopVar) {
-    var firstLoopVarInit = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"=", left:{loc:null, type:"Identifier", name:"v"}, right:{loc:null, type:"Literal", value:true}}}]};
-    firstLoopVarInit.body[0].expression.left = firstLoopVar.body[0].expression;
-    funcBody.splice(0, 0, firstLoopVarInit.body[0]);
-    ++forPosInBody;
-    var firstLoopVarfinal = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"=", left:{loc:null, type:"Identifier", name:"v"}, right:{loc:null, type:"Literal", value:false}}}]};
-    firstLoopVarfinal.body[0].expression.left = firstLoopVar.body[0].expression;
-    funcBody[forPosInBody].body.body.push(firstLoopVarfinal.body[0]);
+function DependencyTrigger(elementId, dependency) {
+    this.element = $(elementId);
+    this.dependency = dependency;
+    this.is = function (values) {
+    this.values = values;
+    this.addHandler();
+    console.log(["showing", this.dependency.element.id, "when", this.element.id, "is", this.values].join(" "));
     }
-    if (lastLoopVar) {
-    var lastLoopVarInit = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"=", left:{loc:null, type:"Identifier", name:"v"}, right:{loc:null, type:"Literal", value:false}}}]};
-    lastLoopVarInit.body[0].expression.left = lastLoopVar.body[0].expression;
-    funcBody.splice(0, 0, lastLoopVarInit.body[0]);
-    ++forPosInBody;
-    var lastLoopVarfinal = {loc:null, type:"Program", body:[{loc:null, type:"IfStatement", test:{loc:null, type:"LogicalExpression", operator:"&&", left:{loc:null, type:"BinaryExpression", operator:"!==", left:{loc:null, type:"UnaryExpression", operator:"typeof", argument:{loc:null, type:"MemberExpression", object:meta_escape( collectionVar), property:{loc:null, type:"Identifier", name:"length"}, computed:false}, prefix:true}, right:{loc:null, type:"Literal", value:"undefined"}}, right:{loc:null, type:"BinaryExpression", operator:"==", left:meta_escape( indexVar), right:{loc:null, type:"BinaryExpression", operator:"-", left:{loc:null, type:"MemberExpression", object:meta_escape( collectionVar), property:{loc:null, type:"Identifier", name:"length"}, computed:false}, right:{loc:null, type:"Literal", value:1}}}}, consequent:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"=", left:{loc:null, type:"Identifier", name:"v"}, right:{loc:null, type:"Literal", value:true}}}]}, alternate:null}, {loc:null, type:"EmptyStatement"}]};
-    lastLoopVarfinal.body[0].consequent.body[0].expression.left = lastLoopVarInit.body[0].expression.left;
-    funcBody[forPosInBody].body.body.splice(0, 0, lastLoopVarfinal.body[0]);
+;
+    this.addHandler = function () {
+    Event.observe(this.element, "change", this.checkDependency.bind(this));
     }
-    return forAst;
+;
+    this.checkDependency = function () {
+    console.log(["checking", this.element.id, "for", this.values].join(" "));
+    if (this.values.split(",").indexOf($F(this.element)) > -1) {
+    this.dependency.element.show();
+    } else {
+    this.dependency.element.hide();
+    }
+    }
+;
 }
 
-inline( metaForEach({collection: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"fruits"}}]},element: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"fruit"}}]},index: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"i"}}]},lastLoop: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"last"}}]},firstLoop: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"first"}}]}}, {loc:null, type:"Program", body:[{loc:null, type:"IfStatement", test:{loc:null, type:"Identifier", name:"first"}, consequent:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"+=", left:{loc:null, type:"Identifier", name:"msg"}, right:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"Literal", value:"i like very much "}, right:{loc:null, type:"Identifier", name:"fruit"}}, right:{loc:null, type:"Literal", value:", "}}}}]}, alternate:{loc:null, type:"IfStatement", test:{loc:null, type:"Identifier", name:"last"}, consequent:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"+=", left:{loc:null, type:"Identifier", name:"msg"}, right:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"Literal", value:"but i hate "}, right:{loc:null, type:"Identifier", name:"fruit"}}}}]}, alternate:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"+=", left:{loc:null, type:"Identifier", name:"msg"}, right:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"Literal", value:"i eat "}, right:{loc:null, type:"Identifier", name:"fruit"}}, right:{loc:null, type:"Literal", value:", "}}}}]}}}]}) );
+function Dependency(elementId) {
+    this.element = $(elementId);
+    this.when = function (elementId) {
+    return (new DependencyTrigger(elementId, this));
+    }
+;
+}
+
+function show(elementId) {
+    return (new Dependency(elementId));
+}
+
+function Ast_esc(ast, isStmt) {
+    return (isStmt?ast.body[0]:ast.body[0].expression);
+    }
+
+function Ast_GetBody(root) {
+    return root.body[0].expression.callee.body.body;
+    }
+
+function jsonToAst(jsonFilename) {
+    function Ast_esc(ast, isStmt) {
+    return (isStmt?ast.body[0]:ast.body[0].expression);
+    }
+
+    function Ast_GetBody(root) {
+    return root.body[0].expression.callee.body.body;
+    }
+
+    var dslParser = {parseItems: {show: function (obj) {
+    var value = obj.value;
+    var whenObj = obj.when;
+    var retVal = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"CallExpression", callee:{loc:null, type:"FunctionExpression", id:null, params:[], defaults:[], body:{loc:null, type:"BlockStatement", body:[{loc:null, type:"VariableDeclaration", kind:"var", declarations:[{loc:null, type:"VariableDeclarator", id:{loc:null, type:"Identifier", name:"dependency"}, init:{loc:null, type:"NewExpression", callee:{loc:null, type:"Identifier", name:"Dependency"}, arguments:[{loc:null, type:"Literal", value:""}]}}]}, {loc:null, type:"ReturnStatement", argument:{loc:null, type:"Identifier", name:"dependency"}}]}, rest:null, generator:false, expression:false}, arguments:[]}}]};
+    var retValBody = Ast_GetBody(retVal);
+    retValBody[0].declarations[0].init.arguments[0].value = value;
+    var item = this.when(whenObj, {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"dependency"}}]});
+    retValBody.splice(1, 0, Ast_esc(item, true));
+    return retVal;
+}
+,when: function (obj, parent) {
+    var value = obj.value;
+    var isObj = obj.is;
+    var retVal = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"CallExpression", callee:{loc:null, type:"FunctionExpression", id:null, params:[{loc:null, type:"Identifier", name:"parent"}], defaults:[], body:{loc:null, type:"BlockStatement", body:[{loc:null, type:"VariableDeclaration", kind:"var", declarations:[{loc:null, type:"VariableDeclarator", id:{loc:null, type:"Identifier", name:"dependencyTrigger"}, init:{loc:null, type:"NewExpression", callee:{loc:null, type:"Identifier", name:"DependencyTrigger"}, arguments:[{loc:null, type:"Literal", value:""}, {loc:null, type:"Identifier", name:"parent"}]}}]}]}, rest:null, generator:false, expression:false}, arguments:[meta_escape( parent)]}}]};
+    var retValBody = Ast_GetBody(retVal);
+    retValBody[0].declarations[0].init.arguments[0].value = value;
+    var item = this.is(isObj, {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"dependencyTrigger"}}]});
+    retValBody.push(Ast_esc(item, true));
+    return retVal;
+}
+,is: function (obj, parent) {
+    var value = obj.value;
+    var retVal = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"CallExpression", callee:{loc:null, type:"FunctionExpression", id:null, params:[{loc:null, type:"Identifier", name:"parent"}], defaults:[], body:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"=", left:{loc:null, type:"MemberExpression", object:{loc:null, type:"Identifier", name:"parent"}, property:{loc:null, type:"Identifier", name:"values"}, computed:false}, right:{loc:null, type:"Literal", value:""}}}, {loc:null, type:"ExpressionStatement", expression:{loc:null, type:"CallExpression", callee:{loc:null, type:"MemberExpression", object:{loc:null, type:"Identifier", name:"parent"}, property:{loc:null, type:"Identifier", name:"addHandler"}, computed:false}, arguments:[]}}, {loc:null, type:"ExpressionStatement", expression:{loc:null, type:"CallExpression", callee:{loc:null, type:"MemberExpression", object:{loc:null, type:"Identifier", name:"console"}, property:{loc:null, type:"Identifier", name:"log"}, computed:false}, arguments:[{loc:null, type:"CallExpression", callee:{loc:null, type:"MemberExpression", object:{loc:null, type:"ArrayExpression", elements:[{loc:null, type:"Literal", value:"showing"}, {loc:null, type:"MemberExpression", object:{loc:null, type:"MemberExpression", object:{loc:null, type:"MemberExpression", object:{loc:null, type:"Identifier", name:"parent"}, property:{loc:null, type:"Identifier", name:"dependency"}, computed:false}, property:{loc:null, type:"Identifier", name:"element"}, computed:false}, property:{loc:null, type:"Identifier", name:"id"}, computed:false}, {loc:null, type:"Literal", value:"when"}, {loc:null, type:"MemberExpression", object:{loc:null, type:"MemberExpression", object:{loc:null, type:"Identifier", name:"parent"}, property:{loc:null, type:"Identifier", name:"element"}, computed:false}, property:{loc:null, type:"Identifier", name:"id"}, computed:false}, {loc:null, type:"Literal", value:"is"}, {loc:null, type:"MemberExpression", object:{loc:null, type:"Identifier", name:"parent"}, property:{loc:null, type:"Identifier", name:"values"}, computed:false}]}, property:{loc:null, type:"Identifier", name:"join"}, computed:false}, arguments:[{loc:null, type:"Literal", value:" "}]}]}}]}, rest:null, generator:false, expression:false}, arguments:[meta_escape( parent)]}}]};
+    var retValBody = Ast_GetBody(retVal);
+    retValBody[0].expression.right.value = value;
+    return retVal;
+}
+},startParser: function (obj) {
+    var showObj = obj.show;
+    return this.parseItems.show(showObj);
+}
+};
+    var jsonDsl = read(jsonFilename);
+    var dslObj = JSON.parse(jsonDsl);
+    return dslParser.startParser(dslObj);
+}
+
+inline( jsonToAst("Src\\examples\\DSL\\dsl.json") );
 ===================RESULT==========================
 (function () {
-    last = false;
-    first = true;
-    for (i in fruits) {
-    if (typeof fruits.length !== "undefined" && i == fruits.length - 1) {
-    last = true;
+    var dependency = new Dependency("state-field");
+    (function (parent) {
+    var dependencyTrigger = new DependencyTrigger("country", parent);
+    (function (parent) {
+    parent.values = "United States";
+    parent.addHandler();
+    console.log(["showing", parent.dependency.element.id, "when", parent.element.id, "is", parent.values].join(" "));
     }
-    fruit = fruits[i];
-    if (first) {
-    msg += "i like very much " + fruit + ", ";
-    } else
-        if (last) {
-    msg += "but i hate " + fruit;
-        } else {
-    msg += "i eat " + fruit + ", ";
-        }
-    first = false;
+(dependencyTrigger));
     }
-    ;
+(dependency));
+    return dependency;
 }
 ());
 

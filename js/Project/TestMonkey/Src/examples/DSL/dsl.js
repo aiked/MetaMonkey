@@ -46,27 +46,72 @@ function show(elementId){
 }
 
 
-
-show("state-field").when("country").is("United States");
-
-
-
 function jsonToAst( jsonFilename ){
-	var jsonDsl = read(jsonFilename);
-	var dslObj = JSON.stringify(jsonStr);
+
+	function Ast_esc(ast, isStmt){
+		return isStmt? ast.body[0] : ast.body[0].expression;
+	}
+
+	function Ast_GetBody(root){
+		return root.body[0].expression.callee.body.body;
+	}
 
 	var dslParser = {
 		parseItems:{
 			show: function(obj){
-				this.parseItems.when(obj);
+				var value = obj.value;
+				var whenObj = obj.when;
+
+				var retVal = .<
+							(function(){
+								var dependency = new Dependency("");
+
+								return dependency;
+							})();
+						>.;	
+				var retValBody = Ast_GetBody(retVal);
+				retValBody[0].declarations[0].init.arguments[0].value = value;
+
+				var item = this.when(whenObj, .< dependency; >.);
+				retValBody.splice( 1, 0, Ast_esc(item, true) );
+
+				return retVal;
 			},
 
-			when: function(obj){
-				this.parseItems.is(obj);
+			when: function(obj, parent){
+				var value = obj.value;
+				var isObj = obj.is;
+
+				var retVal = .<
+							(function(parent){
+								var dependencyTrigger = new DependencyTrigger("", parent);
+							})(.~parent);
+						>.;	
+				var retValBody = Ast_GetBody(retVal);
+				retValBody[0].declarations[0].init.arguments[0].value = value;
+
+				var item = this.is(isObj, .< dependencyTrigger; >.);
+				retValBody.push( Ast_esc(item, true) );
+
+				return retVal;
 			},
 
-			is: function(obj){
+			is: function(obj, parent){
 
+				var value = obj.value;
+				var retVal = .<
+							(function(parent){
+								parent.values = "";
+								parent.addHandler();
+								console.log( 
+										[ "showing", parent.dependency.element.id, "when", parent.element.id, "is", parent.values  ].join(' ')
+									);
+							})(.~parent);
+						>.;	
+				var retValBody = Ast_GetBody(retVal);
+				retValBody[0].expression.right.value = value;
+
+				return retVal;
 			}//,
 
 			// call: function(dslKey){
@@ -74,16 +119,19 @@ function jsonToAst( jsonFilename ){
 			// 	assert(handler);
 			// 	return this[queryKey]()
 			// }
-		}
+		},
 		startParser: function(obj){
-			this.parseItems.show(obj);
+			var showObj = obj.show;
+			return this.parseItems.show(showObj);
 		}
-	}
+	};
 
-	dslParser.startParser(dslObj);
+	var jsonDsl = read(jsonFilename);
+	var dslObj = JSON.parse(jsonDsl);
+	return dslParser.startParser(dslObj);
 }
 
 
 .!jsonToAst(
-		"Src\\examples\\examples\\dsl.json",
+		"Src\\examples\\DSL\\dsl.json"
 	);

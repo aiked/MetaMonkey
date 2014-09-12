@@ -1801,7 +1801,6 @@ JSBool unparse::stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **
 	return JS_TRUE;
 }
 
-
 JSBool unparse::stringifyObject(JSObject *obj, JSString **s)
 {
 	JSString *typeStr;
@@ -2363,7 +2362,7 @@ JSBool unparse::unParse_start(JSObject *obj, JSString **s)
 	sourceElementValueApplier seva;
 	if ( !unparse_values(bodyObj, &children, seva, false ) )
 		return JS_FALSE;
-
+	
 	*s = joinStringVector(&children, NULL, NULL, NULL );
 
 	if( !(*s) ){
@@ -2376,3 +2375,4 @@ JSBool unparse::unParse_start(JSObject *obj, JSString **s)
 	//js_DumpObject(obj);
 	return JS_TRUE;
 }
+
