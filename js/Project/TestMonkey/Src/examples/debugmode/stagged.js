@@ -1,5 +1,5 @@
 function getBuildMode() {
-    return "debug";
+    return "release";
 }
 
 function assert(cond, msg) {
@@ -19,9 +19,12 @@ var handlers = {plus: function (x, y) {
 }
 ,call: function (funcName) {
     var fun = this[funcName];
-    console.assert(fun, "cannot find (" + funcName + ") method");
+    if (fun) {
+    alert("oops!, an error occurred!, " + ("cannot find (" + funcName + ") method") + ", pleaze contact us.");
+}
+;
 ;
     return fun.apply(this, arguments);
 }
 };
-handlers.call("plus2", 1, 2);
+handlers.call("plus", 1, 2);

@@ -1503,7 +1503,7 @@ JSBool unparse::stmt_functiondeclaration(JSObject *val, JSString **child, JSStri
 unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), standarJsSrcNames(x), 
 	stringifyStmtHandlerMapInst(x), inlineEvaluateCode(x), cx(x)
 {
-	const char *outputFileName = "Src/GUIGen/stanging.js";
+	const char *outputFileName = "Src/stanging.js";
 	using namespace JS;
 
 	if (!file.open(cx, outputFileName, "w"))

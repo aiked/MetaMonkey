@@ -5241,8 +5241,8 @@ ProcessArgs(JSContext *cx, JSObject *obj_, OptionParser *op)
 static int run (JSContext *cx, JSObject *global) {
 	using namespace JS;
 
-	const char *inputFileName = "Src/GUIGen/GUIGen.js";
-	const char *outputFileName = "Src/GUIGen/jqueryTestOut.js";
+	const char *inputFileName = "Src/examples/loop/main.js";
+	const char *outputFileName = "Src/examples/loop/stagged.js";
 
     fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
 
