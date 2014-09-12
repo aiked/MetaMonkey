@@ -1,0 +1,11 @@
+{
+	"show": {
+		"value": "state-field",
+		"when": {
+			"value": "country",
+			"is": {
+				"value": "United States"
+			}
+		}
+	}
+}
