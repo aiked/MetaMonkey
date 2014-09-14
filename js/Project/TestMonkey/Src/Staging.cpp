@@ -3587,8 +3587,8 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
     }
 
 	JSString *str = NULL;
-	unparse up(cx);
-	if (!up.unParse_start(obj, &str))
+	unparse *up = unparse::getSingleton();
+	if (!up->unParse_start(obj, &str))
 		return JS_FALSE;
 
 	vp->setString(str);
@@ -4945,6 +4945,9 @@ NewGlobalObject(JSContext *cx, JSObject *sameZoneAs)
         if (!JS_InitReflect(cx, glob))
             return NULL;
 
+		//metadev
+        JS_InitUnparse(cx);
+
         if (!JS_DefineDebuggerObject(cx, glob))
             return NULL;
         //if (!JS::RegisterPerfMeasurement(cx, glob))
@@ -4999,250 +5002,11 @@ NewGlobalObject(JSContext *cx, JSObject *sameZoneAs)
     return glob;
 }
 
-static bool
-BindScriptArgs(JSContext *cx, JSObject *obj_, OptionParser *op)
-{
-    RootedObject obj(cx, obj_);
 
-    MultiStringRange msr = op->getMultiStringArg("scriptArgs");
-    RootedObject scriptArgs(cx);
-    scriptArgs = JS_NewArrayObject(cx, 0, NULL);
-    if (!scriptArgs)
-        return false;
-
-    if (!JS_DefineProperty(cx, obj, "scriptArgs", OBJECT_TO_JSVAL(scriptArgs), NULL, NULL, 0))
-        return false;
-
-    for (size_t i = 0; !msr.empty(); msr.popFront(), ++i) {
-        const char *scriptArg = msr.front();
-        JSString *str = JS_NewStringCopyZ(cx, scriptArg);
-        if (!str ||
-            !JS_DefineElement(cx, scriptArgs, i, STRING_TO_JSVAL(str), NULL, NULL,
-                              JSPROP_ENUMERATE)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// This function is currently only called from "#if defined(JS_ION)" chunks,
-// so we're guarding the function definition with an #ifdef, too, to avoid
-// build warning for unused function in non-ion-enabled builds:
-#if defined(JS_ION)
-static int
-OptionFailure(const char *option, const char *str)
-{
-    fprintf(stderr, "Unrecognized option for %s: %s\n", option, str);
-    return EXIT_FAILURE;
-}
-#endif /* JS_ION */
-
-static int
-ProcessArgs(JSContext *cx, JSObject *obj_, OptionParser *op)
-{
-    RootedObject obj(cx, obj_);
-
-    if (op->getBoolOption('c'))
-        compileOnly = true;
-
-    if (op->getBoolOption('w'))
-        reportWarnings = JS_TRUE;
-    else if (op->getBoolOption('W'))
-        reportWarnings = JS_FALSE;
-
-    if (op->getBoolOption('s'))
-        JS_ToggleOptions(cx, JSOPTION_EXTRA_WARNINGS);
-
-    if (op->getBoolOption('d')) {
-        JS_SetRuntimeDebugMode(JS_GetRuntime(cx), true);
-        JS_SetDebugMode(cx, true);
-    }
-
-    if (op->getBoolOption('b'))
-        printTiming = true;
-
-    if (op->getBoolOption('D'))
-        enableDisassemblyDumps = true;
-
-#ifdef JS_THREADSAFE
-    int32_t threadCount = op->getIntOption("thread-count");
-    if (threadCount >= 0)
-        cx->runtime()->requestHelperThreadCount(threadCount);
-#endif /* JS_THREADSAFE */
-
-#if defined(JS_ION)
-    if (op->getBoolOption("no-ion")) {
-        enableIon = false;
-        JS_ToggleOptions(cx, JSOPTION_ION);
-    }
-    if (op->getBoolOption("no-asmjs")) {
-        enableAsmJS = false;
-        JS_ToggleOptions(cx, JSOPTION_ASMJS);
-    }
-
-    if (op->getBoolOption("no-baseline")) {
-        enableBaseline = false;
-        JS_ToggleOptions(cx, JSOPTION_BASELINE);
-    }
-
-    if (const char *str = op->getStringOption("ion-gvn")) {
-        if (strcmp(str, "off") == 0)
-            jit::js_IonOptions.gvn = false;
-        else if (strcmp(str, "pessimistic") == 0)
-            jit::js_IonOptions.gvnIsOptimistic = false;
-        else if (strcmp(str, "optimistic") == 0)
-            jit::js_IonOptions.gvnIsOptimistic = true;
-        else
-            return OptionFailure("ion-gvn", str);
-    }
-
-    if (const char *str = op->getStringOption("ion-licm")) {
-        if (strcmp(str, "on") == 0)
-            jit::js_IonOptions.licm = true;
-        else if (strcmp(str, "off") == 0)
-            jit::js_IonOptions.licm = false;
-        else
-            return OptionFailure("ion-licm", str);
-    }
-
-    if (const char *str = op->getStringOption("ion-edgecase-analysis")) {
-        if (strcmp(str, "on") == 0)
-            jit::js_IonOptions.edgeCaseAnalysis = true;
-        else if (strcmp(str, "off") == 0)
-            jit::js_IonOptions.edgeCaseAnalysis = false;
-        else
-            return OptionFailure("ion-edgecase-analysis", str);
-    }
-
-     if (const char *str = op->getStringOption("ion-range-analysis")) {
-         if (strcmp(str, "on") == 0)
-             jit::js_IonOptions.rangeAnalysis = true;
-         else if (strcmp(str, "off") == 0)
-             jit::js_IonOptions.rangeAnalysis = false;
-         else
-             return OptionFailure("ion-range-analysis", str);
-     }
-
-    if (const char *str = op->getStringOption("ion-inlining")) {
-        if (strcmp(str, "on") == 0)
-            jit::js_IonOptions.inlining = true;
-        else if (strcmp(str, "off") == 0)
-            jit::js_IonOptions.inlining = false;
-        else
-            return OptionFailure("ion-inlining", str);
-    }
-
-    if (const char *str = op->getStringOption("ion-osr")) {
-        if (strcmp(str, "on") == 0)
-            jit::js_IonOptions.osr = true;
-        else if (strcmp(str, "off") == 0)
-            jit::js_IonOptions.osr = false;
-        else
-            return OptionFailure("ion-osr", str);
-    }
-
-    if (const char *str = op->getStringOption("ion-limit-script-size")) {
-        if (strcmp(str, "on") == 0)
-            jit::js_IonOptions.limitScriptSize = true;
-        else if (strcmp(str, "off") == 0)
-            jit::js_IonOptions.limitScriptSize = false;
-        else
-            return OptionFailure("ion-limit-script-size", str);
-    }
-
-    int32_t useCount = op->getIntOption("ion-uses-before-compile");
-    if (useCount >= 0)
-        jit::js_IonOptions.usesBeforeCompile = useCount;
-
-    useCount = op->getIntOption("baseline-uses-before-compile");
-    if (useCount >= 0)
-        jit::js_IonOptions.baselineUsesBeforeCompile = useCount;
-
-    if (op->getBoolOption("baseline-eager"))
-        jit::js_IonOptions.baselineUsesBeforeCompile = 0;
-
-    if (const char *str = op->getStringOption("ion-regalloc")) {
-        if (strcmp(str, "lsra") == 0)
-            jit::js_IonOptions.registerAllocator = jit::RegisterAllocator_LSRA;
-        else if (strcmp(str, "backtracking") == 0)
-            jit::js_IonOptions.registerAllocator = jit::RegisterAllocator_Backtracking;
-        else if (strcmp(str, "stupid") == 0)
-            jit::js_IonOptions.registerAllocator = jit::RegisterAllocator_Stupid;
-        else
-            return OptionFailure("ion-regalloc", str);
-    }
-
-    if (op->getBoolOption("ion-eager"))
-        jit::js_IonOptions.setEagerCompilation();
-
-#ifdef JS_THREADSAFE
-    if (const char *str = op->getStringOption("ion-parallel-compile")) {
-        if (strcmp(str, "on") == 0) {
-            if (cx->runtime()->helperThreadCount() == 0) {
-                fprintf(stderr, "Parallel compilation not available without helper threads");
-                return EXIT_FAILURE;
-            }
-            jit::js_IonOptions.parallelCompilation = true;
-        } else if (strcmp(str, "off") == 0) {
-            jit::js_IonOptions.parallelCompilation = false;
-        } else {
-            return OptionFailure("ion-parallel-compile", str);
-        }
-    }
-#endif /* JS_THREADSAFE */
-
-#endif /* JS_ION */
-
-    /* |scriptArgs| gets bound on the global before any code is run. */
-    if (!BindScriptArgs(cx, obj, op))
-        return EXIT_FAILURE;
-
-    MultiStringRange filePaths = op->getMultiStringOption('f');
-    MultiStringRange codeChunks = op->getMultiStringOption('e');
-
-    if (filePaths.empty() && codeChunks.empty() && !op->getStringArg("script")) {
-        Process(cx, obj, NULL, true); /* Interactive. */
-        return gExitCode;
-    }
-
-    while (!filePaths.empty() || !codeChunks.empty()) {
-        size_t fpArgno = filePaths.empty() ? -1 : filePaths.argno();
-        size_t ccArgno = codeChunks.empty() ? -1 : codeChunks.argno();
-        if (fpArgno < ccArgno) {
-            char *path = filePaths.front();
-            Process(cx, obj, path, false);
-            if (gExitCode)
-                return gExitCode;
-            filePaths.popFront();
-        } else {
-            const char *code = codeChunks.front();
-            RootedValue rval(cx);
-            if (!JS_EvaluateScript(cx, obj, code, strlen(code), "-e", 1, rval.address()))
-                return gExitCode ? gExitCode : EXITCODE_RUNTIME_ERROR;
-            codeChunks.popFront();
-        }
-    }
-
-    /* The |script| argument is processed after all options. */
-    if (const char *path = op->getStringArg("script")) {
-        Process(cx, obj, path, false);
-        if (gExitCode)
-            return gExitCode;
-    }
-
-    if (op->getBoolOption('i'))
-        Process(cx, obj, NULL, true);
-
-    return gExitCode ? gExitCode : EXIT_SUCCESS;
-}
-
-
-static int run (JSContext *cx, JSObject *global) {
+static int run (JSContext *cx, JSObject *global, const char *inputFileName, const char *outputFileName) {
 	using namespace JS;
 
-	const char *inputFileName = "Src/examples/DSL/dsl.js";
-	const char *outputFileName = "Src/examples/DSL/stagged.js";
+    char* staggedFilename = JS_sprintf_append(NULL, "%s_stagged", inputFileName);
 
     fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
 
@@ -5297,21 +5061,35 @@ static int run (JSContext *cx, JSObject *global) {
 }
 
 int
-Shell(JSContext *cx, OptionParser *op, char **envp)
+main(int argc, char **argv, char **envp)
 {
-    JSAutoRequest ar(cx);
+    JSRuntime *rt;
+    JSContext *cx;
+    int result;
 
-    /*
-     * First check to see if type inference is enabled. These flags
-     * must be set on the compartment when it is constructed.
-     */
-    if (op->getBoolOption("no-ti")) {
-        enableTypeInference = false;
-        JS_ToggleOptions(cx, JSOPTION_TYPE_INFERENCE);
-    }
+	const char *inputFileName = "Src/test.js";
+	const char *outputFileName = "Src/ramoooon.js";
 
-    if (op->getBoolOption("fuzzing-safe"))
-        fuzzingSafe = true;
+    /* Use the same parameters as the browser in xpcjsruntime.cpp. */
+    rt = JS_NewRuntime(32L * 1024L * 1024L, JS_USE_HELPER_THREADS);
+    if (!rt)
+        return 1;
+    gTimeoutFunc = NullValue();
+    if (!JS_AddNamedValueRootRT(rt, &gTimeoutFunc, "gTimeoutFunc"))
+        return 1;
+
+    JS_SetGCParameter(rt, JSGC_MAX_BYTES, 0xffffffff);
+    JS_SetNativeStackQuota(rt, gMaxStackSize);
+
+    if (!InitWatchdog(rt))
+        return 1;
+
+    cx = NewContext(rt);
+    if (!cx)
+        return 1;
+
+    JS_SetGCParameter(rt, JSGC_MODE, JSGC_MODE_INCREMENTAL);
+    JS_SetGCParameterForThread(cx, JSGC_MAX_CODE_CACHE_BYTES, 16 * 1024 * 1024);
 
     RootedObject glob(cx);
     glob = NewGlobalObject(cx, NULL);
@@ -5326,250 +5104,9 @@ Shell(JSContext *cx, OptionParser *op, char **envp)
         return 1;
     JS_SetPrivate(envobj, envp);
 
-    //int result = ProcessArgs(cx, glob, op);
-	int result = run(cx, glob);
+	result = run(cx, glob, inputFileName, outputFileName);
+	JS_DestroyUnparse(cx);
 	system("@pause");
-
-    if (enableDisassemblyDumps)
-        JS_DumpCompartmentPCCounts(cx);
-
-    return result;
-}
-
-static void
-MaybeOverrideOutFileFromEnv(const char* const envVar,
-                            FILE* defaultOut,
-                            FILE** outFile)
-{
-    const char* outPath = getenv(envVar);
-    if (!outPath || !*outPath || !(*outFile = fopen(outPath, "w"))) {
-        *outFile = defaultOut;
-    }
-}
-
-/* Set the initial counter to 1 so the principal will never be destroyed. */
-JSPrincipals shellTrustedPrincipals = { 1 };
-
-JSBool
-CheckObjectAccess(JSContext *cx, HandleObject obj, HandleId id, JSAccessMode mode,
-                  MutableHandleValue vp)
-{
-    return true;
-}
-
-JSSecurityCallbacks securityCallbacks = {
-    CheckObjectAccess,
-    NULL
-};
-
-/* Pretend we can always preserve wrappers for dummy DOM objects. */
-static bool
-DummyPreserveWrapperCallback(JSContext *cx, JSObject *obj)
-{
-    return true;
-}
-
-int
-main2(int argc, char **argv, char **envp)
-{
-    int stackDummy;
-    JSRuntime *rt;
-    JSContext *cx;
-    int result;
-#ifdef XP_WIN
-    {
-        const char *crash_option = getenv("XRE_NO_WINDOWS_CRASH_DIALOG");
-        if (crash_option && strncmp(crash_option, "1", 1)) {
-            DWORD oldmode = SetErrorMode(SEM_NOGPFAULTERRORBOX);
-            SetErrorMode(oldmode | SEM_NOGPFAULTERRORBOX);
-        }
-    }
-#endif
-
-#ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "");
-#endif
-
-#ifdef JS_THREADSAFE
-    if (PR_FAILURE == PR_NewThreadPrivateIndex(&gStackBaseThreadIndex, NULL) ||
-        PR_FAILURE == PR_SetThreadPrivate(gStackBaseThreadIndex, &stackDummy)) {
-        return 1;
-    }
-#else
-    gStackBase = (uintptr_t) &stackDummy;
-#endif
-
-#ifdef XP_OS2
-   /* these streams are normally line buffered on OS/2 and need a \n, *
-    * so we need to unbuffer then to get a reasonable prompt          */
-    setbuf(stdout,0);
-    setbuf(stderr,0);
-#endif
-
-    MaybeOverrideOutFileFromEnv("JS_STDERR", stderr, &gErrFile);
-    MaybeOverrideOutFileFromEnv("JS_STDOUT", stdout, &gOutFile);
-
-    OptionParser op("Usage: {progname} [options] [[script] scriptArgs*]");
-
-    op.setDescription("The SpiderMonkey shell provides a command line interface to the "
-        "JavaScript engine. Code and file options provided via the command line are "
-        "run left to right. If provided, the optional script argument is run after "
-        "all options have been processed. Just-In-Time compilation modes may be enabled via "
-        "command line options.");
-    op.setDescriptionWidth(72);
-    op.setHelpWidth(80);
-    op.setVersion(JS_GetImplementationVersion());
-
-    if (!op.addMultiStringOption('f', "file", "PATH", "File path to run")
-        || !op.addMultiStringOption('e', "execute", "CODE", "Inline code to run")
-        || !op.addBoolOption('i', "shell", "Enter prompt after running code")
-        || !op.addBoolOption('m', "jm", "No-op (still used by fuzzers)")
-        || !op.addBoolOption('\0', "no-jm", "No-op (still used by fuzzers)")
-        || !op.addBoolOption('n', "ti", "Enable type inference (default)")
-        || !op.addBoolOption('\0', "no-ti", "Disable type inference")
-        || !op.addBoolOption('c', "compileonly", "Only compile, don't run (syntax checking mode)")
-        || !op.addBoolOption('w', "warnings", "Emit warnings")
-        || !op.addBoolOption('W', "nowarnings", "Don't emit warnings")
-        || !op.addBoolOption('s', "strict", "Check strictness")
-        || !op.addBoolOption('d', "debugjit", "Enable runtime debug mode for method JIT code")
-        || !op.addBoolOption('a', "always-mjit", "No-op (still used by fuzzers)")
-        || !op.addBoolOption('D', "dump-bytecode", "Dump bytecode with exec count for all scripts")
-        || !op.addBoolOption('b', "print-timing", "Print sub-ms runtime for each file that's run")
-#ifdef DEBUG
-        || !op.addBoolOption('O', "print-alloc", "Print the number of allocations at exit")
-#endif
-        || !op.addOptionalStringArg("script", "A script to execute (after all options)")
-        || !op.addOptionalMultiStringArg("scriptArgs",
-                                         "String arguments to bind as |scriptArgs| in the "
-                                         "shell's global")
-#ifdef JS_THREADSAFE
-        || !op.addIntOption('\0', "thread-count", "COUNT", "Use COUNT auxiliary threads "
-                            "(default: # of cores - 1)", -1)
-#endif
-        || !op.addBoolOption('\0', "ion", "Enable IonMonkey (default)")
-        || !op.addBoolOption('\0', "no-ion", "Disable IonMonkey")
-        || !op.addBoolOption('\0', "no-asmjs", "Disable asm.js compilation")
-        || !op.addStringOption('\0', "ion-gvn", "[mode]",
-                               "Specify Ion global value numbering:\n"
-                               "  off: disable GVN\n"
-                               "  pessimistic: (default) use pessimistic GVN\n"
-                               "  optimistic: use optimistic GVN")
-        || !op.addStringOption('\0', "ion-licm", "on/off",
-                               "Loop invariant code motion (default: on, off to disable)")
-        || !op.addStringOption('\0', "ion-edgecase-analysis", "on/off",
-                               "Find edge cases where Ion can avoid bailouts (default: on, off to disable)")
-        || !op.addStringOption('\0', "ion-range-analysis", "on/off",
-                               "Range analysis (default: off, on to enable)")
-        || !op.addStringOption('\0', "ion-inlining", "on/off",
-                               "Inline methods where possible (default: on, off to disable)")
-        || !op.addStringOption('\0', "ion-osr", "on/off",
-                               "On-Stack Replacement (default: on, off to disable)")
-        || !op.addStringOption('\0', "ion-limit-script-size", "on/off",
-                               "Don't compile very large scripts (default: on, off to disable)")
-        || !op.addIntOption('\0', "ion-uses-before-compile", "COUNT",
-                            "Wait for COUNT calls or iterations before compiling "
-                            "(default: 10240)", -1)
-        || !op.addStringOption('\0', "ion-regalloc", "[mode]",
-                               "Specify Ion register allocation:\n"
-                               "  lsra: Linear Scan register allocation (default)\n"
-                               "  backtracking: Priority based backtracking register allocation\n"
-                               "  stupid: Simple block local register allocation")
-        || !op.addBoolOption('\0', "ion-eager", "Always ion-compile methods (implies --baseline-eager)")
-#ifdef JS_THREADSAFE
-        || !op.addStringOption('\0', "ion-parallel-compile", "on/off",
-                               "Compile scripts off thread (default: off)")
-#endif
-        || !op.addBoolOption('\0', "baseline", "Enable baseline compiler (default)")
-        || !op.addBoolOption('\0', "no-baseline", "Disable baseline compiler")
-        || !op.addBoolOption('\0', "baseline-eager", "Always baseline-compile methods")
-        || !op.addIntOption('\0', "baseline-uses-before-compile", "COUNT",
-                            "Wait for COUNT calls or iterations before baseline-compiling "
-                            "(default: 10)", -1)
-        || !op.addBoolOption('\0', "no-fpu", "Pretend CPU does not support floating-point operations "
-                             "to test JIT codegen (no-op on platforms other than x86).")
-        || !op.addBoolOption('\0', "fuzzing-safe", "Don't expose functions that aren't safe for "
-                             "fuzzers to call")
-#ifdef JSGC_GENERATIONAL
-        || !op.addBoolOption('\0', "no-ggc", "Disable Generational GC")
-#endif
-    )
-    {
-        return EXIT_FAILURE;
-    }
-
-    op.setArgTerminatesOptions("script", true);
-    op.setArgCapturesRest("scriptArgs");
-
-    switch (op.parseArgs(argc, argv)) {
-      case OptionParser::ParseHelp:
-        return EXIT_SUCCESS;
-      case OptionParser::ParseError:
-        op.printHelp(argv[0]);
-        return EXIT_FAILURE;
-      case OptionParser::Fail:
-        return EXIT_FAILURE;
-      case OptionParser::Okay:
-        break;
-    }
-
-    if (op.getHelpOption())
-        return EXIT_SUCCESS;
-
-#ifdef DEBUG
-    /*
-     * Process OOM options as early as possible so that we can observe as many
-     * allocations as possible.
-     */
-    if (op.getBoolOption('O'))
-        OOM_printAllocationCount = true;
-
-#if defined(JS_CPU_X86)
-    if (op.getBoolOption("no-fpu"))
-        JSC::MacroAssembler::SetFloatingPointDisabled();
-#endif
-#endif
-
-    /* Use the same parameters as the browser in xpcjsruntime.cpp. */
-    rt = JS_NewRuntime(32L * 1024L * 1024L, JS_USE_HELPER_THREADS);
-    if (!rt)
-        return 1;
-    gTimeoutFunc = NullValue();
-    if (!JS_AddNamedValueRootRT(rt, &gTimeoutFunc, "gTimeoutFunc"))
-        return 1;
-
-    JS_SetGCParameter(rt, JSGC_MAX_BYTES, 0xffffffff);
-#ifdef JSGC_GENERATIONAL
-    if (op.getBoolOption("no-ggc"))
-        JS::DisableGenerationalGC(rt);
-#endif
-
-    JS_SetTrustedPrincipals(rt, &shellTrustedPrincipals);
-    JS_SetSecurityCallbacks(rt, &securityCallbacks);
-
-    JS_SetNativeStackQuota(rt, gMaxStackSize);
-
-    if (!InitWatchdog(rt))
-        return 1;
-
-    cx = NewContext(rt);
-    if (!cx)
-        return 1;
-
-    JS_SetGCParameter(rt, JSGC_MODE, JSGC_MODE_INCREMENTAL);
-    JS_SetGCParameterForThread(cx, JSGC_MAX_CODE_CACHE_BYTES, 16 * 1024 * 1024);
-
-    js::SetPreserveWrapperCallback(rt, DummyPreserveWrapperCallback);
-
-    /* Must be done before creating the global object */
-    if (op.getBoolOption('D'))
-        JS_ToggleOptions(cx, JSOPTION_PCCOUNT);
-
-    result = Shell(cx, &op, envp);
-
-#ifdef DEBUG
-    if (OOM_printAllocationCount)
-        printf("OOM max count: %u\n", OOM_counter);
-#endif
 
     gTimeoutFunc = NullValue();
     JS_RemoveValueRootRT(rt, &gTimeoutFunc);

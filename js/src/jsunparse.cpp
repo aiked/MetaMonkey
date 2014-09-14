@@ -1499,6 +1499,40 @@ JSBool unparse::stmt_functiondeclaration(JSObject *val, JSString **child, JSStri
 }
 
 /////////////////////
+unparse * unparse::unparseSingleInst = NULL;
+
+JS_PUBLIC_API(void)
+JS_InitUnparse(JSContext *cx)
+{
+	unparse::createSingleton(cx);
+}
+
+JS_PUBLIC_API(void)
+JS_DestroyUnparse(JSContext *cx)
+{
+	unparse::destroySingleton(cx);
+}
+
+void unparse::createSingleton(JSContext *cx)
+{
+	JS_ASSERT(!unparseSingleInst);
+
+	unparseSingleInst = cx->new_<unparse>(cx);
+}
+
+void unparse::destroySingleton(JSContext *cx)
+{
+	JS_ASSERT(unparseSingleInst);
+
+	js_delete(unparseSingleInst);
+	unparseSingleInst = NULL;
+}
+
+unparse *unparse::getSingleton()
+{
+	return unparseSingleInst;
+}
+
 
 unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), standarJsSrcNames(x), 
 	stringifyStmtHandlerMapInst(x), inlineEvaluateCode(x), cx(x)
@@ -2458,9 +2492,6 @@ JSBool unparse::unParse_start(JSObject *obj, JSString **s)
 		return JS_TRUE;
 	}
 
-	//str->dump();
-	//fprintf(stderr, objType.toString()->getChars() );
-	//js_DumpObject(obj);
 	return JS_TRUE;
 }
 

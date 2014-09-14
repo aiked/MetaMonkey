@@ -2184,6 +2184,14 @@ JS_GetScriptedGlobal(JSContext *cx);
 /*
  * Initialize the 'Reflect' object on a global object.
  */
+//metadev
+
+JS_PUBLIC_API(void)
+JS_InitUnparse(JSContext *cx);
+
+JS_PUBLIC_API(void)
+JS_DestroyUnparse(JSContext *cx);
+
 extern JS_PUBLIC_API(JSObject *)
 JS_InitReflect(JSContext *cx, JSObject *global);
 

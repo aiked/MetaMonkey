@@ -30,6 +30,8 @@ struct ConstCharStarHasher
 
 class unparse{
   private:
+	static unparse *unparseSingleInst;
+
 	JSContext *cx;
 	JSString *indentChar;
 	JSString *fourHash;
@@ -324,8 +326,15 @@ class unparse{
 		}
 	};
 
+	
+
   public:
+	// constructor should be private but not visible from jscntxt.h
 	unparse(JSContext *x);
+
+	static void createSingleton(JSContext *x);
+	static void destroySingleton(JSContext *x);
+	static unparse *getSingleton();
 	~unparse();
 
 	JSBool unparse_expr(JSObject *exprVal, JSString **s, JSString *indent, int cprec, bool noIn);
