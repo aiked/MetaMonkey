@@ -5008,7 +5008,15 @@ static int run (JSContext *cx, JSObject *global, const char *inputFileName, cons
 
     char* staggedFilename = JS_sprintf_append(NULL, "%s_stagged", inputFileName);
 
-    fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
+	fprintf(stderr, "\ngenerating stagging report location at \"%s\"...\n", staggedFilename);
+	AutoFile staggedFile;
+	if (!staggedFile.open(cx, staggedFilename, "w"))
+		return 1;
+
+	unparse *up = unparse::getSingleton();
+	up->setStaggingReportOutput(&staggedFile);
+
+    fprintf(stderr, "opening \"%s\"...\n", inputFileName);
 
     FileContents buffer(cx);
 	{

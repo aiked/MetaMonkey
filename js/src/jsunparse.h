@@ -36,11 +36,8 @@ class unparse{
 	JSString *indentChar;
 	JSString *fourHash;
 
-	JS::AutoFile file;
-
+	JS::AutoFile *staggingOutput;
 	JSObject *jsonGlobalObj;
-
-	
 
 	typedef JSBool (unparse::*stringifyStmtHandler)
 		(JSObject *val, JSString **child, JSString *indent);
@@ -326,8 +323,11 @@ class unparse{
 		}
 	};
 
-	
-
+	void staggingReport(const char *msg){
+		if(staggingOutput->fp()){
+			staggingOutput->writeAll(cx, msg);
+		}
+	}
   public:
 	// constructor should be private but not visible from jscntxt.h
 	unparse(JSContext *x);
@@ -335,6 +335,7 @@ class unparse{
 	static void createSingleton(JSContext *x);
 	static void destroySingleton(JSContext *x);
 	static unparse *getSingleton();
+	void setStaggingReportOutput(JS::AutoFile *staggingOutput);
 	~unparse();
 
 	JSBool unparse_expr(JSObject *exprVal, JSString **s, JSString *indent, int cprec, bool noIn);

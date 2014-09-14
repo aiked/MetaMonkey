@@ -9,7 +9,6 @@ metadev
 
 using namespace js;
 
-
 /////////////////////////// 
 // expression
 
@@ -1540,10 +1539,6 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 	const char *outputFileName = "Src/stanging.js";
 	using namespace JS;
 
-	if (!file.open(cx, outputFileName, "w"))
-		JS_ReportError(cx, "cannot open (%s) for staging log", outputFileName);
-	
-
 	JSObject *globalObj = cx->global();
 	if( !JS_GetPropertyToObj(cx, globalObj, "JSON", &jsonGlobalObj) )
 		JS_ReportError(cx, "cannot get JSON object from global object");
@@ -1693,6 +1688,11 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 	}
 }
 
+void unparse::setStaggingReportOutput(JS::AutoFile *staggingOutput)
+{
+	this->staggingOutput = staggingOutput;
+}
+
 unparse::~unparse(){
 
 }
@@ -1713,10 +1713,10 @@ JSBool unparse::inlineEvalExecInline(JSString *code, JSString **child)
 
 	char *source = JS_EncodeString(cx, evaluatedCode);
 
-	file.writeAll(cx, "\n===================RUNNING========================\n");
-	file.writeAll(cx, source);
-	file.writeAll(cx, "\n===================RESULT==========================\n");
-	
+	staggingReport("\n===================RUNNING========================\n");
+	staggingReport(source);
+	staggingReport("\n===================RESULT==========================\n");
+
 	jsval inlineRetVal;
 	if (!JS_EvaluateScript(cx, cx->global(), source, strlen(source),
 							"inlineEval.js", 1, &inlineRetVal))
@@ -1730,8 +1730,8 @@ JSBool unparse::inlineEvalExecInline(JSString *code, JSString **child)
 		return JS_FALSE;
 
 	if(*child){
-		file.writeAll(cx, JS_EncodeString(cx, *child));
-		file.writeAll(cx, "\n==================================================\n");
+		staggingReport(JS_EncodeString(cx, *child));
+		staggingReport("\n==================================================\n");
 	}
 
 	return JS_TRUE;
