@@ -207,7 +207,7 @@ class unparse{
 								jsval id, JSObject *val, JSString *indent);
 
 	JSBool isBadIdentifier(JSObject *val, JSBool *isBad);
-	JSBool objectContainEscape(JSObject *obj, bool *retval, JSObject **retObj);
+	JSBool objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt, JSObject **retObj);
 
 	//JSString *unparse::trimRight(con);
 	JSString *unparse::joinString(size_t num, ...);

@@ -1782,6 +1782,10 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 			uint32_t arrayLen;
 			if (!JS_GetArrayLength(cx, obj, &arrayLen))
 				return JS_FALSE;
+			
+			bool hasNodeEscape;
+			bool fromStmtDepth;
+			JSObject *escapeNode;
 
 			for(uint32_t i=0; i<arrayLen; ++i) {
 
@@ -1789,9 +1793,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				if( !JS_GetArrayElementToObj(cx, obj, i, &nodeObj) )
 					return JS_FALSE;
 
-				bool hasNodeEscape;
-				JSObject *escapeNode;
-				if ( !objectContainEscape(nodeObj, &hasNodeEscape, &escapeNode) )
+				if ( !objectContainEscape(nodeObj, &hasNodeEscape, &fromStmtDepth, &escapeNode)  )
 					return JS_FALSE;
 
 				if ( hasNodeEscape ){
@@ -1853,15 +1855,52 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				children.append(srcStr(JSSRCNAME_COMMA));
 				children.append(retEscape);
 				children.append(srcStr(JSSRCNAME_COMMA));
-				children.append(srcStr(JSSRCNAME_FALSE));
+				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_FALSE) );
 				children.append(srcStr(JSSRCNAME_RP));
 				children.append(srcStr(JSSRCNAME_RB));
 			}
 		} else { // Case: Single object
-			JSString *objStr;
-			stringifyObject( obj, &objStr);
-			children.append(objStr);
+			bool hasNodeEscape;
+			bool fromStmtDepth;
+			JSObject *escapeNode;
+
+			if ( !objectContainEscape(obj, &hasNodeEscape, &fromStmtDepth, &escapeNode)  )
+					return JS_FALSE;
+
+			if ( hasNodeEscape ){
+				JSObject *argObj;
+				if( !JS_GetPropertyToObj(cx, escapeNode, "argument", &argObj ) )
+					return JS_FALSE;
+
+				JSString *argStr;
+				if( !unparse_expr(argObj, &argStr, srcStr(JSSRCNAME_FIVESPACES), 15, false) )
+					return JS_FALSE;
+
+				JSString *exprStr;
+				exprStr = joinString(3, srcStr(JSSRCNAME_EXPR), srcStr(JSSRCNAME_COLON), argStr);
+
+				children.append(srcStr(JSSRCNAME_LB));
+				children.append(srcStr(JSSRCNAME_ESCAPECALL)); 
+				children.append(srcStr(JSSRCNAME_FALSE));
+				children.append(srcStr(JSSRCNAME_COMMA));
+				children.append(srcStr(JSSRCNAME_LB));
+				children.append(srcStr(JSSRCNAME_RB));
+				children.append(srcStr(JSSRCNAME_COMMA));
+				children.append(srcStr(JSSRCNAME_LC));
+				children.append(exprStr);
+				children.append(srcStr(JSSRCNAME_RC));
+				children.append(srcStr(JSSRCNAME_COMMA));
+				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_FALSE) );
+				children.append(srcStr(JSSRCNAME_RP));
+				children.append(srcStr(JSSRCNAME_RB));
+
+			} else {
+				JSString *objStr;
+				stringifyObject( obj, &objStr);
+				children.append(objStr);
+			}
 		}
+		
     } else if (v.isBoolean()) {
         if (v.toBoolean())
             children.append(srcStr(JSSRCNAME_TRUE));
@@ -2296,7 +2335,7 @@ JSBool unparse::isBadIdentifier(JSObject *val, JSBool *isBad){
 	return JS_TRUE;
 }
 
-JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, JSObject **retObj){
+JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt, JSObject **retObj){
 
 	JSString *typeStr;
 	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
@@ -2320,6 +2359,7 @@ JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, JSObject **retO
 
 			if(opStr && opStr->equals("meta_esc")){
 				*retval = true;
+				*fromStmt = true;
 				*retObj = exprObj; 
 			}
 		} else {
@@ -2332,6 +2372,7 @@ JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, JSObject **retO
 		
 		if(opStr && opStr->equals("meta_esc")){
 			*retval = true;
+			*fromStmt = true;
 			*retObj = obj; 
 		} else {
 			*retval = false;
