@@ -1847,7 +1847,6 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				retEscape = joinStringVector(&escapeElements, srcStr(JSSRCNAME_COMMA), 
 											srcStr(JSSRCNAME_LB), srcStr(JSSRCNAME_RB));
 
-				children.append(srcStr(JSSRCNAME_LB));
 				children.append(srcStr(JSSRCNAME_ESCAPECALL)); 
 				children.append(srcStr(JSSRCNAME_TRUE));
 				children.append(srcStr(JSSRCNAME_COMMA));
@@ -1855,9 +1854,8 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				children.append(srcStr(JSSRCNAME_COMMA));
 				children.append(retEscape);
 				children.append(srcStr(JSSRCNAME_COMMA));
-				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_FALSE) );
+				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_TRUE) );
 				children.append(srcStr(JSSRCNAME_RP));
-				children.append(srcStr(JSSRCNAME_RB));
 			}
 		} else { // Case: Single object
 			bool hasNodeEscape;
@@ -1876,23 +1874,13 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				if( !unparse_expr(argObj, &argStr, srcStr(JSSRCNAME_FIVESPACES), 15, false) )
 					return JS_FALSE;
 
-				JSString *exprStr;
-				exprStr = joinString(3, srcStr(JSSRCNAME_EXPR), srcStr(JSSRCNAME_COLON), argStr);
-
-				children.append(srcStr(JSSRCNAME_LB));
 				children.append(srcStr(JSSRCNAME_ESCAPECALL)); 
 				children.append(srcStr(JSSRCNAME_FALSE));
 				children.append(srcStr(JSSRCNAME_COMMA));
-				children.append(srcStr(JSSRCNAME_LB));
-				children.append(srcStr(JSSRCNAME_RB));
+				children.append(argStr);
 				children.append(srcStr(JSSRCNAME_COMMA));
-				children.append(srcStr(JSSRCNAME_LC));
-				children.append(exprStr);
-				children.append(srcStr(JSSRCNAME_RC));
-				children.append(srcStr(JSSRCNAME_COMMA));
-				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_FALSE) );
+				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_TRUE) );
 				children.append(srcStr(JSSRCNAME_RP));
-				children.append(srcStr(JSSRCNAME_RB));
 
 			} else {
 				JSString *objStr;
@@ -2372,7 +2360,7 @@ JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt,
 		
 		if(opStr && opStr->equals("meta_esc")){
 			*retval = true;
-			*fromStmt = true;
+			*fromStmt = false;
 			*retObj = obj; 
 		} else {
 			*retval = false;

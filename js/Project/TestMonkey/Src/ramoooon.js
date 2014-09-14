@@ -1,1 +1,2 @@
-
+x = {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"a"}}]};
+y = {loc:null, type:"Program", body:[{loc:null, type:"FunctionDeclaration", id:{loc:null, type:"Identifier", name:"too"}, params:[], defaults:[], body:{loc:null, type:"BlockStatement", body:meta_escape( true,[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Literal", value:1}},{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Literal", value:3}}],[{index:1,expr:x}],false)}, rest:null, generator:false, expression:false},{loc:null, type:"EmptyStatement"}]};
