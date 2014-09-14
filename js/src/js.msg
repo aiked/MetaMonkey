@@ -198,7 +198,7 @@ MSG_DEF(JSMSG_ILLEGAL_CHARACTER,      144, 0, JSEXN_SYNTAXERR, "illegal characte
 MSG_DEF(JSMSG_BAD_OCTAL,              145, 1, JSEXN_SYNTAXERR, "{0} is not a legal ECMA-262 octal constant")
 MSG_DEF(JSMSG_REPEAT_RANGE,           146, 0, JSEXN_RANGEERR, "repeat count must be positive and less than inifinity")
 MSG_DEF(JSMSG_UNCAUGHT_EXCEPTION,     147, 1, JSEXN_INTERNALERR, "uncaught exception: {0}")
-MSG_DEF(JSMSG_INVALID_BACKREF,        148, 0, JSEXN_SYNTAXERR, "non-octal digit in an escape sequence that doesn't match a back-reference")
+MSG_DEF(JSMSG_INVALID_BACKREF,        148, 0, JSEXN_SYNTAXERR, "non-octal digit in an sequence that doesn't match a back-reference")
 MSG_DEF(JSMSG_BAD_BACKREF,            149, 0, JSEXN_SYNTAXERR, "back-reference exceeds number of capturing parentheses")
 MSG_DEF(JSMSG_PRECISION_RANGE,        150, 1, JSEXN_RANGEERR, "precision {0} out of range")
 MSG_DEF(JSMSG_BAD_GETTER_OR_SETTER,   151, 1, JSEXN_TYPEERR, "invalid {0} usage")
@@ -401,3 +401,4 @@ MSG_DEF(JSMSG_WRONG_VALUE,            347, 2, JSEXN_ERR, "expected {0} but found
 MSG_DEF(JSMSG_PAR_ARRAY_SCATTER_BAD_TARGET, 348, 1, JSEXN_ERR, "target for index {0} is not an integer")
 MSG_DEF(JSMSG_SELFHOSTED_UNBOUND_NAME,349, 0, JSEXN_TYPEERR, "self-hosted code may not contain unbound name lookups")
 MSG_DEF(JSMSG_DEPRECATED_SOURCE_MAP,  350, 0, JSEXN_SYNTAXERR, "Using //@ to indicate source map URL pragmas is deprecated. Use //# instead")
+MSG_DEF(JSMSG_ESCAPE_ARG_WRONG		, 351, 1, JSEXN_SYNTAXERR, "Argument {0} is not an array")
