@@ -3596,6 +3596,25 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 	return JS_TRUE;
 }
 
+
+static JSBool GenerateExprStmtWrapper(JSContext *cx, jsval *expr){
+
+	JSObject *retObj = JS_NewObject(cx, NULL, NULL, NULL);
+
+	if ( !JS_SetProperty(cx, retObj, "loc", &OBJECT_TO_JSVAL(NULL)) )
+		return JS_FALSE;
+
+	JSString *exprStmtStr = JS_NewStringCopyZ(cx, "ExpressionStatement");
+	if ( !JS_SetProperty(cx, retObj, "type", &STRING_TO_JSVAL(exprStmtStr) ) )
+		return JS_FALSE;
+
+	if ( !JS_SetProperty(cx, retObj, "expression", expr ) )
+		return JS_FALSE;
+
+	*expr = OBJECT_TO_JSVAL(retObj);
+	return JS_TRUE;
+}
+
 static JSBool
 Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 {
@@ -3641,7 +3660,7 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 				return JS_FALSE;
 
 			jsval indexVal;
-			if (!JS_GetProperty(cx, escNodeObj, "index", &val))
+			if (!JS_GetProperty(cx, escNodeObj, "index", &indexVal))
 				return JS_FALSE;
 			
 			// Place normal Object to final array
@@ -3650,7 +3669,7 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 				if (!JS_GetElement(cx, normalObjArray, normPos, &normalNodeVal))
 					return JS_FALSE;
 
-				if ( !JS_SetElement(cx, finalObjArray, finalPos, normalNodeVal) )
+				if ( !JS_SetElement(cx, finalObjArray, finalPos, &normalNodeVal) )
 					return JS_FALSE;
 				
 				++normPos;
@@ -3658,7 +3677,7 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 			
 			} else { // Place escape Object to final array
 				JSObject *escExprObj;
-				if( !getObjPropertyAndConvertToObj(escNodeObj, "expr", &escExprObj) )
+				if( !JS_GetPropertyToObj(cx, escNodeObj, "expr", &escExprObj) )
 					return JS_FALSE;
 
 				// If escape expr contains array of objects
@@ -3678,7 +3697,7 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 								return JS_FALSE;
 						}
 
-						if ( !JS_SetElement(cx, finalObjArray, finalPos, escNodeVal) )
+						if ( !JS_SetElement(cx, finalObjArray, finalPos, &escNodeVal) )
 							return JS_FALSE;
 						
 						++finalPos;
@@ -3703,6 +3722,7 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 			}
 		}
 		args.rval().setObject(*finalObjArray);
+
 	} else { // from Single object
 		JSObject *expr = JSVAL_TO_OBJECT(args[1]);
 		bool fromStmt = args[2].toBoolean();
@@ -3724,42 +3744,25 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 						return JS_FALSE;
 				}
 
-				if ( !JS_SetElement(cx, finalObjArray, i, nodeVal) )
+				if ( !JS_SetElement(cx, finalObjArray, i, &nodeVal) )
 					return JS_FALSE;
+
+				args.rval().setObject( *finalObjArray );
 			}
 		} else { // if escape expr contains single object
-			jsval escExprVal = OBJECT_TO_JSVAL(escExprObj);
+			jsval escExprVal = OBJECT_TO_JSVAL(expr);
 
 			if ( fromStmt ){
 					if ( !GenerateExprStmtWrapper(cx, &escExprVal) )
 						return JS_FALSE;
 			}
-
-			if ( !JS_SetElement(cx, finalObjArray, finalPos, &escExprVal ) )
-				return JS_FALSE;
+			args.rval().setObject( escExprVal.toObject() );
 		}
 	}
 
 	return JS_TRUE;
 }
 
-static JSBool GenerateExprStmtWrapper(JSContext *cx, jsval *expr){
-
-	JSObject *retObj = JS_NewObject(cx, NULL, NULL, NULL);
-
-	if ( !JS_SetProperty(cx, retObj, "loc", OBJECT_TO_JSVAL(NULL) )
-		return JS_FALSE;
-
-	JSString *exprStmtStr = JS_NewStringCopyZ(cx, "ExpressionStatement");
-	if ( !JS_SetProperty(cx, retObj, "type",  ) )
-		return JS_FALSE;
-
-	if ( !JS_SetProperty(cx, retObj, "expression", expr ) )
-		return JS_FALSE;
-
-	expr = OBJECT_TO_JSVAL(retObj);
-	return JS_TRUE;
-}
 
 static JSBool
 Inline(JSContext *cx, unsigned argc, jsval *vp)
