@@ -48,3 +48,14 @@ Vector<JSString*> children(cx);
 *child = joinStringVector(&children, NULL, NULL, NULL);
 --------------------------------------------------------------------------------------
 
+uint32_t len;
+if (!JS_GetArrayLength(cx, finalObjArray, &len))
+	return JS_FALSE;
+
+for ( uint32_t i=0; i<len; ++i ){
+	JSObject *nodeObj = NULL;
+	if( !JS_GetArrayElementToObj(cx, finalObjArray, i, &nodeObj) )
+		return JS_FALSE;
+
+	nodeObj->dump();
+}

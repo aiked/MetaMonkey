@@ -1854,7 +1854,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				children.append(srcStr(JSSRCNAME_COMMA));
 				children.append(retEscape);
 				children.append(srcStr(JSSRCNAME_COMMA));
-				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_TRUE) );
+				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_TRUE) : srcStr(JSSRCNAME_FALSE) );
 				children.append(srcStr(JSSRCNAME_RP));
 			}
 		} else { // Case: Single object
@@ -1879,7 +1879,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				children.append(srcStr(JSSRCNAME_COMMA));
 				children.append(argStr);
 				children.append(srcStr(JSSRCNAME_COMMA));
-				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_FALSE) : srcStr(JSSRCNAME_TRUE) );
+				children.append( (fromStmtDepth) ? srcStr(JSSRCNAME_TRUE) : srcStr(JSSRCNAME_FALSE) );
 				children.append(srcStr(JSSRCNAME_RP));
 
 			} else {
@@ -1900,7 +1900,6 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
     }
 
 	*s = joinStringVector(&children, NULL, NULL, NULL);
-
 
 	return JS_TRUE;
 }
@@ -2438,6 +2437,7 @@ JSBool unparse::unparse_expr(JSObject *exprVal, JSString **s, JSString *indent, 
 }
 
 template<class ValueApplier>
+
 JSBool unparse::unparse_values(JSObject *obj, Vector<JSString*> *children, ValueApplier applier, bool noIn)
 {
 	if ( !JS_IsArrayObject(cx, obj ) ) {

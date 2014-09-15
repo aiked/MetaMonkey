@@ -3596,36 +3596,15 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 	return JS_TRUE;
 }
 
-
-static JSBool GenerateExprStmtWrapper(JSContext *cx, jsval *expr){
-
-	JSObject *retObj = JS_NewObject(cx, NULL, NULL, NULL);
-
-	if ( !JS_SetProperty(cx, retObj, "loc", &OBJECT_TO_JSVAL(NULL)) )
-		return JS_FALSE;
-
-	JSString *exprStmtStr = JS_NewStringCopyZ(cx, "ExpressionStatement");
-	if ( !JS_SetProperty(cx, retObj, "type", &STRING_TO_JSVAL(exprStmtStr) ) )
-		return JS_FALSE;
-
-	if ( !JS_SetProperty(cx, retObj, "expression", expr ) )
-		return JS_FALSE;
-
-	*expr = OBJECT_TO_JSVAL(retObj);
-	return JS_TRUE;
-}
-
 static JSBool
 Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 {
-	CallArgs args
-		= CallArgsFromVp(argc, vp);
-    if (args.length() != 1 || !args[0].isObject()) {
+	CallArgs args = CallArgsFromVp(argc, vp);
+	if (args.length() < 1 || !args[0].isBoolean()) {
         JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
                              "Meta_escape", "0", "s");
         return JS_FALSE;
     }
-	
 
 	JSObject *finalObjArray = JS_NewArrayObject(cx, 0, NULL);
 	
@@ -3653,18 +3632,13 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 
 		uint32_t normPos = 0, escPos = 0, finalPos = 0, escapeOffset = 0;
 
-		while ( (normPos < normalArrayLength) && (escPos < escapeArrayLength) ){
+		while ( (normPos < normalArrayLength) || (escPos < escapeArrayLength) ){
 
 			JSObject *escNodeObj;
 			if( !JS_GetArrayElementToObj(cx, escapeObjArray, escPos, &escNodeObj) )
 				return JS_FALSE;
 
-			jsval indexVal;
-			if (!JS_GetProperty(cx, escNodeObj, "index", &indexVal))
-				return JS_FALSE;
-			
-			// Place normal Object to final array
-			if ( (indexVal.toInt32()+escapeOffset) > normPos ){
+			if ( escNodeObj == NULL ){
 				jsval normalNodeVal;
 				if (!JS_GetElement(cx, normalObjArray, normPos, &normalNodeVal))
 					return JS_FALSE;
@@ -3674,89 +3648,166 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 				
 				++normPos;
 				++finalPos;
-			
-			} else { // Place escape Object to final array
-				JSObject *escExprObj;
-				if( !JS_GetPropertyToObj(cx, escNodeObj, "expr", &escExprObj) )
+
+			} else {
+				jsval indexVal;
+				if (!JS_GetProperty(cx, escNodeObj, "index", &indexVal))
 					return JS_FALSE;
 
-				// If escape expr contains array of objects
-				if ( JS_IsArrayObject(cx, escExprObj) ){
-
-					uint32_t escExprLength;
-					if ( !JS_GetArrayLength(cx, escExprObj, &escExprLength) )
+				// Place normal Object to final array
+				if ( (indexVal.toInt32()+escapeOffset) > finalPos ){
+					jsval normalNodeVal;
+					if (!JS_GetElement(cx, normalObjArray, normPos, &normalNodeVal))
 						return JS_FALSE;
 
-					for( uint32_t i=0; i<escExprLength; ++i ){
-						jsval escNodeVal;
-						if (!JS_GetElement(cx, escExprObj, i, &escNodeVal))
+					if ( !JS_SetElement(cx, finalObjArray, finalPos, &normalNodeVal) )
+						return JS_FALSE;
+				
+					++normPos;
+					++finalPos;
+			
+				} else { // Place escape Object to final array
+						JSObject *escExprObj;
+						if( !JS_GetPropertyToObj(cx, escNodeObj, "expr", &escExprObj) )
 							return JS_FALSE;
-						
-						if ( fromStmt ){
-							if ( !GenerateExprStmtWrapper(cx, &escNodeVal) )
-								return JS_FALSE;
+
+						JSString *typeStr;
+						if( !JS_GetPropertyToString(cx, escExprObj, "type", &typeStr) )
+							return JS_FALSE;
+
+						if ( !typeStr->equals("Program") ) {
+							JS_ReportError(cx, "object type is not program");
+							return JS_FALSE;
 						}
 
-						if ( !JS_SetElement(cx, finalObjArray, finalPos, &escNodeVal) )
+						JSObject *bodyExprObj;
+						if( !JS_GetPropertyToObj(cx, escExprObj, "body", &bodyExprObj) )
 							return JS_FALSE;
-						
-						++finalPos;
-					}
 
-					++escPos;
-					escapeOffset += (escExprLength-1);
-				
-				} else { // if escape expr contains single object
-					jsval escExprVal = OBJECT_TO_JSVAL(escExprObj);
+						// If escape expr contains array of objects
+						if ( JS_IsArrayObject(cx, bodyExprObj) ){
 
-					if ( fromStmt ){
-							if ( !GenerateExprStmtWrapper(cx, &escExprVal) )
+							uint32_t bodyExprLength;
+							if ( !JS_GetArrayLength(cx, bodyExprObj, &bodyExprLength) )
 								return JS_FALSE;
-					}
 
-					if ( !JS_SetElement(cx, finalObjArray, finalPos, &escExprVal ) )
-						return JS_FALSE;
-					++escPos;
-					++finalPos;
+							for( uint32_t i=0; i<bodyExprLength; ++i ){
+								jsval escNodeVal;
+								if (!JS_GetElement(cx, bodyExprObj, i, &escNodeVal))
+									return JS_FALSE;
+						
+								if ( !fromStmt ){
+									JSObject *escNodeObj;
+									if( !JS_ValueToObject(cx, escNodeVal, &escNodeObj) )
+										return JS_FALSE;
+							
+									JSObject *expressionObj;
+									if( !JS_GetPropertyToObj(cx, escNodeObj, "expression", &expressionObj) )
+										return JS_FALSE;
+
+									escNodeVal = OBJECT_TO_JSVAL(expressionObj);
+								}
+
+								if ( !JS_SetElement(cx, finalObjArray, finalPos, &escNodeVal) )
+									return JS_FALSE;
+						
+								++finalPos;
+							}
+
+							++escPos;
+							escapeOffset += (bodyExprLength-1);
+				
+						} else { // if escape expr contains single object
+							jsval escExprVal = OBJECT_TO_JSVAL(bodyExprObj);
+
+							if ( !fromStmt ){
+								JSObject *expressionObj;
+								if( !JS_GetPropertyToObj(cx, bodyExprObj, "expression", &expressionObj) )
+									return JS_FALSE;
+
+								escExprVal = OBJECT_TO_JSVAL(expressionObj);
+							}
+
+							if ( !JS_SetElement(cx, finalObjArray, finalPos, &escExprVal ) )
+								return JS_FALSE;
+							++escPos;
+							++finalPos;
+						}
+					}
 				}
 			}
-		}
 		args.rval().setObject(*finalObjArray);
 
 	} else { // from Single object
 		JSObject *expr = JSVAL_TO_OBJECT(args[1]);
 		bool fromStmt = args[2].toBoolean();
 
-		// If escape expr contains array of objects
-		if ( JS_IsArrayObject(cx, expr) ){
+		JSString *typeStr;
+		if( !JS_GetPropertyToString(cx, expr, "type", &typeStr) )
+			return JS_FALSE;
 
-			uint32_t exprLength;
-			if ( !JS_GetArrayLength(cx, expr, &exprLength) )
+		if ( !typeStr->equals("Program") ) {
+			JS_ReportError(cx, "object type is not program");
+			return JS_FALSE;
+		}
+
+		JSObject *bodyExprObj;
+		if( !JS_GetPropertyToObj(cx, expr, "body", &bodyExprObj) )
+			return JS_FALSE;
+
+		// If escape expr contains array of objects
+		if ( !JS_IsArrayObject(cx, bodyExprObj) ){
+			JS_ReportError(cx, "meta_escape: Program.body is not an array.");
+			return JS_FALSE;
+		}
+
+		uint32_t bodyExprLength;
+		if ( !JS_GetArrayLength(cx, bodyExprObj, &bodyExprLength) )
+			return JS_FALSE;
+
+		if ( bodyExprLength == 1 ){
+			jsval escExprVal;
+			if (!JS_GetElement(cx, bodyExprObj, 0, &escExprVal))
 				return JS_FALSE;
 
-			for( uint32_t i=0; i<exprLength; ++i ){
+
+			if ( !fromStmt ){
+				JSObject *escExprObj;
+				if( !JS_ValueToObject(cx, escExprVal, &escExprObj) )
+					return JS_FALSE;
+
+				JSObject *expressionObj;
+				if( !JS_GetPropertyToObj(cx, escExprObj, "expression", &expressionObj) )
+					return JS_FALSE;
+
+				escExprVal = OBJECT_TO_JSVAL(expressionObj);
+			}
+
+			args.rval().setObject( escExprVal.toObject() );
+		} else {
+
+			for( uint32_t i=0; i<bodyExprLength; ++i ){
 				jsval nodeVal;
-				if (!JS_GetElement(cx, expr, i, &nodeVal))
+				if (!JS_GetElement(cx, bodyExprObj, i, &nodeVal))
 					return JS_FALSE;
 						
-				if ( fromStmt ){
-					if ( !GenerateExprStmtWrapper(cx, &nodeVal) )
+				if ( !fromStmt ){
+					JSObject *nodeObj;
+					if( !JS_ValueToObject(cx, nodeVal, &nodeObj) )
 						return JS_FALSE;
+
+					JSObject *expressionObj;
+					if( !JS_GetPropertyToObj(cx, nodeObj, "expression", &expressionObj) )
+						return JS_FALSE;
+
+					nodeVal = OBJECT_TO_JSVAL(expressionObj);
 				}
 
 				if ( !JS_SetElement(cx, finalObjArray, i, &nodeVal) )
 					return JS_FALSE;
-
-				args.rval().setObject( *finalObjArray );
 			}
-		} else { // if escape expr contains single object
-			jsval escExprVal = OBJECT_TO_JSVAL(expr);
 
-			if ( fromStmt ){
-					if ( !GenerateExprStmtWrapper(cx, &escExprVal) )
-						return JS_FALSE;
-			}
-			args.rval().setObject( escExprVal.toObject() );
+			args.rval().setObject( *finalObjArray );
 		}
 	}
 
