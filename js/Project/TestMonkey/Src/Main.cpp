@@ -3567,6 +3567,8 @@
 //    return cx->runtime()->cloneSelfHostedValue(cx, srcName, args.rval());
 //}
 //
+//
+//
 ////metadev
 //
 //static JSBool
@@ -3587,8 +3589,8 @@
 //    }
 //
 //	JSString *str = NULL;
-//	unparse up(cx);
-//	if (!up.unParse_start(obj, &str))
+//	unparse *up = unparse::getSingleton();
+//	if (!up->unParse_start(obj, &str))
 //		return JS_FALSE;
 //
 //	vp->setString(str);
@@ -3600,54 +3602,215 @@
 //Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 //{
 //	CallArgs args = CallArgsFromVp(argc, vp);
-//    if (args.length() != 1 || !args[0].isObject()) {
+//	if (args.length() < 1 || !args[0].isBoolean()) {
 //        JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
 //                             "Meta_escape", "0", "s");
 //        return JS_FALSE;
 //    }
+//
+//	JSObject *finalObjArray = JS_NewArrayObject(cx, 0, NULL);
 //	
-//	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
-//    if (!obj) {
-//        fprintf(stderr, "NULL\n");
-//        return JS_FALSE;
-//    }
+//	// Check fromArray argument
+//	if ( args[0].toBoolean() ){
+//		JSObject *normalObjArray = JSVAL_TO_OBJECT(args[1]);
+//		JSObject *escapeObjArray = JSVAL_TO_OBJECT(args[2]);
+//		bool fromStmt = args[3].toBoolean();
 //
-//	JSString *typeStr;
-//	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
-//		return JS_FALSE;
-//	
-//	if ( !typeStr->equals("Program") ) {
-//		JS_ReportError(cx, "object type is not program");
-//		return JS_FALSE;
-//	}
-//
-//	JSObject *bodyObj;
-//	if( !JS_GetPropertyToObj(cx, obj, "body", &bodyObj) )
-//		return JS_FALSE;
-//
-//	if ( !JS_IsArrayObject(cx, bodyObj ) ) {
-//		JS_ReportError(cx, "object type is not program");
-//		return JS_FALSE;
-//	}
-//
-//	uint32_t lengthp;
-//	if (!JS_GetArrayLength(cx, bodyObj, &lengthp))
-//		return JS_FALSE;
-//
-//	if( lengthp>0 ){
-//		JSObject *nodeObj;
-//		if (!JS_GetArrayElementToObj(cx, bodyObj, 0, &nodeObj)){
-//			JS_ReportError(cx, "array has not index: %d", 0);
+//		if ( !JS_IsArrayObject(cx, normalObjArray) ){
+//			JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_ESCAPE_ARG_WRONG, "1");
 //			return JS_FALSE;
 //		}
-//		
-//		JSObject *nodeExpreObj;;
-//		if( !JS_GetPropertyToObj(cx, nodeObj, "expression", &nodeExpreObj) )
+//
+//		if ( !JS_IsArrayObject(cx, escapeObjArray) ){
+//			JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_ESCAPE_ARG_WRONG, "2");
+//			return JS_FALSE;
+//		}
+//
+//		uint32_t normalArrayLength, escapeArrayLength;
+//		if ( !JS_GetArrayLength(cx, normalObjArray, &normalArrayLength) )
+//			return JS_FALSE;
+//		if ( !JS_GetArrayLength(cx, escapeObjArray, &escapeArrayLength) )
 //			return JS_FALSE;
 //
-//		args.rval().setObject(*nodeExpreObj);
-//	}else{
-//		args.rval().setNull();
+//		uint32_t normPos = 0, escPos = 0, finalPos = 0, escapeOffset = 0;
+//
+//		while ( (normPos < normalArrayLength) || (escPos < escapeArrayLength) ){
+//
+//			JSObject *escNodeObj;
+//			if( !JS_GetArrayElementToObj(cx, escapeObjArray, escPos, &escNodeObj) )
+//				return JS_FALSE;
+//
+//			if ( escNodeObj == NULL ){
+//				jsval normalNodeVal;
+//				if (!JS_GetElement(cx, normalObjArray, normPos, &normalNodeVal))
+//					return JS_FALSE;
+//
+//				if ( !JS_SetElement(cx, finalObjArray, finalPos, &normalNodeVal) )
+//					return JS_FALSE;
+//				
+//				++normPos;
+//				++finalPos;
+//
+//			} else {
+//				jsval indexVal;
+//				if (!JS_GetProperty(cx, escNodeObj, "index", &indexVal))
+//					return JS_FALSE;
+//
+//				// Place normal Object to final array
+//				if ( (indexVal.toInt32()+escapeOffset) > finalPos ){
+//					jsval normalNodeVal;
+//					if (!JS_GetElement(cx, normalObjArray, normPos, &normalNodeVal))
+//						return JS_FALSE;
+//
+//					if ( !JS_SetElement(cx, finalObjArray, finalPos, &normalNodeVal) )
+//						return JS_FALSE;
+//				
+//					++normPos;
+//					++finalPos;
+//			
+//				} else { // Place escape Object to final array
+//						JSObject *escExprObj;
+//						if( !JS_GetPropertyToObj(cx, escNodeObj, "expr", &escExprObj) )
+//							return JS_FALSE;
+//
+//						JSString *typeStr;
+//						if( !JS_GetPropertyToString(cx, escExprObj, "type", &typeStr) )
+//							return JS_FALSE;
+//
+//						if ( !typeStr->equals("Program") ) {
+//							JS_ReportError(cx, "object type is not program");
+//							return JS_FALSE;
+//						}
+//
+//						JSObject *bodyExprObj;
+//						if( !JS_GetPropertyToObj(cx, escExprObj, "body", &bodyExprObj) )
+//							return JS_FALSE;
+//
+//						// If escape expr contains array of objects
+//						if ( JS_IsArrayObject(cx, bodyExprObj) ){
+//
+//							uint32_t bodyExprLength;
+//							if ( !JS_GetArrayLength(cx, bodyExprObj, &bodyExprLength) )
+//								return JS_FALSE;
+//
+//							for( uint32_t i=0; i<bodyExprLength; ++i ){
+//								jsval escNodeVal;
+//								if (!JS_GetElement(cx, bodyExprObj, i, &escNodeVal))
+//									return JS_FALSE;
+//						
+//								if ( !fromStmt ){
+//									JSObject *escNodeObj;
+//									if( !JS_ValueToObject(cx, escNodeVal, &escNodeObj) )
+//										return JS_FALSE;
+//							
+//									JSObject *expressionObj;
+//									if( !JS_GetPropertyToObj(cx, escNodeObj, "expression", &expressionObj) )
+//										return JS_FALSE;
+//
+//									escNodeVal = OBJECT_TO_JSVAL(expressionObj);
+//								}
+//
+//								if ( !JS_SetElement(cx, finalObjArray, finalPos, &escNodeVal) )
+//									return JS_FALSE;
+//						
+//								++finalPos;
+//							}
+//
+//							++escPos;
+//							escapeOffset += (bodyExprLength-1);
+//				
+//						} else { // if escape expr contains single object
+//							jsval escExprVal = OBJECT_TO_JSVAL(bodyExprObj);
+//
+//							if ( !fromStmt ){
+//								JSObject *expressionObj;
+//								if( !JS_GetPropertyToObj(cx, bodyExprObj, "expression", &expressionObj) )
+//									return JS_FALSE;
+//
+//								escExprVal = OBJECT_TO_JSVAL(expressionObj);
+//							}
+//
+//							if ( !JS_SetElement(cx, finalObjArray, finalPos, &escExprVal ) )
+//								return JS_FALSE;
+//							++escPos;
+//							++finalPos;
+//						}
+//					}
+//				}
+//			}
+//		args.rval().setObject(*finalObjArray);
+//
+//	} else { // from Single object
+//		JSObject *expr = JSVAL_TO_OBJECT(args[1]);
+//		bool fromStmt = args[2].toBoolean();
+//
+//		JSString *typeStr;
+//		if( !JS_GetPropertyToString(cx, expr, "type", &typeStr) )
+//			return JS_FALSE;
+//
+//		if ( !typeStr->equals("Program") ) {
+//			JS_ReportError(cx, "object type is not program");
+//			return JS_FALSE;
+//		}
+//
+//		JSObject *bodyExprObj;
+//		if( !JS_GetPropertyToObj(cx, expr, "body", &bodyExprObj) )
+//			return JS_FALSE;
+//
+//		// If escape expr contains array of objects
+//		if ( !JS_IsArrayObject(cx, bodyExprObj) ){
+//			JS_ReportError(cx, "meta_escape: Program.body is not an array.");
+//			return JS_FALSE;
+//		}
+//
+//		uint32_t bodyExprLength;
+//		if ( !JS_GetArrayLength(cx, bodyExprObj, &bodyExprLength) )
+//			return JS_FALSE;
+//
+//		if ( bodyExprLength == 1 ){
+//			jsval escExprVal;
+//			if (!JS_GetElement(cx, bodyExprObj, 0, &escExprVal))
+//				return JS_FALSE;
+//
+//
+//			if ( !fromStmt ){
+//				JSObject *escExprObj;
+//				if( !JS_ValueToObject(cx, escExprVal, &escExprObj) )
+//					return JS_FALSE;
+//
+//				JSObject *expressionObj;
+//				if( !JS_GetPropertyToObj(cx, escExprObj, "expression", &expressionObj) )
+//					return JS_FALSE;
+//
+//				escExprVal = OBJECT_TO_JSVAL(expressionObj);
+//			}
+//
+//			args.rval().setObject( escExprVal.toObject() );
+//		} else {
+//
+//			for( uint32_t i=0; i<bodyExprLength; ++i ){
+//				jsval nodeVal;
+//				if (!JS_GetElement(cx, bodyExprObj, i, &nodeVal))
+//					return JS_FALSE;
+//						
+//				if ( !fromStmt ){
+//					JSObject *nodeObj;
+//					if( !JS_ValueToObject(cx, nodeVal, &nodeObj) )
+//						return JS_FALSE;
+//
+//					JSObject *expressionObj;
+//					if( !JS_GetPropertyToObj(cx, nodeObj, "expression", &expressionObj) )
+//						return JS_FALSE;
+//
+//					nodeVal = OBJECT_TO_JSVAL(expressionObj);
+//				}
+//
+//				if ( !JS_SetElement(cx, finalObjArray, i, &nodeVal) )
+//					return JS_FALSE;
+//			}
+//
+//			args.rval().setObject( *finalObjArray );
+//		}
 //	}
 //
 //	return JS_TRUE;
@@ -3673,6 +3836,7 @@
 //
 //	return JS_TRUE;
 //}
+//
 //
 //
 //static const JSFunctionSpecWithHelp shell_functions[] = {
@@ -3997,8 +4161,6 @@
 //    JS_FN_HELP("trap", Trap, 3, 0,
 //"trap([fun, [pc,]] exp)",
 //"  Trap bytecode execution."),
-//
-//
 //
 //	//metadev
 //	JS_FN_HELP("unparse", unParse, 1, 0,
@@ -4945,6 +5107,8 @@
 //        if (!JS_InitReflect(cx, glob))
 //            return NULL;
 //
+//		JS_InitUnparse(cx);
+//
 //        if (!JS_DefineDebuggerObject(cx, glob))
 //            return NULL;
 //        //if (!JS::RegisterPerfMeasurement(cx, glob))
@@ -5237,14 +5401,20 @@
 //    return gExitCode ? gExitCode : EXIT_SUCCESS;
 //}
 //
-//
-//static int run (JSContext *cx, JSObject *global) {
+//static int run (JSContext *cx, JSObject *global, const char *inputFileName, const char *outputFileName) {
 //	using namespace JS;
 //
-//	const char *inputFileName = "Src/test.js";
-//	const char *outputFileName = "Src/ramoooon.js";
+//    char* staggedFilename = JS_sprintf_append(NULL, "%s_stagged", inputFileName);
 //
-//    fprintf(stderr, "\nopening \"%s\"...\n", inputFileName);
+//	fprintf(stderr, "\ngenerating stagging report location at \"%s\"...\n", staggedFilename);
+//	AutoFile staggedFile;
+//	if (!staggedFile.open(cx, staggedFilename, "w"))
+//		return 1;
+//
+//	unparse *up = unparse::getSingleton();
+//	up->setStaggingReportOutput(&staggedFile);
+//
+//    fprintf(stderr, "opening \"%s\"...\n", inputFileName);
 //
 //    FileContents buffer(cx);
 //	{
@@ -5296,8 +5466,9 @@
 //    return 0;
 //}
 //
+//
 //int
-//Shell(JSContext *cx, OptionParser *op, char **envp)
+//Shell(JSContext *cx, OptionParser *op, char **envp, const char *inputFileName, const char *outputFileName)
 //{
 //    JSAutoRequest ar(cx);
 //
@@ -5326,9 +5497,9 @@
 //        return 1;
 //    JS_SetPrivate(envobj, envp);
 //
-//    //int result = ProcessArgs(cx, glob, op);
-//	int result = run(cx, glob);
-//	system("@pause");
+//    int result = ProcessArgs(cx, glob, op);
+//	//int result = run(cx, glob, inputFileName, outputFileName);
+//	//system("@pause");
 //
 //    if (enableDisassemblyDumps)
 //        JS_DumpCompartmentPCCounts(cx);
@@ -5376,6 +5547,11 @@
 //    JSRuntime *rt;
 //    JSContext *cx;
 //    int result;
+//
+//
+//	const char *inputFileName = "Src/test.js";
+//	const char *outputFileName = "Src/stagged.js";
+//
 //#ifdef XP_WIN
 //    {
 //        const char *crash_option = getenv("XRE_NO_WINDOWS_CRASH_DIALOG");
@@ -5564,8 +5740,8 @@
 //    if (op.getBoolOption('D'))
 //        JS_ToggleOptions(cx, JSOPTION_PCCOUNT);
 //
-//    result = Shell(cx, &op, envp);
-//
+//    result = Shell(cx, &op, envp, inputFileName, outputFileName);
+//	JS_DestroyUnparse(cx);
 //#ifdef DEBUG
 //    if (OOM_printAllocationCount)
 //        printf("OOM max count: %u\n", OOM_counter);

@@ -1,3 +1,5 @@
+
+===================RUNNING========================
 function getBuildMode() {
     return "release";
 }
@@ -11,20 +13,11 @@ function assert(cond, msg) {
     }
 }
 
-var handlers = {plus: function (x, y) {
-    return (x + y);
-}
-,minus: function (x, y) {
-    return (x - y);
-}
-,call: function (funcName) {
-    var fun = this[funcName];
-    if (fun) {
+inline( assert({loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"fun"}}]}, {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"Literal", value:"cannot find ("}, right:{loc:null, type:"Identifier", name:"funcName"}}, right:{loc:null, type:"Literal", value:") method"}}}]}) );
+===================RESULT==========================
+if (fun) {
     alert("oops!, an error occurred!, " + ("cannot find (" + funcName + ") method") + ", pleaze contact us.");
 }
 ;
-;
-    return fun.apply(this, arguments);
-}
-};
-handlers.call("plus", 1, 2);
+
+==================================================

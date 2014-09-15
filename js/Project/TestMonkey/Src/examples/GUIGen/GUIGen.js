@@ -173,43 +173,27 @@ function xmlToAst(xrcFileName, handlers){
 			var size = getElemByName(obj, "size");
 			var object = getElemByName(obj, "object");
 
-			var retVal = .< 
+			return .< 
 
 				(function(parent){
 					var divPanel = document.createElement('div');
-
+					.~this.parseItems.callParser(object, .< divPanel; >.);
 					parent.appendChild(divPanel);
 				})(.~parent);
 
-				 >.;
-
-			var retValBody = Ast_GetBody(retVal);
-
-			 var items = this.parseItems.callParser(object, .< divPanel; >.);
-			 retValBody.splice(1, 0, Ast_esc(items, true) ); 
-
-			return retVal;
+			 >.;
 		},
 
 		startParser: function(obj){
+			return .< 
 
-			var retVal = .< 
+				(function(){
+					var divroot = document.createElement('div');
+					.~this.parsePanel(obj, .< divroot; >.);
+					return divroot;
+				})();
 
-					(function(){
-						var divroot = document.createElement('div');
-
-						return divroot;
-					})();
-
-			 	>.;
-
-			var retValBody = Ast_GetBody(retVal);
-
-			var items = this.parsePanel(obj, .< divroot; >.);
-
-			retValBody.splice(1, 0, Ast_esc(items, true) );	
-
-			return retVal;
+		 	>.;
 		}
 	};
 
@@ -246,9 +230,6 @@ function generateNumberHandlers( handlers ){
 }
 
 function getHandlers(){
-
-
-
 	var handlers =  .< ({
 		'c_clear' : { evt: 'onclick', action: .< ( function(elem){
 			calculatorLogic.textArea.value = "";
@@ -279,7 +260,7 @@ function getHandlers(){
 			try{
 				result = eval( calculatorLogic.textArea.value );
 			}catch(e){
-				result = calculatorLogic.textArea.value = "Error"
+				result = calculatorLogic.textArea.value = "Error";
 			}
 			calculatorLogic.textArea.value += ' = ' + result; 
 

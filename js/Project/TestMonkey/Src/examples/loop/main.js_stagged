@@ -1,3 +1,5 @@
+
+===================RUNNING========================
 function metaForEach(opts, code) {
     var collectionVar = opts.collection;
     var elementVar = opts.element;
@@ -31,8 +33,8 @@ function metaForEach(opts, code) {
     return forAst;
 }
 
-var fruits = ["pineaple", "aple", "lemon", "banana"];
-var msg = "";
+inline( metaForEach({collection: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"fruits"}}]},element: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"fruit"}}]},index: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"i"}}]},lastLoop: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"last"}}]},firstLoop: {loc:null, type:"Program", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"Identifier", name:"first"}}]}}, {loc:null, type:"Program", body:[{loc:null, type:"IfStatement", test:{loc:null, type:"Identifier", name:"first"}, consequent:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"+=", left:{loc:null, type:"Identifier", name:"msg"}, right:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"Literal", value:"i like very much "}, right:{loc:null, type:"Identifier", name:"fruit"}}, right:{loc:null, type:"Literal", value:", "}}}}]}, alternate:{loc:null, type:"IfStatement", test:{loc:null, type:"Identifier", name:"last"}, consequent:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"+=", left:{loc:null, type:"Identifier", name:"msg"}, right:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"Literal", value:"but i hate "}, right:{loc:null, type:"Identifier", name:"fruit"}}}}]}, alternate:{loc:null, type:"BlockStatement", body:[{loc:null, type:"ExpressionStatement", expression:{loc:null, type:"AssignmentExpression", operator:"+=", left:{loc:null, type:"Identifier", name:"msg"}, right:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"BinaryExpression", operator:"+", left:{loc:null, type:"Literal", value:"i eat "}, right:{loc:null, type:"Identifier", name:"fruit"}}, right:{loc:null, type:"Literal", value:", "}}}}]}}}]}) );
+===================RESULT==========================
 (function () {
     last = false;
     first = true;
@@ -54,5 +56,5 @@ var msg = "";
     ;
 }
 ());
-;
-print(msg);
+
+==================================================

@@ -3567,6 +3567,8 @@ GetSelfHostedValue(JSContext *cx, unsigned argc, jsval *vp)
     return cx->runtime()->cloneSelfHostedValue(cx, srcName, args.rval());
 }
 
+
+
 //metadev
 
 static JSBool
@@ -3814,7 +3816,6 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 	return JS_TRUE;
 }
 
-
 static JSBool
 Inline(JSContext *cx, unsigned argc, jsval *vp)
 {
@@ -3835,6 +3836,7 @@ Inline(JSContext *cx, unsigned argc, jsval *vp)
 
 	return JS_TRUE;
 }
+
 
 
 static const JSFunctionSpecWithHelp shell_functions[] = {
@@ -4159,8 +4161,6 @@ static const JSFunctionSpecWithHelp fuzzing_unsafe_functions[] = {
     JS_FN_HELP("trap", Trap, 3, 0,
 "trap([fun, [pc,]] exp)",
 "  Trap bytecode execution."),
-
-
 
 	//metadev
 	JS_FN_HELP("unparse", unParse, 1, 0,
@@ -5107,8 +5107,7 @@ NewGlobalObject(JSContext *cx, JSObject *sameZoneAs)
         if (!JS_InitReflect(cx, glob))
             return NULL;
 
-		//metadev
-        JS_InitUnparse(cx);
+		JS_InitUnparse(cx);
 
         if (!JS_DefineDebuggerObject(cx, glob))
             return NULL;
@@ -5164,8 +5163,47 @@ NewGlobalObject(JSContext *cx, JSObject *sameZoneAs)
     return glob;
 }
 
+static bool
+BindScriptArgs(JSContext *cx, JSObject *obj_, OptionParser *op)
+{
+    RootedObject obj(cx, obj_);
 
-static int run (JSContext *cx, JSObject *global, const char *inputFileName, const char *outputFileName) {
+    MultiStringRange msr = op->getMultiStringArg("scriptArgs");
+    RootedObject scriptArgs(cx);
+    scriptArgs = JS_NewArrayObject(cx, 0, NULL);
+    if (!scriptArgs)
+        return false;
+
+    if (!JS_DefineProperty(cx, obj, "scriptArgs", OBJECT_TO_JSVAL(scriptArgs), NULL, NULL, 0))
+        return false;
+
+    for (size_t i = 0; !msr.empty(); msr.popFront(), ++i) {
+        const char *scriptArg = msr.front();
+        JSString *str = JS_NewStringCopyZ(cx, scriptArg);
+        if (!str ||
+            !JS_DefineElement(cx, scriptArgs, i, STRING_TO_JSVAL(str), NULL, NULL,
+                              JSPROP_ENUMERATE)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// This function is currently only called from "#if defined(JS_ION)" chunks,
+// so we're guarding the function definition with an #ifdef, too, to avoid
+// build warning for unused function in non-ion-enabled builds:
+#if defined(JS_ION)
+static int
+OptionFailure(const char *option, const char *str)
+{
+    fprintf(stderr, "Unrecognized option for %s: %s\n", option, str);
+    return EXIT_FAILURE;
+}
+#endif /* JS_ION */
+
+
+static int staggingProcess(JSContext *cx, JSObject *global, const char *inputFileName, const char *outputFileName) {
 	using namespace JS;
 
     char* staggedFilename = JS_sprintf_append(NULL, "%s_stagged", inputFileName);
@@ -5230,36 +5268,11 @@ static int run (JSContext *cx, JSObject *global, const char *inputFileName, cons
     return 0;
 }
 
+
 int
-main(int argc, char **argv, char **envp)
+run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFileName)
 {
-    JSRuntime *rt;
-    JSContext *cx;
-    int result;
-
-	const char *inputFileName = "Src/test.js";
-	const char *outputFileName = "Src/ramoooon.js";
-
-    /* Use the same parameters as the browser in xpcjsruntime.cpp. */
-    rt = JS_NewRuntime(32L * 1024L * 1024L, JS_USE_HELPER_THREADS);
-    if (!rt)
-        return 1;
-    gTimeoutFunc = NullValue();
-    if (!JS_AddNamedValueRootRT(rt, &gTimeoutFunc, "gTimeoutFunc"))
-        return 1;
-
-    JS_SetGCParameter(rt, JSGC_MAX_BYTES, 0xffffffff);
-    JS_SetNativeStackQuota(rt, gMaxStackSize);
-
-    if (!InitWatchdog(rt))
-        return 1;
-
-    cx = NewContext(rt);
-    if (!cx)
-        return 1;
-
-    JS_SetGCParameter(rt, JSGC_MODE, JSGC_MODE_INCREMENTAL);
-    JS_SetGCParameterForThread(cx, JSGC_MAX_CODE_CACHE_BYTES, 16 * 1024 * 1024);
+    JSAutoRequest ar(cx);
 
     RootedObject glob(cx);
     glob = NewGlobalObject(cx, NULL);
@@ -5274,9 +5287,131 @@ main(int argc, char **argv, char **envp)
         return 1;
     JS_SetPrivate(envobj, envp);
 
-	result = run(cx, glob, inputFileName, outputFileName);
-	JS_DestroyUnparse(cx);
+	int result = staggingProcess(cx, glob, inputFileName, outputFileName);
 	system("@pause");
+
+    if (enableDisassemblyDumps)
+        JS_DumpCompartmentPCCounts(cx);
+
+    return result;
+}
+
+static void
+MaybeOverrideOutFileFromEnv(const char* const envVar,
+                            FILE* defaultOut,
+                            FILE** outFile)
+{
+    const char* outPath = getenv(envVar);
+    if (!outPath || !*outPath || !(*outFile = fopen(outPath, "w"))) {
+        *outFile = defaultOut;
+    }
+}
+
+/* Set the initial counter to 1 so the principal will never be destroyed. */
+JSPrincipals shellTrustedPrincipals = { 1 };
+
+JSBool
+CheckObjectAccess(JSContext *cx, HandleObject obj, HandleId id, JSAccessMode mode,
+                  MutableHandleValue vp)
+{
+    return true;
+}
+
+JSSecurityCallbacks securityCallbacks = {
+    CheckObjectAccess,
+    NULL
+};
+
+/* Pretend we can always preserve wrappers for dummy DOM objects. */
+static bool
+DummyPreserveWrapperCallback(JSContext *cx, JSObject *obj)
+{
+    return true;
+}
+
+int
+main(int argc, char **argv, char **envp)
+{
+    int stackDummy;
+    JSRuntime *rt;
+    JSContext *cx;
+    int result;
+
+
+	const char *inputFileName = "Src/examples/patterns/revealingModule.js";
+	const char *outputFileName = "Src/examples/patterns/revealingModuleStagged.js";
+
+#ifdef XP_WIN
+    {
+        const char *crash_option = getenv("XRE_NO_WINDOWS_CRASH_DIALOG");
+        if (crash_option && strncmp(crash_option, "1", 1)) {
+            DWORD oldmode = SetErrorMode(SEM_NOGPFAULTERRORBOX);
+            SetErrorMode(oldmode | SEM_NOGPFAULTERRORBOX);
+        }
+    }
+#endif
+
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "");
+#endif
+
+#ifdef JS_THREADSAFE
+    if (PR_FAILURE == PR_NewThreadPrivateIndex(&gStackBaseThreadIndex, NULL) ||
+        PR_FAILURE == PR_SetThreadPrivate(gStackBaseThreadIndex, &stackDummy)) {
+        return 1;
+    }
+#else
+    gStackBase = (uintptr_t) &stackDummy;
+#endif
+
+#ifdef XP_OS2
+   /* these streams are normally line buffered on OS/2 and need a \n, *
+    * so we need to unbuffer then to get a reasonable prompt          */
+    setbuf(stdout,0);
+    setbuf(stderr,0);
+#endif
+
+    MaybeOverrideOutFileFromEnv("JS_STDERR", stderr, &gErrFile);
+    MaybeOverrideOutFileFromEnv("JS_STDOUT", stdout, &gOutFile);
+
+
+    /* Use the same parameters as the browser in xpcjsruntime.cpp. */
+    rt = JS_NewRuntime(32L * 1024L * 1024L, JS_USE_HELPER_THREADS);
+    if (!rt)
+        return 1;
+    gTimeoutFunc = NullValue();
+    if (!JS_AddNamedValueRootRT(rt, &gTimeoutFunc, "gTimeoutFunc"))
+        return 1;
+
+    JS_SetGCParameter(rt, JSGC_MAX_BYTES, 0xffffffff);
+#ifdef JSGC_GENERATIONAL
+    if (op.getBoolOption("no-ggc"))
+        JS::DisableGenerationalGC(rt);
+#endif
+
+    JS_SetTrustedPrincipals(rt, &shellTrustedPrincipals);
+    JS_SetSecurityCallbacks(rt, &securityCallbacks);
+
+    JS_SetNativeStackQuota(rt, gMaxStackSize);
+
+    if (!InitWatchdog(rt))
+        return 1;
+
+    cx = NewContext(rt);
+    if (!cx)
+        return 1;
+
+    JS_SetGCParameter(rt, JSGC_MODE, JSGC_MODE_INCREMENTAL);
+    JS_SetGCParameterForThread(cx, JSGC_MAX_CODE_CACHE_BYTES, 16 * 1024 * 1024);
+
+    js::SetPreserveWrapperCallback(rt, DummyPreserveWrapperCallback);
+
+    result = run(cx, envp, inputFileName, outputFileName);
+	JS_DestroyUnparse(cx);
+#ifdef DEBUG
+    if (OOM_printAllocationCount)
+        printf("OOM max count: %u\n", OOM_counter);
+#endif
 
     gTimeoutFunc = NullValue();
     JS_RemoveValueRootRT(rt, &gTimeoutFunc);
@@ -5289,3 +5424,4 @@ main(int argc, char **argv, char **envp)
     JS_ShutDown();
     return result;
 }
+

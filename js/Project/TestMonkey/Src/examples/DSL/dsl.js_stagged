@@ -1,3 +1,5 @@
+
+===================RUNNING========================
 function DependencyTrigger(elementId, dependency) {
     this.element = $(elementId);
     this.dependency = dependency;
@@ -33,6 +35,14 @@ function Dependency(elementId) {
 function show(elementId) {
     return (new Dependency(elementId));
 }
+
+function Ast_esc(ast, isStmt) {
+    return (isStmt?ast.body[0]:ast.body[0].expression);
+    }
+
+function Ast_GetBody(root) {
+    return root.body[0].expression.callee.body.body;
+    }
 
 function jsonToAst(jsonFilename) {
     function Ast_esc(ast, isStmt) {
@@ -76,6 +86,8 @@ function jsonToAst(jsonFilename) {
     return dslParser.startParser(dslObj);
 }
 
+inline( jsonToAst("Src\\examples\\DSL\\dsl.json") );
+===================RESULT==========================
 (function () {
     var dependency = new Dependency("state-field");
     (function (parent) {
@@ -91,4 +103,5 @@ function jsonToAst(jsonFilename) {
     return dependency;
 }
 ());
-;
+
+==================================================

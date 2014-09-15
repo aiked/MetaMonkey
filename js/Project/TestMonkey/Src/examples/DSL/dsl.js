@@ -65,15 +65,12 @@ function jsonToAst( jsonFilename ){
 				var retVal = .<
 							(function(){
 								var dependency = new Dependency("");
-
+								.~this.when(whenObj, .< dependency; >.);
 								return dependency;
 							})();
 						>.;	
 				var retValBody = Ast_GetBody(retVal);
 				retValBody[0].declarations[0].init.arguments[0].value = value;
-
-				var item = this.when(whenObj, .< dependency; >.);
-				retValBody.splice( 1, 0, Ast_esc(item, true) );
 
 				return retVal;
 			},
@@ -85,14 +82,12 @@ function jsonToAst( jsonFilename ){
 				var retVal = .<
 							(function(parent){
 								var dependencyTrigger = new DependencyTrigger("", parent);
+								.~this.is(isObj, .< dependencyTrigger; >.);
 							})(.~parent);
 						>.;	
 				var retValBody = Ast_GetBody(retVal);
 				retValBody[0].declarations[0].init.arguments[0].value = value;
-
-				var item = this.is(isObj, .< dependencyTrigger; >.);
-				retValBody.push( Ast_esc(item, true) );
-
+				
 				return retVal;
 			},
 
