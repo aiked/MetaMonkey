@@ -5338,8 +5338,8 @@ main(int argc, char **argv, char **envp)
     int result;
 
 
-	const char *inputFileName = "Src/examples/patterns/revealingModule.js";
-	const char *outputFileName = "Src/examples/patterns/revealingModuleStagged.js";
+	const char *inputFileName = "Src/examples/functionReusability/optimized.js";
+	const char *outputFileName = "Src/examples/functionReusability/optimizedStagged.js";
 
 #ifdef XP_WIN
     {

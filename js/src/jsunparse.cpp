@@ -2348,10 +2348,9 @@ JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt,
 				*retval = true;
 				*fromStmt = true;
 				*retObj = exprObj; 
+				return JS_TRUE;
 			}
-		} else {
-			*retval = false;
-		}
+		} 
 	} else if( typeStr && typeStr->equals("UnaryExpression") ){
 		JSString *opStr;
 		if( !JS_GetPropertyToString(cx, obj, "operator", &opStr) )
@@ -2361,13 +2360,11 @@ JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt,
 			*retval = true;
 			*fromStmt = false;
 			*retObj = obj; 
-		} else {
-			*retval = false;
-		}
-	}else {
-		*retval = false;
+			return JS_TRUE;
+		} 
 	}
 
+	*retval = false;
 	return JS_TRUE;
 }
 

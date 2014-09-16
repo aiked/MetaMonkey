@@ -26,7 +26,12 @@ function genRevealingModuleName(funcDefs){
 		var funcBody = revealingAst.body[0].declarations[0].init.callee.body.body;
 		funcBody.splice(1, 0, funcDef.body[0]);
 		//var retuObj = funcBody[funcBody.length-1].argument.properties
+		var objTemplate =  .< r = {k: v}; >.;
+		var propertytemplate = objTemplate.body[0].expression.right.properties[0];
+		propertytemplate.key = funcDef.body[0].id;
+		propertytemplate.value = funcDef.body[0].id;
 
+		funcBody[funcBody.length-1].argument.properties.push(propertytemplate);
 	}
 
 	return revealingAst;
