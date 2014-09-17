@@ -1,0 +1,42 @@
+multiExpr = .< 1 - 2 + 3; >.;
+multi = .< print('meta'); x = y ? 1 : 2; >.;
+id = .< x; >.;
+single = .< print('meta'); >.;
+duckString = 'test duck';
+duckNum = 1;
+duckBool = true;
+
+
+.< 1 + .~multiExpr; + .@duckString >.
+
+1 + (1 - 2 + 3) + "test duck";
+
+.< function foo1(){ print(.@duckNum); .~multi; print(2); }; >.
+
+(function foo1() {
+    print(1);
+    print("meta");
+    x = y?1:2;
+    print(2);
+}
+
+.< (.~id)[.~single][.@duckBool]; >.
+
+x[print("meta")][true];
+
+.< print(.~multi, 2); >.
+
+print(print("meta"), x = y?1:2, 2);
+
+
+
+function power(x, n){
+	if(n===1)
+		return x;
+	else 
+		return .< .~x * .~power(x, n-1); >.;
+}
+
+.!power( .< y - 1; >., 5 );
+
+(y - 1) * ((y - 1) * ((y - 1) * ((y - 1) * (y - 1))));

@@ -5328,6 +5328,8 @@ Parser<ParseHandler>::unaryExpr()
 		return unaryOpExpr(PNK_METAINLINE, JSOP_NOP, begin);
 	  case TOK_META_ESC:
 		return unaryOpExpr(PNK_METAESC, JSOP_NOP, begin);
+	  case TOK_META_DUCK:
+		return unaryOpExpr(PNK_METADUCK, JSOP_NOP, begin);
       case TOK_TYPEOF:
         return unaryOpExpr(PNK_TYPEOF, JSOP_TYPEOF, begin);
       case TOK_VOID:

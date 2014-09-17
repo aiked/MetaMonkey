@@ -49,8 +49,8 @@ enum TokenKind {
 	TOK_META_LQ, TOK_META_RQ,	// produce ast from expression .< expr >.
 	TOK_META_ESC, // .~ escape
 	TOK_META_INLINE, // .! inline
-	TOK_META_DUCK, 	// .@ ast to string
-	TOK_META_HASH,	// .# string to ast
+	TOK_META_DUCK, 	// .@ parse a compile-time jsvalue to AST
+	TOK_META_HASH,	// .# unparse a meta expression (AST->text)
 	/////////////////////////////////
 
     TOK_NAME,                      /* identifier */

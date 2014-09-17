@@ -22,9 +22,6 @@
     <None Include="Src\jquery.js">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="Src\testfile.txt">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="Src\jqueryTest.js">
       <Filter>Source Files</Filter>
     </None>

@@ -79,6 +79,7 @@ char const * const js::unopNames[] = {
     "delete",  /* UNOP_DELETE */
 	"meta_inline",
 	"meta_esc",
+	"meta_duck",
     "-",       /* UNOP_NEG */
     "+",       /* UNOP_POS */
     "!",       /* UNOP_NOT */
@@ -1988,6 +1989,8 @@ ASTSerializer::unop(ParseNodeKind kind, JSOp op)
 		  return UNOP_META_INLINE;
 	  case PNK_METAESC:
 		  return UNOP_META_ESC;
+	  case PNK_METADUCK:
+		  return UNOP_META_DUCK;
 	}
 
     switch (op) {
@@ -2823,6 +2826,7 @@ ASTSerializer::expression(ParseNode *pn, MutableHandleValue dst)
       case PNK_DELETE:
 	  case PNK_METAINLINE:
 	  case PNK_METAESC:
+	  case PNK_METADUCK:
       case PNK_TYPEOF:
       case PNK_VOID:
       case PNK_NOT:

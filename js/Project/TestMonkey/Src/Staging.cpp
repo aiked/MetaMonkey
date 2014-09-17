@@ -3599,6 +3599,37 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 }
 
 static JSBool
+Meta_escapejsvalue(JSContext *cx, unsigned argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+	if (args.length() != 1 || args[0].isObject() ) {
+        JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
+                             "Meta_escapejsvalue", "0", "s");
+        return JS_FALSE;
+    }
+
+	JSObject *retAst = JS_NewObject(cx, NULL, NULL, NULL);
+	if(!retAst)
+		return JS_FALSE;
+	
+	JSString *literalStr = JS_NewStringCopyZ(cx, "Literal");
+	RootedValue rootedLiteralStr(cx, StringValue(literalStr));
+	if (!JS_SetProperty(cx, retAst, "type", rootedLiteralStr.address() ))
+		return JS_FALSE;
+
+	RootedValue rootedValueStr(cx, args[0]);
+	if (!JS_SetProperty(cx, retAst, "value", rootedValueStr.address()))
+		return JS_FALSE;
+
+	args.rval().setObject(*retAst);
+
+	return JS_TRUE;
+}
+
+
+
+
+static JSBool
 Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
@@ -4174,6 +4205,10 @@ static const JSFunctionSpecWithHelp fuzzing_unsafe_functions[] = {
 	JS_FN_HELP("meta_escape", Meta_escape, 1, 0,
 		"meta_escape(expr)",
 		"  return the innet ast of a program ast"),
+
+	JS_FN_HELP("meta_escapejsvalue", Meta_escapejsvalue, 1, 0,
+		"meta_escapejsvalue(expr)",
+		"  return the innet ast jsval of a program ast"),
 
 		JS_FN_HELP("untrap", Untrap, 2, 0,
 	"untrap(fun[, pc])",
@@ -5288,7 +5323,6 @@ run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFil
     JS_SetPrivate(envobj, envp);
 
 	int result = staggingProcess(cx, glob, inputFileName, outputFileName);
-	system("@pause");
 
     if (enableDisassemblyDumps)
         JS_DumpCompartmentPCCounts(cx);
@@ -5337,9 +5371,16 @@ main(int argc, char **argv, char **envp)
     JSContext *cx;
     int result;
 
+	if(argc!=3){
+		printf("wrong arguments. \n> inputFilename outputfilename\n");
+		system("@pause");
+		return 1;
+	}
 
-	const char *inputFileName = "Src/examples/functionReusability/optimized.js";
-	const char *outputFileName = "Src/examples/functionReusability/optimizedStagged.js";
+	const char *inputFileName = argv[1];
+	//const char *inputFileName = "Src/examples/simple/simple.js";
+	const char *outputFileName = argv[2];
+	//const char *outputFileName = "Src/examples/simple/simpleStagged.js";
 
 #ifdef XP_WIN
     {
@@ -5407,6 +5448,7 @@ main(int argc, char **argv, char **envp)
     js::SetPreserveWrapperCallback(rt, DummyPreserveWrapperCallback);
 
     result = run(cx, envp, inputFileName, outputFileName);
+	system("@pause");
 	JS_DestroyUnparse(cx);
 #ifdef DEBUG
     if (OOM_printAllocationCount)

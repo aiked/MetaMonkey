@@ -62,51 +62,39 @@ function jsonToAst( jsonFilename ){
 				var value = obj.value;
 				var whenObj = obj.when;
 
-				var retVal = .<
+				return .<
 							(function(){
-								var dependency = new Dependency("");
+								var dependency = new Dependency(.@value);
 								.~this.when(whenObj, .< dependency; >.);
 								return dependency;
 							})();
 						>.;	
-				var retValBody = Ast_GetBody(retVal);
-				retValBody[0].declarations[0].init.arguments[0].value = value;
-
-				return retVal;
 			},
 
 			when: function(obj, parent){
 				var value = obj.value;
 				var isObj = obj.is;
 
-				var retVal = .<
+				return .<
 							(function(parent){
-								var dependencyTrigger = new DependencyTrigger("", parent);
+								var dependencyTrigger = new DependencyTrigger(.@value, parent);
 								.~this.is(isObj, .< dependencyTrigger; >.);
 							})(.~parent);
 						>.;	
-				var retValBody = Ast_GetBody(retVal);
-				retValBody[0].declarations[0].init.arguments[0].value = value;
-				
-				return retVal;
 			},
 
 			is: function(obj, parent){
 
 				var value = obj.value;
-				var retVal = .<
+				return .<
 							(function(parent){
-								parent.values = "";
+								parent.values = .@value;
 								parent.addHandler();
 								console.log( 
 										[ "showing", parent.dependency.element.id, "when", parent.element.id, "is", parent.values  ].join(' ')
 									);
 							})(.~parent);
 						>.;	
-				var retValBody = Ast_GetBody(retVal);
-				retValBody[0].expression.right.value = value;
-
-				return retVal;
 			}//,
 
 			// call: function(dslKey){

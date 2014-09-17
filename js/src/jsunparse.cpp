@@ -1665,6 +1665,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 		"debugger;",
 		"inline( ",
 		"meta_escape( ",
+		"meta_escapejsvalue( ",
 		"Program",
 		" at ",
 		"null",
@@ -1930,24 +1931,39 @@ JSBool unparse::stringifyObject(JSObject *obj, JSString **s)
 {
 	Vector<JSString*> children(cx);
     if (obj->isNative()) {
-        children.append(srcStr(JSSRCNAME_LC));
-        Vector<Shape *, 8, SystemAllocPolicy> props;
-        for (Shape::Range<NoGC> r(obj->lastProperty()); !r.empty(); r.popFront())
-            props.append(&r.front());
-        for (size_t i = props.length(); i-- != 0;){
-			JSString *propKey;
-			JSString *propVal;
-            if ( !stringifyObjectProperty(obj, *props[i], &propKey, &propVal) )
+
+		JSObject *escapeArgObj;
+		bool hasNodeEscapejsval;
+		if ( !objectContainEscapejsvalue(obj, &hasNodeEscapejsval, &escapeArgObj)  )
 				return JS_FALSE;
 
-			JSString *prop = joinString(3, propKey, srcStr(JSSRCNAME_COLON), propVal);
-			children.append( prop );
-			if( i != 0 )
-				children.append(srcStr(JSSRCNAME_COMMASPACE));
-		}
-		children.append(srcStr(JSSRCNAME_RC));
+		if(hasNodeEscapejsval){
+			JSString *escapeArgStr;
+			if( !unparse_expr(escapeArgObj, &escapeArgStr, srcStr(JSSRCNAME_FIVESPACES), 15, false) )
+				return JS_FALSE;
 
-		*s = joinStringVector(&children, NULL, NULL, NULL);
+			*s = joinString( 3, srcStr(JSSRCNAME_ESCAPEJSVALUECALL), escapeArgStr, srcStr(JSSRCNAME_RP) );
+		}
+		else{
+			children.append(srcStr(JSSRCNAME_LC));
+			Vector<Shape *, 8, SystemAllocPolicy> props;
+			for (Shape::Range<NoGC> r(obj->lastProperty()); !r.empty(); r.popFront())
+				props.append(&r.front());
+			for (size_t i = props.length(); i-- != 0;){
+				JSString *propKey;
+				JSString *propVal;
+				if ( !stringifyObjectProperty(obj, *props[i], &propKey, &propVal) )
+					return JS_FALSE;
+
+				JSString *prop = joinString(3, propKey, srcStr(JSSRCNAME_COLON), propVal);
+				children.append( prop );
+				if( i != 0 )
+					children.append(srcStr(JSSRCNAME_COMMASPACE));
+			}
+			children.append(srcStr(JSSRCNAME_RC));
+
+			*s = joinStringVector(&children, NULL, NULL, NULL);
+		}
     }else{
 		JS_ReportError(cx, "object is not native stringifyObject");
 		return JS_FALSE;
@@ -2319,6 +2335,31 @@ JSBool unparse::isBadIdentifier(JSObject *val, JSBool *isBad){
 
 	*isBad = (JSBool) ( !std::regex_search(nameChars, regx) );
 
+	return JS_TRUE;
+}
+
+JSBool unparse::objectContainEscapejsvalue(JSObject *obj, bool *hasNodeEscapejsval, JSObject **escapeArgObj){
+	JSString *typeExprStr;
+	if( !JS_GetPropertyToString(cx, obj, "type", &typeExprStr) )
+		return JS_FALSE;
+
+	if( typeExprStr && typeExprStr->equals("UnaryExpression") ){
+
+		JSString *opStr;
+		if( !JS_GetPropertyToString(cx, obj, "operator", &opStr) )
+			return JS_FALSE;
+
+		if(opStr && opStr->equals("meta_duck")){
+
+			if( !JS_GetPropertyToObj(cx, obj, "argument", escapeArgObj ) )
+				return JS_FALSE;
+
+			*hasNodeEscapejsval = true;
+			return JS_TRUE;
+		}
+	} 
+
+	*hasNodeEscapejsval = false;
 	return JS_TRUE;
 }
 

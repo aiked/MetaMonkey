@@ -1,0 +1,39 @@
+{
+	"show": {
+		"value": "state-field",
+		"when": {
+			"value": "country",
+			"is": {
+				"value": "United States"
+			}
+		}
+	}
+}
+
+
+show: function(obj){
+	var value = obj.value;
+	var whenObj = obj.when;
+
+	return .<
+				(function(){
+					var dependency = new Dependency(.@value);
+					.~this.when(whenObj, .< dependency; >.);
+					return dependency;
+				})();
+			>.;	
+}
+
+
+(function () {
+    var dependency = new Dependency("state-field");
+    (function (parent) {
+    	var dependencyTrigger = new DependencyTrigger("country", parent);
+    	(function (parent) {
+    		parent.values = "United States";
+    		parent.addHandler();
+    		console.log(["showing", parent.dependency.element.id, "when", parent.element.id, "is", parent.values].join(" "));
+    	}(dependencyTrigger));
+    }(dependency));
+    return dependency;
+}());

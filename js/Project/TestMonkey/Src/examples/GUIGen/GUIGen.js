@@ -21,8 +21,7 @@ function xmlToAst(xrcFileName, handlers){
 			var handler = handlers[id];
 			if(handler){
 				if( handler.evt ){
-					actionAst = .< elem[ ''] = .~handler.action; >.;
-					actionAst.body[0].expression.left.property.value = handler.evt;
+					actionAst = .< elem[.@handler.evt] = .~handler.action; >.;
 				}else{
 					actionAst = .< ( .~handler.action )(elem); >.;
 				}
@@ -81,16 +80,13 @@ function xmlToAst(xrcFileName, handlers){
 
 					(function(parent){
 						var divChild = document.createElement('div');
-						divChild.setAttribute('class', '');
+						divChild.setAttribute('class', .@(getElemValue(orient) === 'wxHORIZONTAL' ? 'c-row' : 'c-col'));
 						parent.appendChild(divChild);
 					})(.~parent);
 
 				 >.;
 
 			var retValBody = Ast_GetBody(retVal);
-			// divChild.setAttribute('class','"+ getElemValue(orient) +"');  );
-			retValBody[1].expression.arguments[1].value = getElemValue(orient) === 'wxHORIZONTAL' ? 'c-row' : 'c-col';
-
 			for (var i=0; i<sizeritems.length; ++i) {
 				var sizeritem = sizeritems[i];
 				if( sizeritem.type == "element" && sizeritem.name == "object"){
@@ -110,19 +106,14 @@ function xmlToAst(xrcFileName, handlers){
 				var retVal = .< 
 						(function(parent){
 							var elem = document.createElement('textarea');
-							elem.setAttribute('id', '');
-				 			elem.setAttribute('value',''); 
+							elem.setAttribute('id', .@id);
+				 			elem.setAttribute('value', .@getElemValue(value)); 
 				 			elem.readOnly = true;
 				 			parent.appendChild( elem );
 				 		})(.~parent);
 					>.;
 			
-				// textarea.setAttribute('value','');
-				var retValBody = Ast_GetBody(retVal);
-				retValBody[1].expression.arguments[1].value = id;
-				retValBody[2].expression.arguments[1].value = getElemValue(value);
-
-				Ast_appendHandlerToBody(retValBody, handlers, id);
+				Ast_appendHandlerToBody(Ast_GetBody(retVal), handlers, id);
 
 				return retVal;
 			},
@@ -133,19 +124,14 @@ function xmlToAst(xrcFileName, handlers){
 				var retVal = .< 
 						(function(parent){
 							var elem = document.createElement('button');
-							elem.setAttribute('id', '');
-							var textNode = document.createTextNode('');
+							elem.setAttribute('id', .@id);
+							var textNode = document.createTextNode(.@getElemValue(label));
 							elem.appendChild( textNode );
 							parent.appendChild( elem );
 						})(.~parent);
 					>.;
 	
-				// document.createTextNode(getElemValue(label));
-				var retValBody = Ast_GetBody(retVal);
-				retValBody[1].expression.arguments[1].value = id;
-				retValBody[2].declarations[0].init.arguments[0].value = getElemValue(label);
-				
-				Ast_appendHandlerToBody(retValBody, handlers, id);
+				Ast_appendHandlerToBody(Ast_GetBody(retVal), handlers, id);
 
 				return retVal;
 			},
@@ -211,7 +197,7 @@ function generateNumberHandlers( handlers ){
 						.< 
 
 						( function(){
-							calculatorLogic.textArea.value += '';
+							calculatorLogic.textArea.value += .@( i + "");
 						} ); 
 
 						>. }
@@ -219,9 +205,6 @@ function generateNumberHandlers( handlers ){
 			>.;
 		var astprop = astprops.body[0].expression.properties[0];
 		astprop.key.value = "c_" + i;
-
- 		astprop.value.properties[1].value.body[0].expression.body
- 			.body[0].expression.right.value = i + "";
 
  		handlers.body[0].expression.properties.push(
  			astprop

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<object class="wxPanel" name="MyPanel2">
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>0</option>
+				<border>5</border>
+				<object class="wxTextCtrl" name="c_input">
+					<size>-1,50</size>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="c_1">
+							<label>1</label>
+							<default>0</default>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+</resource>
+
+
+
+
+'c_plus' : { evt: 'onclick', action: .< ( function(){
+	calculatorLogic.textArea.value += '+';
+} ); >. } 
+
+
+
+(function (parent) {
+	var divChild = document.createElement("div");
+	divChild.setAttribute("class", "c-row");
+	parent.appendChild(divChild);
+	(function (parent) {
+		var elem = document.createElement("button");
+		elem.setAttribute("id", "c_plus");
+		var textNode = document.createTextNode("+");
+		elem["onclick"] = function () {
+			calculatorLogic.textArea.value += "+";
+		};
+		elem.appendChild(textNode);
+		parent.appendChild(elem);
+	}(divChild));
+}(divChild)
+

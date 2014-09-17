@@ -105,6 +105,7 @@ class unparse{
 		JSSRCNAME_DEBUGGERSEMI,
 		JSSRCNAME_INLINECALL,
 		JSSRCNAME_ESCAPECALL,
+		JSSRCNAME_ESCAPEJSVALUECALL,
 		JSSRCNAME_PROGRAM,
 		JSSRCNAME_SPACEATSPACE,
 		JSSRCNAME_NULL,
@@ -208,6 +209,7 @@ class unparse{
 
 	JSBool isBadIdentifier(JSObject *val, JSBool *isBad);
 	JSBool objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt, JSObject **retObj);
+	JSBool objectContainEscapejsvalue(JSObject *obj, bool *hasNodeEscapejsval, JSObject **escapeArgObj);
 
 	//JSString *unparse::trimRight(con);
 	JSString *unparse::joinString(size_t num, ...);

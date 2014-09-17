@@ -130,6 +130,7 @@ class UpvarCookie
     F(TYPEOF) \
 	F(METAESC) \
 	F(METAINLINE) \
+	F(METADUCK) \
     F(VOID) \
     F(NOT) \
     F(BITNOT) \
