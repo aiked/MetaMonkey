@@ -3494,6 +3494,9 @@ JS_GetPropertyToString(JSContext *cx, JSObject *obj, const char *name, JSString 
 extern JS_PUBLIC_API(JSBool)
 JS_GetPropertyToObj(JSContext *cx, JSObject *obj, const char *name, JSObject **vp);
 
+extern JS_PUBLIC_API(JSBool)
+JS_ArrayObjPush(JSContext *cx, JSObject *obj, jsval *val);
+
 extern JS_PUBLIC_API(JSBool) 
 JS_GetArrayElementToObj(JSContext *cx, JSObject *arrayObj, 	const uint32_t index, JSObject **objVal);
 

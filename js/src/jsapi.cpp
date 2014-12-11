@@ -4170,6 +4170,19 @@ JS_GetPropertyToObj(JSContext *cx, JSObject *obj, const char *name, JSObject **v
 	return JS_TRUE;
 }
 
+extern JS_PUBLIC_API(JSBool)
+JS_ArrayObjPush(JSContext *cx, JSObject *obj, jsval *val)
+{
+	uint32_t arrayLen;
+	if ( !JS_GetArrayLength(cx, obj, &arrayLen) ) 
+		return JS_FALSE;
+
+	if ( !JS_SetElement(cx, obj, arrayLen, val) )
+		return JS_FALSE;
+
+	return JS_TRUE;
+}
+
 extern JS_PUBLIC_API(JSBool) 
 JS_GetArrayElementToObj(JSContext *cx, JSObject *arrayObj, 	const uint32_t index, JSObject **objVal)
 {

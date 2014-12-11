@@ -5541,7 +5541,7 @@
 //}
 //
 //int
-//main2(int argc, char **argv, char **envp)
+//main(int argc, char **argv, char **envp)
 //{
 //    int stackDummy;
 //    JSRuntime *rt;

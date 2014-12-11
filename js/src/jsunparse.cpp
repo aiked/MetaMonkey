@@ -1929,46 +1929,45 @@ JSBool unparse::stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **
 
 JSBool unparse::stringifyObject(JSObject *obj, JSString **s)
 {
-	Vector<JSString*> children(cx);
-    if (obj->isNative()) {
-
-		JSObject *escapeArgObj;
-		bool hasNodeEscapejsval;
-		if ( !objectContainEscapejsvalue(obj, &hasNodeEscapejsval, &escapeArgObj)  )
-				return JS_FALSE;
-
-		if(hasNodeEscapejsval){
-			JSString *escapeArgStr;
-			if( !unparse_expr(escapeArgObj, &escapeArgStr, srcStr(JSSRCNAME_FIVESPACES), 15, false) )
-				return JS_FALSE;
-
-			*s = joinString( 3, srcStr(JSSRCNAME_ESCAPEJSVALUECALL), escapeArgStr, srcStr(JSSRCNAME_RP) );
-		}
-		else{
-			children.append(srcStr(JSSRCNAME_LC));
-			Vector<Shape *, 8, SystemAllocPolicy> props;
-			for (Shape::Range<NoGC> r(obj->lastProperty()); !r.empty(); r.popFront())
-				props.append(&r.front());
-			for (size_t i = props.length(); i-- != 0;){
-				JSString *propKey;
-				JSString *propVal;
-				if ( !stringifyObjectProperty(obj, *props[i], &propKey, &propVal) )
-					return JS_FALSE;
-
-				JSString *prop = joinString(3, propKey, srcStr(JSSRCNAME_COLON), propVal);
-				children.append( prop );
-				if( i != 0 )
-					children.append(srcStr(JSSRCNAME_COMMASPACE));
-			}
-			children.append(srcStr(JSSRCNAME_RC));
-
-			*s = joinStringVector(&children, NULL, NULL, NULL);
-		}
-    }else{
+	if( !obj->isNative() ) {
 		JS_ReportError(cx, "object is not native stringifyObject");
 		return JS_FALSE;
 	}
 
+	JSObject *escapeArgObj;
+	bool hasNodeEscapejsval;
+	if ( !objectContainEscapejsvalue(obj, &hasNodeEscapejsval, &escapeArgObj)  )
+			return JS_FALSE;
+
+	if(hasNodeEscapejsval){
+		JSString *escapeArgStr;
+		if( !unparse_expr(escapeArgObj, &escapeArgStr, srcStr(JSSRCNAME_FIVESPACES), 15, false) )
+			return JS_FALSE;
+
+		*s = joinString( 3, srcStr(JSSRCNAME_ESCAPEJSVALUECALL), escapeArgStr, srcStr(JSSRCNAME_RP) );
+	}
+	else{
+		Vector<JSString*> children(cx);
+		children.append(srcStr(JSSRCNAME_LC));
+		Vector<Shape *, 8, SystemAllocPolicy> props;
+		for (Shape::Range<NoGC> r(obj->lastProperty()); !r.empty(); r.popFront())
+			props.append(&r.front());
+		for (size_t i = props.length(); i-- != 0;){
+			JSString *propKey;
+			JSString *propVal;
+			if ( !stringifyObjectProperty(obj, *props[i], &propKey, &propVal) )
+				return JS_FALSE;
+
+			children.append( propKey );
+			children.append( srcStr(JSSRCNAME_COLON) );
+			children.append( propVal );
+			if( i != 0 )
+				children.append(srcStr(JSSRCNAME_COMMASPACE));
+		}
+		children.append(srcStr(JSSRCNAME_RC));
+
+		*s = joinStringVector(&children, NULL, NULL, NULL);
+	}
 	return JS_TRUE;
 }
 
@@ -2363,49 +2362,41 @@ JSBool unparse::objectContainEscapejsvalue(JSObject *obj, bool *hasNodeEscapejsv
 	return JS_TRUE;
 }
 
+JSBool unparse::objectContainEscapeExpr(JSString *typeExprStr, JSObject *exprObj, bool *retval, JSObject **expr){
+	if( typeExprStr && typeExprStr->equals("UnaryExpression") ){
+		JSString *opStr;
+		if( !JS_GetPropertyToString(cx, exprObj, "operator", &opStr) )
+			return JS_FALSE;
+		if(opStr && opStr->equals("meta_esc")){
+			*retval = true;
+			*expr = exprObj; 
+		}
+	} 
+	return JS_TRUE;
+}
+
 JSBool unparse::objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt, JSObject **retObj){
 
 	JSString *typeStr;
+	*retval = false;
 	if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
 		return JS_FALSE;
 
+	*fromStmt = false;
 	if( typeStr && typeStr->equals("ExpressionStatement") ){
-
+		*fromStmt = true;
 		JSObject *exprObj;
-		if( !JS_GetPropertyToObj(cx, obj, "expression", &exprObj ) )
+		if( !JS_GetPropertyToObj(cx, obj, "expression", &obj ) )
 			return JS_FALSE;
 
 		JSString *typeExprStr;
-		if( !JS_GetPropertyToString(cx, exprObj, "type", &typeExprStr) )
-			return JS_FALSE;
-
-		if( typeExprStr && typeExprStr->equals("UnaryExpression") ){
-
-			JSString *opStr;
-			if( !JS_GetPropertyToString(cx, exprObj, "operator", &opStr) )
-				return JS_FALSE;
-
-			if(opStr && opStr->equals("meta_esc")){
-				*retval = true;
-				*fromStmt = true;
-				*retObj = exprObj; 
-				return JS_TRUE;
-			}
-		} 
-	} else if( typeStr && typeStr->equals("UnaryExpression") ){
-		JSString *opStr;
-		if( !JS_GetPropertyToString(cx, obj, "operator", &opStr) )
+		if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
 			return JS_FALSE;
 		
-		if(opStr && opStr->equals("meta_esc")){
-			*retval = true;
-			*fromStmt = false;
-			*retObj = obj; 
-			return JS_TRUE;
-		} 
 	}
+	if( !objectContainEscapeExpr(typeStr, obj, retval, retObj) )
+		return JS_FALSE;
 
-	*retval = false;
 	return JS_TRUE;
 }
 

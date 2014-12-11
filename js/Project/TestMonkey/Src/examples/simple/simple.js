@@ -24,7 +24,9 @@ function genSimpleTests(){
 		.< '.< .~multiExpr * .~id * 2 / .~singleExpr - .~multiExpr;  >.'; >.,
 		.< .~multiExpr * .~id * 2 / .~singleExpr - .~multiExpr;  >.,
 		.< '.< (.~id)[.~single][.@duckBool]; >.'; >.,
-		.< (.~id)[.~single][.@duckBool]; >.
+		.< (.~id)[.~single][.@duckBool]; >.,
+		.< '.< if(1).~multi; >.'; >.,
+		.< if(1).~multi; >.,
 	];
 }
 

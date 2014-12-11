@@ -208,6 +208,7 @@ class unparse{
 								jsval id, JSObject *val, JSString *indent);
 
 	JSBool isBadIdentifier(JSObject *val, JSBool *isBad);
+	JSBool unparse::objectContainEscapeExpr(JSString *typeExprStr, JSObject *exprObj, bool *retval, JSObject **expr);
 	JSBool objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt, JSObject **retObj);
 	JSBool objectContainEscapejsvalue(JSObject *obj, bool *hasNodeEscapejsval, JSObject **escapeArgObj);
 

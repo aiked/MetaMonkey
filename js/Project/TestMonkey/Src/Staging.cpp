@@ -3627,223 +3627,165 @@ Meta_escapejsvalue(JSContext *cx, unsigned argc, jsval *vp)
 }
 
 
+static JSBool 
+WrapStmt(JSContext *cx, jsval *stmtVal)
+{
+	JSObject *stmtObj;
+	if( !JS_ValueToObject(cx, *stmtVal, &stmtObj) )
+		return JS_FALSE;
 
+	JSObject *exprObj;
+	if( !JS_GetPropertyToObj(cx, stmtObj, "expression", &exprObj) )
+		return JS_FALSE;
+
+	*stmtVal = OBJECT_TO_JSVAL(exprObj);
+	return JS_TRUE;
+}
+
+static JSBool 
+GetBodyFromProgram(JSContext *cx, jsval astObjVal, JSObject **bodyObj, uint32_t *bodyChildrenLen )
+{
+	JSObject *astObj = JSVAL_TO_OBJECT(astObjVal);
+	if( !astObj )
+		return JS_FALSE;
+
+	JSString *astTypeStr;
+	if( !JS_GetPropertyToString(cx, astObj, "type", &astTypeStr) )
+		return JS_FALSE;
+
+	if ( !astTypeStr->equals("Program") ) {
+		JS_ReportError(cx, "object type is not program");
+		return JS_FALSE;
+	}
+
+	if( !JS_GetPropertyToObj(cx, astObj, "body", bodyObj) )
+		return JS_FALSE;
+
+	if ( !JS_IsArrayObject(cx, *bodyObj) ){
+		JS_ReportError(cx, "Program.body is not an array.");
+		return JS_FALSE;
+	}
+
+	if ( !JS_GetArrayLength(cx, *bodyObj, bodyChildrenLen) )
+		return JS_FALSE;
+	
+	return JS_TRUE;
+}
+
+static JSBool 
+GetStmtsFromAstObj(JSContext *cx, bool fromStmt, jsval astObjVal,  JSObject **vp, uint32_t *bodyChildrenLen) 
+{
+	JSObject *bodyObj;
+	if( !GetBodyFromProgram(cx, astObjVal, &bodyObj, bodyChildrenLen) )
+		return JS_FALSE;
+
+	for( uint32_t i=0; i<*bodyChildrenLen; ++i ){
+		jsval stmtVal;
+		if (!JS_GetElement(cx, bodyObj, i, &stmtVal))
+			return JS_FALSE;
+		if ( !fromStmt && !WrapStmt(cx, &stmtVal) )
+			return JS_FALSE;
+		if ( !JS_ArrayObjPush(cx, *vp, &stmtVal ) )
+			return JS_FALSE;
+	}
+	return JS_TRUE;
+}
 
 static JSBool
 Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
-	if (args.length() < 1 || !args[0].isBoolean()) {
+	unsigned int argsLen =  args.length();
+	if ( !( ( argsLen == 3 || argsLen == 4 ) && args[0].isBoolean() ) ) {
         JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_MORE_ARGS_NEEDED,
                              "Meta_escape", "0", "s");
         return JS_FALSE;
     }
 
-	JSObject *finalObjArray = JS_NewArrayObject(cx, 0, NULL);
-	
-	// Check fromArray argument
-	if ( args[0].toBoolean() ){
-		JSObject *normalObjArray = JSVAL_TO_OBJECT(args[1]);
-		JSObject *escapeObjArray = JSVAL_TO_OBJECT(args[2]);
-		bool fromStmt = args[3].toBoolean();
+	JSObject *escapeObjArray = JS_NewArrayObject(cx, 0, NULL);
+	bool fromArray = args[0].toBoolean();
+	bool fromStmt;
 
-		if ( !JS_IsArrayObject(cx, normalObjArray) ){
-			JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_ESCAPE_ARG_WRONG, "1");
-			return JS_FALSE;
-		}
-
-		if ( !JS_IsArrayObject(cx, escapeObjArray) ){
-			JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_ESCAPE_ARG_WRONG, "2");
-			return JS_FALSE;
-		}
-
-		uint32_t normalArrayLength, escapeArrayLength;
-		if ( !JS_GetArrayLength(cx, normalObjArray, &normalArrayLength) )
-			return JS_FALSE;
-		if ( !JS_GetArrayLength(cx, escapeObjArray, &escapeArrayLength) )
+	if( !fromArray ) {
+		uint32_t bodyChildrenLen;
+		jsval escapeStmt = args[1];
+		fromStmt = args[2].toBoolean();
+		if( !GetStmtsFromAstObj(cx, fromStmt, escapeStmt, &escapeObjArray, &bodyChildrenLen) )
 			return JS_FALSE;
 
-		uint32_t normPos = 0, escPos = 0, finalPos = 0, escapeOffset = 0;
-
-		while ( (normPos < normalArrayLength) || (escPos < escapeArrayLength) ){
-
-			JSObject *escNodeObj;
-			if( !JS_GetArrayElementToObj(cx, escapeObjArray, escPos, &escNodeObj) )
+		if( bodyChildrenLen==1 ) {
+			jsval retVal;
+			if (!JS_GetElement(cx, escapeObjArray, 0, &retVal))
 				return JS_FALSE;
-
-			if ( escNodeObj == NULL ){
-				jsval normalNodeVal;
-				if (!JS_GetElement(cx, normalObjArray, normPos, &normalNodeVal))
-					return JS_FALSE;
-
-				if ( !JS_SetElement(cx, finalObjArray, finalPos, &normalNodeVal) )
-					return JS_FALSE;
-				
-				++normPos;
-				++finalPos;
-
-			} else {
-				jsval indexVal;
-				if (!JS_GetProperty(cx, escNodeObj, "index", &indexVal))
-					return JS_FALSE;
-
-				// Place normal Object to final array
-				if ( (indexVal.toInt32()+escapeOffset) > finalPos ){
-					jsval normalNodeVal;
-					if (!JS_GetElement(cx, normalObjArray, normPos, &normalNodeVal))
-						return JS_FALSE;
-
-					if ( !JS_SetElement(cx, finalObjArray, finalPos, &normalNodeVal) )
-						return JS_FALSE;
-				
-					++normPos;
-					++finalPos;
-			
-				} else { // Place escape Object to final array
-						JSObject *escExprObj;
-						if( !JS_GetPropertyToObj(cx, escNodeObj, "expr", &escExprObj) )
-							return JS_FALSE;
-
-						JSString *typeStr;
-						if( !JS_GetPropertyToString(cx, escExprObj, "type", &typeStr) )
-							return JS_FALSE;
-
-						if ( !typeStr->equals("Program") ) {
-							JS_ReportError(cx, "object type is not program");
-							return JS_FALSE;
-						}
-
-						JSObject *bodyExprObj;
-						if( !JS_GetPropertyToObj(cx, escExprObj, "body", &bodyExprObj) )
-							return JS_FALSE;
-
-						// If escape expr contains array of objects
-						if ( JS_IsArrayObject(cx, bodyExprObj) ){
-
-							uint32_t bodyExprLength;
-							if ( !JS_GetArrayLength(cx, bodyExprObj, &bodyExprLength) )
-								return JS_FALSE;
-
-							for( uint32_t i=0; i<bodyExprLength; ++i ){
-								jsval escNodeVal;
-								if (!JS_GetElement(cx, bodyExprObj, i, &escNodeVal))
-									return JS_FALSE;
-						
-								if ( !fromStmt ){
-									JSObject *escNodeObj;
-									if( !JS_ValueToObject(cx, escNodeVal, &escNodeObj) )
-										return JS_FALSE;
-							
-									JSObject *expressionObj;
-									if( !JS_GetPropertyToObj(cx, escNodeObj, "expression", &expressionObj) )
-										return JS_FALSE;
-
-									escNodeVal = OBJECT_TO_JSVAL(expressionObj);
-								}
-
-								if ( !JS_SetElement(cx, finalObjArray, finalPos, &escNodeVal) )
-									return JS_FALSE;
-						
-								++finalPos;
-							}
-
-							++escPos;
-							escapeOffset += (bodyExprLength-1);
-				
-						} else { // if escape expr contains single object
-							jsval escExprVal = OBJECT_TO_JSVAL(bodyExprObj);
-
-							if ( !fromStmt ){
-								JSObject *expressionObj;
-								if( !JS_GetPropertyToObj(cx, bodyExprObj, "expression", &expressionObj) )
-									return JS_FALSE;
-
-								escExprVal = OBJECT_TO_JSVAL(expressionObj);
-							}
-
-							if ( !JS_SetElement(cx, finalObjArray, finalPos, &escExprVal ) )
-								return JS_FALSE;
-							++escPos;
-							++finalPos;
-						}
-					}
-				}
-			}
-		args.rval().setObject(*finalObjArray);
-
-	} else { // from Single object
-		JSObject *expr = JSVAL_TO_OBJECT(args[1]);
-		bool fromStmt = args[2].toBoolean();
-
-		JSString *typeStr;
-		if( !JS_GetPropertyToString(cx, expr, "type", &typeStr) )
-			return JS_FALSE;
-
-		if ( !typeStr->equals("Program") ) {
-			JS_ReportError(cx, "object type is not program");
-			return JS_FALSE;
-		}
-
-		JSObject *bodyExprObj;
-		if( !JS_GetPropertyToObj(cx, expr, "body", &bodyExprObj) )
-			return JS_FALSE;
-
-		// If escape expr contains array of objects
-		if ( !JS_IsArrayObject(cx, bodyExprObj) ){
-			JS_ReportError(cx, "meta_escape: Program.body is not an array.");
-			return JS_FALSE;
-		}
-
-		uint32_t bodyExprLength;
-		if ( !JS_GetArrayLength(cx, bodyExprObj, &bodyExprLength) )
-			return JS_FALSE;
-
-		if ( bodyExprLength == 1 ){
-			jsval escExprVal;
-			if (!JS_GetElement(cx, bodyExprObj, 0, &escExprVal))
-				return JS_FALSE;
-
-
-			if ( !fromStmt ){
-				JSObject *escExprObj;
-				if( !JS_ValueToObject(cx, escExprVal, &escExprObj) )
-					return JS_FALSE;
-
-				JSObject *expressionObj;
-				if( !JS_GetPropertyToObj(cx, escExprObj, "expression", &expressionObj) )
-					return JS_FALSE;
-
-				escExprVal = OBJECT_TO_JSVAL(expressionObj);
-			}
-
-			args.rval().setObject( escExprVal.toObject() );
-		} else {
-
-			for( uint32_t i=0; i<bodyExprLength; ++i ){
-				jsval nodeVal;
-				if (!JS_GetElement(cx, bodyExprObj, i, &nodeVal))
-					return JS_FALSE;
-						
-				if ( !fromStmt ){
-					JSObject *nodeObj;
-					if( !JS_ValueToObject(cx, nodeVal, &nodeObj) )
-						return JS_FALSE;
-
-					JSObject *expressionObj;
-					if( !JS_GetPropertyToObj(cx, nodeObj, "expression", &expressionObj) )
-						return JS_FALSE;
-
-					nodeVal = OBJECT_TO_JSVAL(expressionObj);
-				}
-
-				if ( !JS_SetElement(cx, finalObjArray, i, &nodeVal) )
-					return JS_FALSE;
-			}
-
-			args.rval().setObject( *finalObjArray );
-		}
+			args.rval().set( retVal );
+		} else
+			args.rval().setObject( *escapeObjArray );
+		
+		return JS_TRUE;
 	}
 
+	JSObject *normalArray = JSVAL_TO_OBJECT(args[1]);
+	JSObject *escapeArray = JSVAL_TO_OBJECT(args[2]);
+	fromStmt = args[3].toBoolean();
+
+	if ( !JS_IsArrayObject(cx, normalArray) 
+		 || !JS_IsArrayObject(cx, escapeArray) 
+	){
+		JS_ReportErrorNumber(cx, js_GetErrorMessage, NULL, JSMSG_ESCAPE_ARG_WRONG, "1 or 2");
+		return JS_FALSE;
+	}
+
+	/*
+		naLen = normal array length
+		eaLen = escape array length
+		naIdx = normal array current index
+		eaIdx = escape array current index
+		finLen = final array length
+	*/
+
+	uint32_t naLen, eaLen, naIdx=0, eaIdx=0, finLen;
+	if ( !JS_GetArrayLength(cx, normalArray, &naLen)
+		 || !JS_GetArrayLength(cx, escapeArray, &eaLen) 
+	)
+		return JS_FALSE;
+
+	while( naLen < naIdx || eaIdx < eaLen ) {	
+		if( eaIdx<eaLen ) {
+			JSObject *escNodeObj;
+			if( !JS_GetArrayElementToObj(cx, escapeArray, eaIdx, &escNodeObj) )
+				return JS_FALSE;
+
+			jsval escNodeIdx;
+			if (!JS_GetProperty(cx, escNodeObj, "index", &escNodeIdx))
+				return JS_FALSE;
+
+			if ( !JS_GetArrayLength(cx, escapeObjArray, &finLen) )
+				return JS_FALSE;
+
+			if( escNodeIdx.toInt32() <= finLen ) {
+				JSObject *escStmtObj;
+				if( !JS_GetPropertyToObj(cx, escNodeObj, "expr", &escStmtObj) )
+					return JS_FALSE;
+
+				uint32_t bodyChildrenLen;
+				if( !GetStmtsFromAstObj(cx, fromStmt, OBJECT_TO_JSVAL(escStmtObj), &escapeObjArray, &bodyChildrenLen) )
+					return JS_FALSE;
+		
+				++eaIdx;
+			}
+		}
+
+		if( naIdx<naLen ) {
+			jsval normalNodeVal;
+			if (!JS_GetElement(cx, normalArray, naIdx, &normalNodeVal))
+				return JS_FALSE;
+			if ( !JS_ArrayObjPush(cx, escapeObjArray, &normalNodeVal ) )
+				return JS_FALSE;
+			++naIdx;
+		}
+	} //while
+
+	args.rval().setObject( *escapeObjArray );
 	return JS_TRUE;
 }
 
@@ -5371,16 +5313,18 @@ main(int argc, char **argv, char **envp)
     JSContext *cx;
     int result;
 
-	if(argc!=3){
-		printf("wrong arguments. \n> inputFilename outputfilename\n");
-		system("@pause");
-		return 1;
-	}
+	//if(argc!=3){
+	//	printf("wrong arguments. \n> inputFilename outputfilename\n");
+		//system("@pause");
+	//	return 1;
+	//}
 
-	const char *inputFileName = argv[1];
-	//const char *inputFileName = "Src/examples/simple/simple.js";
-	const char *outputFileName = argv[2];
-	//const char *outputFileName = "Src/examples/simple/simpleStagged.js";
+	//const char *inputFileName = argv[1];
+	//const char *inputFileName = "Src/examples/test.js";
+	const char *inputFileName = "Src/examples/simple/simple.js";
+	//const char *outputFileName = argv[2];
+	//const char *outputFileName = "Src/examples/test_final.js";
+	const char *outputFileName = "Src/examples/simple/simple_staged_.js";
 
 #ifdef XP_WIN
     {
