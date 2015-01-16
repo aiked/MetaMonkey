@@ -291,6 +291,10 @@ class FullParseHandler
 		return new_<UnaryNode>(PNK_METAQUAZI, JSOP_NOP, pos, stmts);
     }
 
+    ParseNode *newMetaExecStatement(ParseNode *stmt, const TokenPos &pos) {
+		return new_<UnaryNode>(PNK_METAEXEC, JSOP_NOP, pos, stmt);
+    }
+
 
     ParseNode *newReturnStatement(ParseNode *expr, const TokenPos &pos) {
         JS_ASSERT_IF(expr, pos.encloses(expr->pn_pos));

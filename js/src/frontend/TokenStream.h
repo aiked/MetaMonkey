@@ -49,6 +49,7 @@ enum TokenKind {
 	TOK_META_LQ, TOK_META_RQ,	// produce ast from expression .< expr >.
 	TOK_META_ESC, // .~ escape
 	TOK_META_INLINE, // .! inline
+	TOK_META_EXEC, 	// .& parse a compile-time jsvalue to AST
 	TOK_META_DUCK, 	// .@ parse a compile-time jsvalue to AST
 	TOK_META_HASH,	// .# unparse a meta expression (AST->text)
 	/////////////////////////////////
@@ -793,13 +794,6 @@ class MOZ_STACK_CLASS TokenStream
           : base_(buf), limit_(buf + length), ptr(buf),
             skipBase(cx, &base_), skipLimit(cx, &limit_), skipPtr(cx, &ptr)
         {  }
-
-		//metadev
-		void initBufferChar( jschar *chars, size_t length ) {
-			JS_ASSERT( _bufferedPtr.size() > 0 );
-		}
-
-
 
         bool hasRawChars() const {
             return ptr < limit_;

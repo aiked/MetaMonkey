@@ -41,6 +41,7 @@ ASTDEF(AST_LET_EXPR,              "LetExpression",                  "letExpressi
 ASTDEF(AST_EMPTY_STMT,            "EmptyStatement",                 "emptyStatement")
 ASTDEF(AST_BLOCK_STMT,            "BlockStatement",                 "blockStatement")
 ASTDEF(AST_METAQUAZI_STMT,        "MetaQuaziStatement",             "metaQuaziStatement")
+ASTDEF(AST_METAEXEC_STMT,		  "MetaExecStatement",				"metaExecStatement")
 ASTDEF(AST_EXPR_STMT,             "ExpressionStatement",            "expressionStatement")
 ASTDEF(AST_LAB_STMT,              "LabeledStatement",               "labeledStatement")
 ASTDEF(AST_IF_STMT,               "IfStatement",                    "ifStatement")

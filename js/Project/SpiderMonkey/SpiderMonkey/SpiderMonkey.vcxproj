@@ -55,7 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\src\build-release\dist\include;..\..\..\src\assembler\assembler;..\..\..\src\assembler\jit;..\..\..\src\assembler\moco;..\..\..\src\assembler\wtf;..\..\..\src\ds;..\..\..\src\frontend;..\..\..\src\jit\x86;..\..\..\src\perf;..\..\..\src\vm;..\..\..\src\build-release;..\..\..\src\assembler;..\..\..\..\mfbt;..\..\..\..\mfbt\decimal;..\..\..\..\mfbt\double-conversion;..\..\..\src\jit;..\..\..\..\intl\icu\source\common</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>STATIC_JS_API;WIN32;_WIN32;XP_WIN;WTF_COMPILER_MSVC;_X86_;JS_ION;ENABLE_YARR_JIT;HAVE_FORCEINLINE;HAVE_LOCALECONV;HAVE_SNPRINTF;HAVE_WINSDKVER_H;HW_THREADS;JSGC_INCREMENTAL;JS_CPU_X86;JS_METHODJIT;JS_METHODJIT_TYPED_ARRAY;JS_MONOIC;JS_NUNBOX32;JS_POLYIC;MOZ_DEBUG_SYMBOLS;NO_X11;NS_ATTR_MALLOC;NS_WARN_UNUSED_RESULT;RELEASE_BUILD;STDC_HEADERS;WIN32_LEAN_AND_MEAN;XP_WIN32;X_DISPLAY_MISSING;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WINDOWS;__MWERKS__</PreprocessorDefinitions>
+      <PreprocessorDefinitions>STATIC_JS_API;WIN32;_WIN32;XP_WIN;WTF_COMPILER_MSVC;_X86_;JS_ION;ENABLE_YARR_JIT;HAVE_FORCEINLINE;HAVE_LOCALECONV;HAVE_SNPRINTF;HAVE_WINSDKVER_H;HW_THREADS;JSGC_INCREMENTAL;JS_CPU_X86;JS_METHODJIT;JS_METHODJIT_TYPED_ARRAY;JS_MONOIC;JS_NUNBOX32;JS_POLYIC;MOZ_DEBUG_SYMBOLS;NO_X11;NS_ATTR_MALLOC;NS_WARN_UNUSED_RESULT;RELEASE_BUILD;STDC_HEADERS;WIN32_LEAN_AND_MEAN;XP_WIN32;X_DISPLAY_MISSING;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WINDOWS;__MWERKS__;DEBUG;JS_DEBUG</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
@@ -196,6 +196,7 @@
     <ClCompile Include="..\..\..\src\jsanalyze.cpp" />
     <ClCompile Include="..\..\..\src\jsapi.cpp" />
     <ClCompile Include="..\..\..\src\jsarray.cpp" />
+    <ClCompile Include="..\..\..\src\jsastmng.cpp" />
     <ClCompile Include="..\..\..\src\jsatom.cpp" />
     <ClCompile Include="..\..\..\src\jsbool.cpp" />
     <ClCompile Include="..\..\..\src\jsclone.cpp" />
@@ -224,6 +225,7 @@
     <ClCompile Include="..\..\..\src\jsproxy.cpp" />
     <ClCompile Include="..\..\..\src\jsreflect.cpp" />
     <ClCompile Include="..\..\..\src\jsscript.cpp" />
+    <ClCompile Include="..\..\..\src\jsstaging.cpp" />
     <ClCompile Include="..\..\..\src\jsstr.cpp" />
     <ClCompile Include="..\..\..\src\jstypedarray.cpp" />
     <ClCompile Include="..\..\..\src\jsunparse.cpp" />
@@ -235,6 +237,7 @@
     <ClCompile Include="..\..\..\src\perf\pm_stub.cpp" />
     <ClCompile Include="..\..\..\src\prmjtime.cpp" />
     <ClCompile Include="..\..\..\src\shell\js.cpp" />
+    <ClCompile Include="..\..\..\src\shell\jsheaptools.cpp" />
     <ClCompile Include="..\..\..\src\shell\jsoptparse.cpp" />
     <ClCompile Include="..\..\..\src\vm\ArgumentsObject.cpp" />
     <ClCompile Include="..\..\..\src\vm\CharacterEncoding.cpp" />
@@ -504,6 +507,7 @@
     <ClInclude Include="..\..\..\src\jsanalyzeinlines.h" />
     <ClInclude Include="..\..\..\src\jsapi.h" />
     <ClInclude Include="..\..\..\src\jsarray.h" />
+    <ClInclude Include="..\..\..\src\jsastmng.h" />
     <ClInclude Include="..\..\..\src\jsatom.h" />
     <ClInclude Include="..\..\..\src\jsatominlines.h" />
     <ClInclude Include="..\..\..\src\jsbool.h" />
@@ -550,6 +554,7 @@
     <ClInclude Include="..\..\..\src\jsreflect.h" />
     <ClInclude Include="..\..\..\src\jsscript.h" />
     <ClInclude Include="..\..\..\src\jsscriptinlines.h" />
+    <ClInclude Include="..\..\..\src\jsstaging.h" />
     <ClInclude Include="..\..\..\src\jsstr.h" />
     <ClInclude Include="..\..\..\src\jsstrinlines.h" />
     <ClInclude Include="..\..\..\src\jstypedarray.h" />

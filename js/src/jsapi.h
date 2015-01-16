@@ -3489,10 +3489,10 @@ JS_GetProperty(JSContext *cx, JSObject *obj, const char *name, jsval *vp);
 
 //metadev
 extern JS_PUBLIC_API(JSBool)
-JS_GetPropertyToString(JSContext *cx, JSObject *obj, const char *name, JSString **vp);
+JS_GetPropertyToString(JSContext *cx, const JSObject *obj, const char *name, JSString **vp);
 
 extern JS_PUBLIC_API(JSBool)
-JS_GetPropertyToObj(JSContext *cx, JSObject *obj, const char *name, JSObject **vp);
+JS_GetPropertyToObj(JSContext *cx, const JSObject *obj, const char *name, JSObject **vp);
 
 extern JS_PUBLIC_API(JSBool)
 JS_ArrayObjPush(JSContext *cx, JSObject *obj, jsval *val);
@@ -4434,6 +4434,22 @@ JS_NewDependentString(JSContext *cx, JSString *str, size_t start,
  */
 extern JS_PUBLIC_API(JSString *)
 JS_ConcatStrings(JSContext *cx, JSString *left, JSString *right);
+
+
+///////////////////////////
+//metadev
+extern JS_PUBLIC_API(JSString *)
+JS_PrefixSuffixConcatStrings(JSContext *cx, JSString *sep, js::Vector<JSString*> *strs, 
+							 JSString *str, size_t index);
+
+extern JS_PUBLIC_API(JSString *)
+JS_JoinStrings(JSContext *cx, size_t num, ...);
+
+extern JS_PUBLIC_API(JSString *)
+JS_JoinStringVector(JSContext *cx, js::Vector<JSString*> *strs, JSString* sep, 
+					JSString* prf, JSString* suf, bool reverse = false);
+///////////////////////
+
 
 /*
  * For JS_DecodeBytes, set *dstlenp to the size of the destination buffer before

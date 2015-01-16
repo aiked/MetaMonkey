@@ -41,6 +41,7 @@
 #include "jswrapper.h"
 #include "jsperf.h"
 #include "jsunparse.h"
+#include "jsstaging.h"
 
 #include "builtin/TestingFunctions.h"
 #include "frontend/BytecodeEmitter.h"
@@ -3590,10 +3591,25 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 
 	JSString *str = NULL;
 	unparse *up = unparse::getSingleton();
+
+	StagingProcess::createSingleton(cx);
+	StagingProcess *stagingProcess = StagingProcess::getSingleton();
+	int depth;
+	stagingProcess->getDeapestStage(obj, &depth);
+	if(depth>-1) {
+		stagingProcess->collectStage(obj, (uint32_t) depth);
+		Stage &stage = stagingProcess->getStage();
+		stage.exec();
+	}
+
+	StagingProcess::destroySingleton();
+
 	if (!up->unParse_start(obj, &str))
 		return JS_FALSE;
 
 	vp->setString(str);
+
+	//vp->setString( JS_NewStringCopyZ(cx, "unparse") );
 
 	return JS_TRUE;
 }
@@ -5180,12 +5196,12 @@ OptionFailure(const char *option, const char *str)
 #endif /* JS_ION */
 
 
-static int staggingProcess(JSContext *cx, JSObject *global, const char *inputFileName, const char *outputFileName) {
+static int stagingProcess(JSContext *cx, JSObject *global, const char *inputFileName, const char *outputFileName) {
 	using namespace JS;
 
     char* staggedFilename = JS_sprintf_append(NULL, "%s_stagged", inputFileName);
 
-	fprintf(stderr, "\ngenerating stagging report location at \"%s\"...\n", staggedFilename);
+	fprintf(stderr, "\ngenerating staging report location at \"%s\"...\n", staggedFilename);
 	AutoFile staggedFile;
 	if (!staggedFile.open(cx, staggedFilename, "w"))
 		return 1;
@@ -5264,7 +5280,7 @@ run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFil
         return 1;
     JS_SetPrivate(envobj, envp);
 
-	int result = staggingProcess(cx, glob, inputFileName, outputFileName);
+	int result = stagingProcess(cx, glob, inputFileName, outputFileName);
 
     if (enableDisassemblyDumps)
         JS_DumpCompartmentPCCounts(cx);
@@ -5320,11 +5336,11 @@ main(int argc, char **argv, char **envp)
 	//}
 
 	//const char *inputFileName = argv[1];
-	//const char *inputFileName = "Src/examples/test.js";
-	const char *inputFileName = "Src/examples/simple/simple.js";
+	const char *inputFileName = "Src/examples/test.js";
+	//const char *inputFileName = "Src/examples/simple/simple.js";
 	//const char *outputFileName = argv[2];
-	//const char *outputFileName = "Src/examples/test_final.js";
-	const char *outputFileName = "Src/examples/simple/simple_staged_.js";
+	const char *outputFileName = "Src/examples/test_final.js";
+	//const char *outputFileName = "Src/examples/simple/simple_staged_.js";
 
 #ifdef XP_WIN
     {

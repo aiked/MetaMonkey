@@ -60,7 +60,7 @@ class UpvarCookie
     }
 };
 
-// metadev added METAQUAZI, METAESC, METAINLINE
+// metadev added METAQUAZI, METAEXEC, METAESC, METAINLINE
 #define FOR_EACH_PARSE_NODE_KIND(F) \
     F(NOP) \
     F(SEMI) \
@@ -104,6 +104,7 @@ class UpvarCookie
     F(CONST) \
     F(WITH) \
 	F(METAQUAZI) \
+	F(METAEXEC) \
     F(RETURN) \
     F(NEW) \
     F(DELETE) \

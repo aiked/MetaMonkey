@@ -428,7 +428,6 @@ class JSString : public js::gc::Cell
     
     bool equals(const char *s);
 
-
   private:
     JSString() MOZ_DELETE;
     JSString(const JSString &other) MOZ_DELETE;

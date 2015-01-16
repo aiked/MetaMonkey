@@ -118,6 +118,7 @@ class SyntaxParseHandler
     Node newBreakStatement(PropertyName *label, const TokenPos &pos) { return NodeGeneric; }
 	//metadev
 	Node newMetaQuaziStatement(Node expr, const TokenPos &pos) { return NodeGeneric; }
+	Node newMetaExecStatement(Node expr, const TokenPos &pos) { return NodeGeneric; }
     Node newReturnStatement(Node expr, const TokenPos &pos) { return NodeGeneric; }
 
     Node newLabeledStatement(PropertyName *label, Node stmt, uint32_t begin) {

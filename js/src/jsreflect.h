@@ -56,12 +56,13 @@ enum BinaryOperator {
 
     BINOP_LIMIT
 };
-
+//metadev
 enum UnaryOperator {
     UNOP_ERR = -1,
 
     UNOP_DELETE = 0,
 	UNOP_META_INLINE,
+	UNOP_META_EXEC,
 	UNOP_META_ESC,
 	UNOP_META_DUCK,
     UNOP_NEG,

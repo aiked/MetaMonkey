@@ -299,6 +299,8 @@ bool DecompressString(const unsigned char *inp, size_t inplen,
                       unsigned char *out, size_t outlen);
 #endif
 
+
+//////////////// metadev
 }  /* namespace js */
 
 /* Crash diagnostics */

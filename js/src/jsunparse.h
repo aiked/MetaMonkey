@@ -12,7 +12,6 @@ metadev
 
 namespace js {
 
-
 struct ConstCharStarHasher
 {
 	typedef const char * Lookup;
@@ -27,34 +26,9 @@ struct ConstCharStarHasher
 	}
 };
 
-
 class unparse{
-  private:
-	static unparse *unparseSingleInst;
-
+  public:
 	JSContext *cx;
-	JSString *indentChar;
-	JSString *fourHash;
-
-	JS::AutoFile *staggingOutput;
-	JSObject *jsonGlobalObj;
-
-	typedef JSBool (unparse::*stringifyStmtHandler)
-		(JSObject *val, JSString **child, JSString *indent);
-	typedef HashMap<const char *, stringifyStmtHandler, ConstCharStarHasher> stringifyStmtHandlerMap;
-
-	typedef JSBool (unparse::*stringifyExprHandler)
-		(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	typedef HashMap<const char *, stringifyExprHandler, ConstCharStarHasher> stringifyExprHandlerMap;
-
-	typedef HashMap<const char *, size_t, ConstCharStarHasher> stringToIntMap;
-
-	stringToIntMap precedence;
-	stringifyStmtHandlerMap stringifyStmtHandlerMapInst;
-	stringifyExprHandlerMap stringifyExprHandlerMapInst;
-
-	Vector<JSString*> inlineEvaluateCode;
-
 	enum JSSRCNAME{
 		JSSRCNAME_START = -1,
 
@@ -103,7 +77,9 @@ class unparse{
 		JSSRCNAME_VARSPACELP,
 		JSSRCNAME_THIS,
 		JSSRCNAME_DEBUGGERSEMI,
+		JSSRCNAME_INLINE,
 		JSSRCNAME_INLINECALL,
+		JSSRCNAME_EXEC,
 		JSSRCNAME_ESCAPECALL,
 		JSSRCNAME_ESCAPEJSVALUECALL,
 		JSSRCNAME_PROGRAM,
@@ -121,57 +97,88 @@ class unparse{
 
 		JSSRCNAME_END
 	};
-
 	Vector<JSString*, JSSRCNAME_END> standarJsSrcNames;
+
+	inline JSString * srcStr(JSSRCNAME name){
+		JS_ASSERT( name>JSSRCNAME_START && name<JSSRCNAME_END );
+		return standarJsSrcNames[name];
+	}
+
+  private:
+	static unparse *unparseSingleInst;
+
+	JSString *indentChar;
+	JSString *fourHash;
+
+	JS::AutoFile *staggingOutput;
+	JSObject *jsonGlobalObj;
+
+	typedef JSBool (unparse::*stringifyStmtHandler)
+		(const JSObject *val, JSString **child, JSString *indent);
+	typedef HashMap<const char *, stringifyStmtHandler, ConstCharStarHasher> stringifyStmtHandlerMap;
+
+	typedef JSBool (unparse::*stringifyExprHandler)
+		(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	typedef HashMap<const char *, stringifyExprHandler, ConstCharStarHasher> stringifyExprHandlerMap;
+
+	typedef HashMap<const char *, size_t, ConstCharStarHasher> stringToIntMap;
+
+	stringToIntMap precedence;
+	stringifyStmtHandlerMap stringifyStmtHandlerMapInst;
+	stringifyExprHandlerMap stringifyExprHandlerMapInst;
+
+	Vector<JSString*> inlineEvaluateCode;
 
 	/////////////////////// 
 	// expression
-	JSBool expr_array(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_obj(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_graph(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_graphIndx(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_let(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_gen(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_comprehen(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_yield(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_sequence(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_cond(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_indent(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_literal(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_call(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_new(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_this(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_member(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);	
-	JSBool expr_metaQuazi(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_unary(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_logic(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_assign(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_func(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
-	JSBool expr_objpattern(JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_array(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_obj(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_graph(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_graphIndx(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_let(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_gen(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_comprehen(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_yield(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_sequence(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_cond(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_indent(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_literal(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_call(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_new(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_this(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_member(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);	
+	JSBool expr_metaQuazi(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_metaExec(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_unary(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_logic(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_assign(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_func(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
+	JSBool expr_objpattern(const JSObject *val, JSString **child, JSString *indent, int cprec, bool noIn);
 	///////////////////////
 
 	/////////////////////// 
 	// statement
-	JSBool stmt_block(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_variableDeclaration(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_empty(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_expression(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_let(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_if(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_while(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_for(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_forin(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_dowhile(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_continue(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_break(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_return(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_with(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_labeled(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_switch(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_throw(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_try(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_debugger(JSObject *val, JSString **child, JSString *indent);
-	JSBool stmt_functiondeclaration(JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_block(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_variableDeclaration(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_empty(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_expression(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_let(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_if(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_while(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_for(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_forin(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_dowhile(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_continue(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_break(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_return(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_with(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_labeled(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_switch(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_throw(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_try(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_debugger(const JSObject *val, JSString **child, JSString *indent);
+	JSBool stmt_functiondeclaration(const JSObject *val, JSString **child, JSString *indent);
+
 	///////////////////////
 
 	///////////////////////
@@ -183,76 +190,56 @@ class unparse{
 	public:
 	///////////////////////
 	// object stringify
-	JSBool stringifyObject(JSObject *obj, JSString **s);
-	JSBool stringifyObjectProperty(JSObject *obj, Shape &shape, JSString **propKey, JSString **propVal);
+	JSBool stringifyObject(const JSObject *obj, JSString **s);
+	JSBool stringifyObjectProperty(const JSObject *obj, Shape &shape, JSString **propKey, JSString **propVal);
 	JSBool stringifyObjectValue(const Value &v, JSString **s);
 	
 	private:
 
-
 	///////////////////////
 	// helpers
 
-	JSString* prefixSuffixConcatString(JSString *sep, Vector<JSString*> *strs, 
-		JSString *str, size_t index);
-
-	JSBool declarators(JSObject *decls, JSString **s, JSString *indent, bool noIn);
+	JSBool declarators(const JSObject *decls, JSString **s, JSString *indent, bool noIn);
 	JSBool wrapExpr(JSString **s, int cprec, int xprec);
-	JSBool forHead(JSObject *val, JSString **s, JSString *indent);
-	JSBool comprehension(JSObject *val, JSString **s, JSString *indent);
-	JSBool substmt(JSObject *obj, JSString **s, JSString *indent, bool more);
-	JSBool args(JSObject *values, JSString **s, JSString *indent);
-	JSBool params(JSObject *values, JSString **s, JSString *indent);
-	JSBool unexpected(JSObject *values, JSString **s);
-	JSBool functionDeclaration(JSString *funcInitStr, JSString **s, 
-								jsval id, JSObject *val, JSString *indent);
+	JSBool forHead(const JSObject *val, JSString **s, JSString *indent);
+	JSBool comprehension(const JSObject *val, JSString **s, JSString *indent);
+	JSBool args(const JSObject *values, JSString **s, JSString *indent);
+	JSBool params(const JSObject *values, JSString **s, JSString *indent);
+	JSBool unexpected(const JSObject *values, JSString **s);
+	JSBool functionDeclaration(const JSString *funcInitStr, JSString **s, 
+								jsval id, const JSObject *val, JSString *indent);
 
-	JSBool isBadIdentifier(JSObject *val, JSBool *isBad);
-	JSBool unparse::objectContainEscapeExpr(JSString *typeExprStr, JSObject *exprObj, bool *retval, JSObject **expr);
-	JSBool objectContainEscape(JSObject *obj, bool *retval, bool *fromStmt, JSObject **retObj);
-	JSBool objectContainEscapejsvalue(JSObject *obj, bool *hasNodeEscapejsval, JSObject **escapeArgObj);
+	JSBool isBadIdentifier(const JSObject *val, JSBool *isBad);
+	JSBool objectContainEscapeExpr(const JSString *typeExprStr, const JSObject *exprObj, bool *retval, const JSObject **expr);
+	JSBool objectContainEscape(const JSObject *obj, bool *retval, bool *fromStmt, const JSObject **retObj);
+	JSBool objectContainEscapejsvalue(const JSObject *obj, bool *hasNodeEscapejsval, JSObject **escapeArgObj);
 
 	//JSString *unparse::trimRight(con);
-	JSString *unparse::joinString(size_t num, ...);
-	JSString *unparse::joinStringVector(Vector<JSString*> *strs, 
-		JSString* sep, JSString* prf, JSString* suf, bool reverse = false);
-
-	inline size_t getPrecedence(char *key){
+	inline size_t getPrecedence(const char *key){
 		stringToIntMap::Ptr ptr = precedence.lookup(key);
 		return ptr.found() ? ptr->value: 0;
 	}
 
-	inline size_t getPrecedence(JSString *key){
-		char *chars = JS_EncodeString(cx, key);
+	inline size_t getPrecedence(const JSString *key){
+		char *chars = JS_EncodeString(cx, const_cast<JSString*>(key) );
 		return getPrecedence(chars);
 	}
-
-	inline JSString * srcStr(JSSRCNAME name){
-		JS_ASSERT( name>JSSRCNAME_START && NAME<JSSRCNAME_END );
-		return standarJsSrcNames[name];
-	}
-
+	
 	struct sourceElementValueApplier
 	{
-		JSBool apply(unparse *uprs, JSObject *nodeObj, 
+		JSBool apply(unparse *uprs, const JSObject *nodeObj, 
 			JSString **child, JSString *indent, JSString *indentChar, bool noIn) 
 		{
-			if (!uprs->unparse_sourceElement(nodeObj, child, indent))
-				return JS_FALSE;
-
-			return JS_TRUE;
+			return uprs->unparse_sourceElement(nodeObj, child, indent);
 		}
 	};
 
 	struct argsValueApplier
 	{
-		JSBool apply(unparse *uprs, JSObject *nodeObj, 
+		JSBool apply(unparse *uprs, const JSObject *nodeObj, 
 			JSString **child, JSString *indent, JSString *indentChar, bool noIn) 
 		{
-			if (!uprs->unparse_expr(nodeObj, child, indent, 2, false))
-				return JS_FALSE;
-
-			return JS_TRUE;
+			return uprs->unparse_expr(nodeObj, child, indent, 2, false);
 		}
 	};
 
@@ -260,19 +247,16 @@ class unparse{
 	{
 		JSString *indentArg;
 		paramsValueApplier(JSString * ia) :indentArg(ia) {}
-		JSBool apply(unparse *uprs, JSObject *nodeObj, 
+		JSBool apply(unparse *uprs, const JSObject *nodeObj, 
 			JSString **child, JSString *indent, JSString *indentChar, bool noIn) 
 		{
-			if (!uprs->unparse_expr(nodeObj, child, indentArg, 18, false))
-				return JS_FALSE;
-
-			return JS_TRUE;
+			return uprs->unparse_expr(nodeObj, child, indentArg, 18, false);
 		}
 	};
 
 	struct declValueApplier
 	{
-		JSBool apply(unparse *uprs, JSObject *nodeObj, 
+		JSBool apply(unparse *uprs, const JSObject *nodeObj, 
 			JSString **child, JSString *indent, JSString *indentChar, bool noIn) 
 		{
 			JSContext *cx = uprs->cx;
@@ -303,7 +287,7 @@ class unparse{
 				if( !uprs->unparse_expr(initObj, &rvalStr, indent, 2, noIn) )
 					return JS_FALSE;
 
-				*child = uprs->joinString(5, pattStr, uprs->srcStr(JSSRCNAME_SPACE), 
+				*child = JS_JoinStrings(cx, 5, pattStr, uprs->srcStr(JSSRCNAME_SPACE), 
 					uprs->srcStr(JSSRCNAME_ASSIGN),	uprs->srcStr(JSSRCNAME_SPACE), rvalStr);			
 			}
 			else{
@@ -316,10 +300,10 @@ class unparse{
 
 	struct blockStmtValueApplier
 	{
-		JSBool apply(unparse *uprs, JSObject *nodeObj, 
+		JSBool apply(unparse *uprs, const JSObject *nodeObj, 
 			JSString **child, JSString *indent, JSString *indentChar, bool noIn) 
 		{
-			JSString *stmtIndent = uprs->joinString(2, indent, indentChar);
+			JSString *stmtIndent = JS_JoinStrings(uprs->cx, 2, indent, indentChar);
 			if (!uprs->unparse_sourceElement(nodeObj, child, stmtIndent))
 				return JS_FALSE;
 			return JS_TRUE;
@@ -334,19 +318,21 @@ class unparse{
   public:
 	// constructor should be private but not visible from jscntxt.h
 	unparse(JSContext *x);
+	~unparse();
 
 	static void createSingleton(JSContext *x);
 	static void destroySingleton(JSContext *x);
 	static unparse *getSingleton();
 	void setStaggingReportOutput(JS::AutoFile *staggingOutput);
-	~unparse();
+	
 
-	JSBool unparse_expr(JSObject *exprVal, JSString **s, JSString *indent, int cprec, bool noIn);
+	JSBool substmt(const JSObject *obj, JSString **s, JSString *indent, bool more);
+	JSBool unparse_expr(const JSObject *exprVal, JSString **s, JSString *indent, int cprec, bool noIn);
 	template<class ValueApplier>
-	JSBool unparse_values(JSObject *obj, Vector<JSString*> *children, ValueApplier applier, bool noIn);
-	JSBool unparse_sourceElement(JSObject *val, JSString **child, JSString *indent);
-	JSBool unParse_start(JSObject *obj, JSString **s);
-};
+	JSBool unparse_values(const JSObject *obj, Vector<JSString*> *children, ValueApplier applier, bool noIn);
+	JSBool unparse_sourceElement(const JSObject *val, JSString **child, JSString *indent);
+	JSBool unParse_start(const JSObject *obj, JSString **s);	 
+}; /* class unparse */
 
 } /* js */
 

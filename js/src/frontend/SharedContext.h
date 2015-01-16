@@ -284,6 +284,7 @@ enum StmtType {
     STMT_LABEL,                 /* labeled statement:  L: s */
 	// METADEV
 	STMT_QUAZI,
+	STMT_EXEC,
     STMT_IF,                    /* if (then) statement */
     STMT_ELSE,                  /* else clause of if statement */
     STMT_SEQ,                   /* synthetic sequence of statements */

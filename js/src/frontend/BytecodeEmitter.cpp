@@ -280,6 +280,7 @@ static const char * const statementName[] = {
     "label statement",       /* LABEL */
 	// METADEV
 	"quazi statement", 
+	"exec statement",
     "if statement",          /* IF */
     "else statement",        /* ELSE */
     "destructuring body",    /* BODY */

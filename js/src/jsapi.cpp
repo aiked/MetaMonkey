@@ -4136,10 +4136,10 @@ JS_GetProperty(JSContext *cx, JSObject *objArg, const char *name, jsval *vp)
 
 //metadev
 JS_PUBLIC_API(JSBool)
-JS_GetPropertyToString(JSContext *cx, JSObject *obj, const char *name, JSString **vp)
+JS_GetPropertyToString(JSContext *cx, const JSObject *obj, const char *name, JSString **vp)
 {
 	jsval val;
-	if (!JS_GetProperty(cx, obj, name, &val)){
+	if (!JS_GetProperty(cx, const_cast<JSObject*>(obj), name, &val)){
 		JS_ReportError(cx, "object has not property (%s)", name);
 		return JS_FALSE;
 	}
@@ -4154,10 +4154,10 @@ JS_GetPropertyToString(JSContext *cx, JSObject *obj, const char *name, JSString 
 }
 
 extern JS_PUBLIC_API(JSBool)
-JS_GetPropertyToObj(JSContext *cx, JSObject *obj, const char *name, JSObject **vp)
+JS_GetPropertyToObj(JSContext *cx, const JSObject *obj, const char *name, JSObject **vp)
 {
 	jsval val;
-	if (!JS_GetProperty(cx, obj, name, &val)){
+	if (!JS_GetProperty(cx, const_cast<JSObject*>(obj), name, &val)){
 		JS_ReportError(cx, "object has not property (%s)", name);
 		return JS_FALSE;
 	}
@@ -6089,6 +6089,68 @@ JS_ConcatStrings(JSContext *cx, JSString *left, JSString *right)
     Rooted<JSString*> rstr(cx, right);
     return ConcatStrings<CanGC>(cx, lstr, rstr);
 }
+
+
+
+///////////////////////////
+//metadev
+JS_PUBLIC_API(JSString *)
+JS_PrefixSuffixConcatStrings(JSContext *cx, JSString *sep, Vector<JSString*> *strs, 
+							JSString *str, size_t index)
+{
+	if(sep){
+		str = JS_ConcatStrings(cx, str, sep);
+	}
+	return JS_ConcatStrings(cx, str, (*strs)[index]);
+}
+
+JS_PUBLIC_API(JSString *)
+JS_JoinStrings(JSContext *cx, size_t num, ...)
+{
+	JS_ASSERT(num>1);
+	va_list args;
+	va_start ( args, num );
+	JSString *str = va_arg ( args, JSString * );
+	if(!str)
+		str = cx->runtime()->emptyString;
+	for ( size_t i = 1; i < num; ++i ){  
+		JSString *arg = va_arg ( args, JSString * );
+		if(arg){
+			str = JS_ConcatStrings(cx, str, arg);
+		}
+	}
+	va_end ( args );
+
+	return str;
+}
+
+JS_PUBLIC_API(JSString *)
+JS_JoinStringVector(JSContext *cx, Vector<JSString*> *strs, JSString* sep, 
+					JSString* prf, JSString* suf, bool reverse)
+{
+	size_t strsLn = strs->length();
+	if( strsLn==0 ){
+		return NULL;
+	}
+
+	JSString *str = reverse ? (*strs)[strsLn-1] : (*strs)[0];
+	if(reverse){
+		for( size_t i=strsLn-2; i!=-1; --i ){
+			str = JS_PrefixSuffixConcatStrings(cx, sep, strs, str, i);
+		}
+	}
+	else{
+		for( size_t i=1; i<strsLn; ++i ){
+			str = JS_PrefixSuffixConcatStrings(cx, sep, strs, str, i);
+		}
+	}
+
+	return JS_JoinStrings(cx, 3, prf, str, suf);
+}
+
+///////////////////////
+
+
 
 JS_PUBLIC_API(JSBool)
 JS_DecodeBytes(JSContext *cx, const char *src, size_t srclen, jschar *dst, size_t *dstlenp)

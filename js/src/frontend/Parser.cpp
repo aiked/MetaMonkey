@@ -6434,6 +6434,12 @@ Parser<ParseHandler>::primaryExpr(TokenKind tt)
 			/////////////////////////////
 		}
 
+		case TOK_META_EXEC:
+		{
+			pn = statement(true); 
+			return handler.newMetaExecStatement(pn, pos());
+		}
+
 
 
       case TOK_FUNCTION: // function...

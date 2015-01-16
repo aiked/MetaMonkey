@@ -123,6 +123,12 @@
     <Filter Include="Header Files\SHELL">
       <UniqueIdentifier>{235758d9-384c-4dfa-95a9-4fc30616b565}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Std\Metaprogramming">
+      <UniqueIdentifier>{04de6699-abc9-4b77-8ce3-e3d987e1dd67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Std\Metaprogramming">
+      <UniqueIdentifier>{ec7e5fbd-bbb0-47c4-809c-6e97158ca7ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\jsscript.cpp">
@@ -690,7 +696,16 @@
       <Filter>Source Files\Shell</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\jsunparse.cpp">
-      <Filter>Source Files\Std</Filter>
+      <Filter>Source Files\Std\Metaprogramming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsastmng.cpp">
+      <Filter>Source Files\Std\Metaprogramming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsstaging.cpp">
+      <Filter>Source Files\Std\Metaprogramming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\shell\jsheaptools.cpp">
+      <Filter>Source Files\Shell</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1775,7 +1790,13 @@
       <Filter>Header Files\SHELL</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\jsunparse.h">
-      <Filter>Header Files\Std</Filter>
+      <Filter>Header Files\Std\Metaprogramming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsastmng.h">
+      <Filter>Header Files\Std\Metaprogramming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsstaging.h">
+      <Filter>Header Files\Std\Metaprogramming</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1203,30 +1203,23 @@ TokenStream::getTokenInternal()
         c = getCharIgnoreEOL();
 
 		// METADEV metatags lexical recognition
-		if (c == '<') {
-			tt = TOK_META_LQ;
-			goto out;
+		switch(c) {
+			case '<': tt = TOK_META_LQ;
+					goto out; break;
+			case '>': tt = TOK_META_RQ;
+					goto out; break;
+			case '~': tt = TOK_META_ESC;
+					goto out; break;
+			case '!': tt = TOK_META_INLINE;
+					goto out; break;
+			case '&': tt = TOK_META_EXEC;
+					goto out; break;
+			case '@': tt = TOK_META_DUCK;
+					goto out; break;
+			case '#': tt = TOK_META_HASH;
+					goto out; break;
 		}
-		if (c == '>') {
-			tt = TOK_META_RQ;
-			goto out;
-		}
-		if (c == '~') {
-			tt = TOK_META_ESC;
-			goto out;
-		}
-		if (c == '!') {
-			tt = TOK_META_INLINE;
-			goto out;
-		}
-		if (c == '@') {
-			tt = TOK_META_DUCK;
-			goto out;
-		}
-		if (c == '#') {
-			tt = TOK_META_HASH;
-			goto out;
-		}
+
 		/////////////////////////////
 		
         if (JS7_ISDEC(c)) {
