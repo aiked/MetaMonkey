@@ -4,6 +4,7 @@ using namespace js;
 
 JSBool AstObjMng::getUnaryExpr(JSContext *cx, JSObject *node, JSString **op, JSObject **body)
 {
+	*body = NULL;
 	JSString *typeStr;
 	if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
 		return JS_FALSE;
@@ -14,32 +15,27 @@ JSBool AstObjMng::getUnaryExpr(JSContext *cx, JSObject *node, JSString **op, JSO
 
 		if( !JS_GetPropertyToObj(cx, node, "argument", body) )
 			return JS_FALSE;
-	}else {
-		*body = NULL;
 	}
 	return JS_TRUE;
 }
 
 JSBool AstObjMng::getUnaryExprStmt(JSContext *cx, JSObject *node, JSString **op, JSObject **body)
 {
-	JSString *typeStr;
-	if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
+	*body = NULL;
+	JSObject *expr;
+	if( !getExprStmt(cx, node, &expr) )
 		return JS_FALSE;
-	if(typeStr->equals("ExpressionStatement")) {
 
-		if( !JS_GetPropertyToObj(cx, node, "expression", body) )
+	if(expr) {
+		if( !getUnaryExpr(cx, expr, op, body) )
 			return JS_FALSE;
-
-		if( !getUnaryExpr(cx, *body, op, body) )
-			return JS_FALSE;
-	}else {
-		*body = NULL;
 	}
 	return JS_TRUE;
 }
 
 JSBool AstObjMng::getUnary(JSContext *cx, JSObject *node, JSString **op, JSObject **body)
 {
+	*body = NULL;
 	if( !getUnaryExprStmt(cx, node, op, body) )
 		return JS_FALSE;
 
@@ -51,23 +47,24 @@ JSBool AstObjMng::getUnary(JSContext *cx, JSObject *node, JSString **op, JSObjec
 
 JSBool AstObjMng::getSpecificUnaryExpr(JSContext *cx, JSObject *node, const char *op, JSObject **body)
 {
+	*body = NULL;
 	JSString *opType;
 	if( !getUnaryExpr(cx, node, &opType, body) )
 		return JS_FALSE;
 
-	if(!opType->equals(op)) {
-		body = NULL;
+	if( !(*body && opType->equals(op)) ) {
+		*body = NULL;
 	}
 	return JS_TRUE;
 }
 
 JSBool AstObjMng::getMetaExecStmt(JSContext *cx, JSObject *node, JSObject **body)
 {
+	*body = NULL;
 	JSString *typeStr;
 	if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
 		return JS_FALSE;
 
-	*body = NULL;
 	if(typeStr->equals("MetaExecStatement")) {
 		if( !JS_GetPropertyToObj(cx, node, "body", body) )
 			return JS_FALSE;
@@ -77,15 +74,13 @@ JSBool AstObjMng::getMetaExecStmt(JSContext *cx, JSObject *node, JSObject **body
 
 JSBool AstObjMng::getMetaExecExprStmt(JSContext *cx, JSObject *node, JSObject **body)
 {
-	JSString *typeStr;
 	*body = NULL;
-	if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
+	JSObject *expr;
+	if( !getExprStmt(cx, node, &expr) )
 		return JS_FALSE;
-	if(typeStr->equals("ExpressionStatement")) {
-		if( !JS_GetPropertyToObj(cx, node, "expression", body) )
-			return JS_FALSE;
 
-		if( !getMetaExecStmt(cx, *body, body) )
+	if(expr) {
+		if( !getMetaExecStmt(cx, expr, body) )
 			return JS_FALSE;
 	}
 	return JS_TRUE;
@@ -93,6 +88,7 @@ JSBool AstObjMng::getMetaExecExprStmt(JSContext *cx, JSObject *node, JSObject **
 
 JSBool AstObjMng::getMetaExec(JSContext *cx, JSObject *node, JSObject **body)
 {
+	*body = NULL;
 	if( !AstObjMng::getMetaExecExprStmt(cx, node, body) )
 		return JS_FALSE;
 
@@ -102,102 +98,99 @@ JSBool AstObjMng::getMetaExec(JSContext *cx, JSObject *node, JSObject **body)
 	return JS_TRUE;
 }
 
-JSBool AstObjMng::getExecNode(JSContext *cx, JSObject *parentNode, JSObject *node, 
-								JSObject **stmt, bool *isExpr, const uint32_t depth)
+JSBool AstObjMng::getMetaQuaziStmt(JSContext *cx, JSObject *node, JSObject **body)
 {
-	JSObject *parentBody;
-	if( parentNode ) {
-		if(!AstObjMng::getMetaExecStmt(cx, parentNode, &parentBody))
+	*body = NULL;
+	JSString *typeStr;
+	if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
+		return JS_FALSE;
+
+	if(typeStr->equals("MetaQuaziStatement")) {
+		if( !JS_GetPropertyToObj(cx, node, "body", body) )
 			return JS_FALSE;
-
-		if(parentBody){
-			*stmt = NULL;
-			return JS_TRUE;
-		}
-	}
-	uint32_t currDepth = 0;
-	JSObject *lastExecNode = NULL;
-	*stmt = NULL;
-	bool firstLoop = true;
-	while(1) {
-		JSObject *tmpNode;
-		if( !AstObjMng::getMetaExecExprStmt(cx, node, &tmpNode) )
-			return JS_FALSE;
-
-		if(firstLoop) 
-			*isExpr = !!tmpNode;
-
-		if( !tmpNode && !AstObjMng::getMetaExecStmt(cx, node, &tmpNode) )
-			return JS_FALSE;
-
-		if(tmpNode) {
-			++currDepth;
-			lastExecNode = tmpNode;
-			node = tmpNode;
-		}else {
-			if(depth==currDepth-1){
-				*stmt = lastExecNode;
-			}
-			break;
-		}
-		firstLoop = false;
 	}
 	return JS_TRUE;
 }
 
-JSBool AstObjMng::getInlineNode(JSContext *cx, JSObject *parentNode, JSObject *node, 
-								JSObject **expr, bool *isExpr, const uint32_t depth)
+JSBool AstObjMng::getExprStmt(JSContext *cx, JSObject *node, JSObject **expr)
 {
-	JSObject *parentBody;
-	if( parentNode ) {
-		if(!AstObjMng::getMetaExecStmt(cx, parentNode, &parentBody))
-			return JS_FALSE;
-
-		if(parentBody){
-			*expr = NULL;
-			return JS_TRUE;
-		}
-	}
-	uint32_t currDepth = 0;
 	*expr = NULL;
-	bool firstLoop = true;
-	while(1) {
-		JSObject *tmpNode;
-		if( !AstObjMng::getMetaExecExprStmt(cx, node, &tmpNode) )
+	JSString *typeStr;
+	if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
+		return JS_FALSE;
+
+	if(typeStr->equals("ExpressionStatement")) {
+		if( !JS_GetPropertyToObj(cx, node, "expression", expr) )
 			return JS_FALSE;
-
-		if(firstLoop) 
-			*isExpr = !!tmpNode;
-
-		if( !tmpNode && !AstObjMng::getMetaExecStmt(cx, node, &tmpNode) )
-			return JS_FALSE;
-
-		if(tmpNode) {
-			++currDepth;
-			node = tmpNode;
-		}else {
-			JSObject *inlineBody;
-			JSString *op;
-			if( !AstObjMng::getUnaryExpr(cx, node, &op, &inlineBody) )
-				return JS_FALSE;
-
-			if(firstLoop) 
-				*isExpr = !!inlineBody;
-
-			if( !inlineBody && !AstObjMng::getUnaryExprStmt(cx, node, &op, &inlineBody) )
-				return JS_FALSE;
-			
-			if( inlineBody && op->equals(".!") && currDepth==depth ) {
-				*expr = inlineBody;
-			}
-			break;
-		}
-		firstLoop = false;
 	}
 	return JS_TRUE;
 }
 
 
+JSBool AstObjMng::WrapStmt(JSContext *cx, jsval *stmtVal)
+{
+	JSObject *stmtObj;
+	if( !JS_ValueToObject(cx, *stmtVal, &stmtObj) )
+		return JS_FALSE;
+
+	JSObject *exprObj;
+	if( !JS_GetPropertyToObj(cx, stmtObj, "expression", &exprObj) )
+		return JS_FALSE;
+
+	*stmtVal = OBJECT_TO_JSVAL(exprObj);
+	return JS_TRUE;
+}
+
+
+JSBool AstObjMng::GetBodyFromProgram(JSContext *cx, jsval astObjVal, 
+							JSObject **bodyObj, uint32_t *bodyChildrenLen )
+{
+	JSObject *astObj = JSVAL_TO_OBJECT(astObjVal);
+	if( !astObj )
+		return JS_FALSE;
+
+	JSString *astTypeStr;
+	if( !JS_GetPropertyToString(cx, astObj, "type", &astTypeStr) )
+		return JS_FALSE;
+
+	if ( !astTypeStr->equals("Program") ) {
+		JS_ReportError(cx, "object type is not program");
+		return JS_FALSE;
+	}
+
+	if( !JS_GetPropertyToObj(cx, astObj, "body", bodyObj) )
+		return JS_FALSE;
+
+	if ( !JS_IsArrayObject(cx, *bodyObj) ){
+		JS_ReportError(cx, "Program.body is not an array.");
+		return JS_FALSE;
+	}
+
+	if ( !JS_GetArrayLength(cx, *bodyObj, bodyChildrenLen) )
+		return JS_FALSE;
+	
+	return JS_TRUE;
+}
+
+
+JSBool AstObjMng::GetStmtsFromAstObj(JSContext *cx, bool fromStmt, jsval astObjVal,  
+										JSObject **vp, uint32_t *bodyChildrenLen) 
+{
+	JSObject *bodyObj;
+	if( !GetBodyFromProgram(cx, astObjVal, &bodyObj, bodyChildrenLen) )
+		return JS_FALSE;
+
+	for( uint32_t i=0; i<*bodyChildrenLen; ++i ){
+		jsval stmtVal;
+		if (!JS_GetElement(cx, bodyObj, i, &stmtVal))
+			return JS_FALSE;
+		if ( !fromStmt && !WrapStmt(cx, &stmtVal) )
+			return JS_FALSE;
+		if ( !JS_ArrayObjPush(cx, *vp, &stmtVal ) )
+			return JS_FALSE;
+	}
+	return JS_TRUE;
+}
 
 ///////////////////////////////////////////////////
 // iterate object

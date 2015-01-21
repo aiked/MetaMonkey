@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iostream>
+
 #include "mozilla/DebugOnly.h"
 #include "mozilla/GuardObjects.h"
 #include "mozilla/Util.h"
@@ -41,6 +43,7 @@
 #include "jswrapper.h"
 #include "jsperf.h"
 #include "jsunparse.h"
+#include "jsastmng.h"
 #include "jsstaging.h"
 
 #include "builtin/TestingFunctions.h"
@@ -3568,10 +3571,7 @@ GetSelfHostedValue(JSContext *cx, unsigned argc, jsval *vp)
     return cx->runtime()->cloneSelfHostedValue(cx, srcName, args.rval());
 }
 
-
-
 //metadev
-
 static JSBool
 unParse(JSContext *cx, unsigned argc, jsval *vp)
 {
@@ -3583,33 +3583,28 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
     }
 
 	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
-
     if (!obj) {
-        fprintf(stderr, "NULL\n");
+		JS_ReportError(cx, "ast object is null");
         return JS_FALSE;
     }
 
-	JSString *str = NULL;
-	unparse *up = unparse::getSingleton();
-
-	StagingProcess::createSingleton(cx);
 	StagingProcess *stagingProcess = StagingProcess::getSingleton();
-	int depth;
-	stagingProcess->getDeapestStage(obj, &depth);
-	if(depth>-1) {
-		stagingProcess->collectStage(obj, (uint32_t) depth);
-		Stage &stage = stagingProcess->getStage();
-		stage.exec();
+	uint32_t depth;
+	while(1){
+		if(!stagingProcess->getDeapestStage(obj, &depth))
+			return JS_FALSE;
+		if(depth==0)
+			break;
+		JS_ReportInfo(cx, "- executing stage %d\n", (int)depth);
+		if(!stagingProcess->staging(obj, depth))
+			return JS_FALSE;
 	}
 
-	StagingProcess::destroySingleton();
-
+	JSString *str = NULL;
+	unparse *up = unparse::getSingleton();
 	if (!up->unParse_start(obj, &str))
 		return JS_FALSE;
-
 	vp->setString(str);
-
-	//vp->setString( JS_NewStringCopyZ(cx, "unparse") );
 
 	return JS_TRUE;
 }
@@ -3642,71 +3637,6 @@ Meta_escapejsvalue(JSContext *cx, unsigned argc, jsval *vp)
 	return JS_TRUE;
 }
 
-
-static JSBool 
-WrapStmt(JSContext *cx, jsval *stmtVal)
-{
-	JSObject *stmtObj;
-	if( !JS_ValueToObject(cx, *stmtVal, &stmtObj) )
-		return JS_FALSE;
-
-	JSObject *exprObj;
-	if( !JS_GetPropertyToObj(cx, stmtObj, "expression", &exprObj) )
-		return JS_FALSE;
-
-	*stmtVal = OBJECT_TO_JSVAL(exprObj);
-	return JS_TRUE;
-}
-
-static JSBool 
-GetBodyFromProgram(JSContext *cx, jsval astObjVal, JSObject **bodyObj, uint32_t *bodyChildrenLen )
-{
-	JSObject *astObj = JSVAL_TO_OBJECT(astObjVal);
-	if( !astObj )
-		return JS_FALSE;
-
-	JSString *astTypeStr;
-	if( !JS_GetPropertyToString(cx, astObj, "type", &astTypeStr) )
-		return JS_FALSE;
-
-	if ( !astTypeStr->equals("Program") ) {
-		JS_ReportError(cx, "object type is not program");
-		return JS_FALSE;
-	}
-
-	if( !JS_GetPropertyToObj(cx, astObj, "body", bodyObj) )
-		return JS_FALSE;
-
-	if ( !JS_IsArrayObject(cx, *bodyObj) ){
-		JS_ReportError(cx, "Program.body is not an array.");
-		return JS_FALSE;
-	}
-
-	if ( !JS_GetArrayLength(cx, *bodyObj, bodyChildrenLen) )
-		return JS_FALSE;
-	
-	return JS_TRUE;
-}
-
-static JSBool 
-GetStmtsFromAstObj(JSContext *cx, bool fromStmt, jsval astObjVal,  JSObject **vp, uint32_t *bodyChildrenLen) 
-{
-	JSObject *bodyObj;
-	if( !GetBodyFromProgram(cx, astObjVal, &bodyObj, bodyChildrenLen) )
-		return JS_FALSE;
-
-	for( uint32_t i=0; i<*bodyChildrenLen; ++i ){
-		jsval stmtVal;
-		if (!JS_GetElement(cx, bodyObj, i, &stmtVal))
-			return JS_FALSE;
-		if ( !fromStmt && !WrapStmt(cx, &stmtVal) )
-			return JS_FALSE;
-		if ( !JS_ArrayObjPush(cx, *vp, &stmtVal ) )
-			return JS_FALSE;
-	}
-	return JS_TRUE;
-}
-
 static JSBool
 Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 {
@@ -3726,7 +3656,8 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 		uint32_t bodyChildrenLen;
 		jsval escapeStmt = args[1];
 		fromStmt = args[2].toBoolean();
-		if( !GetStmtsFromAstObj(cx, fromStmt, escapeStmt, &escapeObjArray, &bodyChildrenLen) )
+		if( !AstObjMng::GetStmtsFromAstObj(cx, fromStmt, escapeStmt, 
+											&escapeObjArray, &bodyChildrenLen) )
 			return JS_FALSE;
 
 		if( bodyChildrenLen==1 ) {
@@ -3784,7 +3715,8 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 					return JS_FALSE;
 
 				uint32_t bodyChildrenLen;
-				if( !GetStmtsFromAstObj(cx, fromStmt, OBJECT_TO_JSVAL(escStmtObj), &escapeObjArray, &bodyChildrenLen) )
+				if( !AstObjMng::GetStmtsFromAstObj(cx, fromStmt, OBJECT_TO_JSVAL(escStmtObj), 
+													&escapeObjArray, &bodyChildrenLen) )
 					return JS_FALSE;
 		
 				++eaIdx;
@@ -3815,14 +3747,19 @@ Inline(JSContext *cx, unsigned argc, jsval *vp)
         return JS_FALSE;
     }
 
-	JSObject *obj = JSVAL_TO_OBJECT(args[0]);
-    if (!obj) {
-        fprintf(stderr, "NULL\n");
-        return JS_FALSE;
-    }
+	jsval astObj = args[0];
+	if(!JSVAL_TO_OBJECT(astObj)) {
+		JS_ReportError(cx, "inline: not valid object argument\n");
+		return JS_FALSE;
+	}
 
-	args.rval().setObject(*obj);
+	StagingProcess *stagingProcess = StagingProcess::getSingleton();
+	Stage &stage = stagingProcess->getStage();
+	NodeInfo inlineNodeInfo = stage.dequeueInline();
+	if(!MergeNodeToAst(cx, inlineNodeInfo, JSVAL_TO_OBJECT(astObj)))
+		return JS_FALSE;
 
+	args.rval().setUndefined();
 	return JS_TRUE;
 }
 
@@ -5200,16 +5137,10 @@ static int stagingProcess(JSContext *cx, JSObject *global, const char *inputFile
 	using namespace JS;
 
     char* staggedFilename = JS_sprintf_append(NULL, "%s_stagged", inputFileName);
-
-	fprintf(stderr, "\ngenerating staging report location at \"%s\"...\n", staggedFilename);
-	AutoFile staggedFile;
-	if (!staggedFile.open(cx, staggedFilename, "w"))
-		return 1;
-
+	StagingProcess::createSingleton(cx, outputFileName);
 	unparse *up = unparse::getSingleton();
-	up->setStaggingReportOutput(&staggedFile);
 
-    fprintf(stderr, "opening \"%s\"...\n", inputFileName);
+	JS_ReportInfo(cx, "opening \"%s\".\n", inputFileName);
 
     FileContents buffer(cx);
 	{
@@ -5226,38 +5157,31 @@ static int stagingProcess(JSContext *cx, JSObject *global, const char *inputFile
 //============================= START ================================
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
-	jsval	rval;
+	jsval rval;
 
-	fprintf(stderr, "converting src to ast...\n");
-
+	JS_ReportInfo(cx, "converting src to ast... ");
 	if (!reflect_parse_from_string(cx, chars, length, &rval)){
-		fprintf(stderr, "reflection parse error\n");
+		JS_ReportError(cx, "reflection parse error\n");
 		return JS_FALSE;
 	}
+	JS_ReportInfo(cx, "done.\n");
 
-	fprintf(stderr, "converting ast to src...\n");
+	JS_ReportInfo(cx, "converting ast to src.\n");
 	JS::Value args[] = { rval  };
 	JS::Value stringify;
 	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringify)){
-		fprintf(stderr, "unparse error\n");
+		JS_ReportError(cx, "unparse error\n");
 		return JS_FALSE;
 	}
+	JS_ReportInfo(cx, "done.\n", outputFileName);
 
 //============================= END =================================
-
-	fprintf(stderr, "saving \"%s\"...\n", outputFileName);
-	{
-		char * retVal = JS_EncodeString(cx, stringify.toString() );
-		AutoFile file;
-		if (!file.open(cx, outputFileName, "w") || !file.writeAll(cx, retVal))
-			return 1;
-		js_free(retVal);
-	}
-
+	JS_ReportInfo(cx, "saving \"%s\"...\n", outputFileName);
+	if (!JS::AutoFile::OpenAndWriteAll(cx, outputFileName, stringify.toString()))
+		return 1;
 	js_free(chars);
-
-	fprintf(stderr, "done.\n\n");
-	
+	StagingProcess::destroySingleton();
+	JS_ReportInfo(cx, "finish.\n");
     return 0;
 }
 

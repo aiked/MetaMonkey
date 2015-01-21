@@ -1674,14 +1674,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 	}
 }
 
-void unparse::setStaggingReportOutput(JS::AutoFile *staggingOutput)
-{
-	this->staggingOutput = staggingOutput;
-}
-
-unparse::~unparse(){
-
-}
+unparse::~unparse(){}
 
 ///////////////////////////////
 // inline evaluator
@@ -1699,10 +1692,10 @@ JSBool unparse::inlineEvalExecInline(JSString *code, JSString **child)
 
 	char *source = JS_EncodeString(cx, evaluatedCode);
 
-	staggingReport("\n===================RUNNING========================\n");
+/*	staggingReport("\n===================RUNNING========================\n");
 	staggingReport(source);
 	staggingReport("\n===================RESULT==========================\n");
-
+*/
 	jsval inlineRetVal;
 	if (!JS_EvaluateScript(cx, cx->global(), source, strlen(source),
 							"inlineEval.js", 1, &inlineRetVal))
@@ -1716,8 +1709,9 @@ JSBool unparse::inlineEvalExecInline(JSString *code, JSString **child)
 		return JS_FALSE;
 
 	if(*child){
-		staggingReport(JS_EncodeString(cx, *child));
+/*		staggingReport(JS_EncodeString(cx, *child));
 		staggingReport("\n==================================================\n");
+		*/
 	}
 
 	return JS_TRUE;
@@ -2440,6 +2434,7 @@ JSBool unparse::unparse_sourceElement(const JSObject *val, JSString **child, JSS
 
 JSBool unparse::unParse_start(const JSObject *obj, JSString **s)
 {	
+	*s = NULL;
 	JSString *objTypeStr;
 	if( !JS_GetPropertyToString(cx, obj, "type", &objTypeStr) )
 		return JS_FALSE;

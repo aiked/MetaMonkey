@@ -38,7 +38,8 @@ There are 2 different types to acces a value from an object.
 	value.key = key1;
 	parent = objVal;
 */
-struct InlineInfo{
+	
+struct NodeInfo{
 	bool isArray;
 	bool isExpr;
 	
@@ -50,30 +51,39 @@ struct InlineInfo{
 
 	JSObject *parent;
 
-	InlineInfo(bool _isExpr, JSObject *_parent, JSObject *_node )
+	NodeInfo(bool _isExpr, JSObject *_parent, JSObject *_node )
 		: isArray(true), isExpr(_isExpr), parent(_parent) { value.node = _node; }
 
-	InlineInfo(bool _isExpr, JSObject *_parent, const char *_key )
-		: isArray(true), isExpr(_isExpr), parent(_parent) { value.key = _key; }
+	NodeInfo(bool _isExpr, JSObject *_parent, const char *_key )
+		: isArray(false), isExpr(_isExpr), parent(_parent) { value.key = _key; }
 };
+
+extern JSBool MergeNodeToAst(JSContext *cx, NodeInfo nodeinfo, JSObject *ast=NULL);
 
 class Stage{
 	JSContext *cx;
+	JSObject *ast;
 	JSString *code;
-	Vector<InlineInfo> inlinesInfo;
-	Vector<JSObject*> execNodes;
+	uint32_t depth;
+	Vector<NodeInfo> inlineNodesInfo;
+	Vector<NodeInfo> execNodesInfo;
 
   public:
 	Stage(JSContext *cx);
 
-	JSBool addInline(bool _isExpr, JSObject *expr, JSObject *_parent, JSObject *_node);
-	JSBool addInline(bool _isExpr, JSObject *expr, JSObject *_parent, const char *_key);
-	JSBool addExec(JSObject *node, JSObject *stmt);
+	JSBool pushInline(NodeInfo nodeInfo, JSObject *expr);
+	JSBool pushExec(NodeInfo nodeInfo, JSObject *stmt);
+
+	NodeInfo dequeueInline();
 
 	JSBool exec();
-	JSBool clear();
+	JSBool init(JSObject *ast, uint32_t depth);
+	JSBool unparseAst(JSString **srcCode);
+
+	uint32_t getDepth(){ return depth; }
+	JSString *getSrcCode(){ return code; }
   private:
-	JSBool unparseInline(JSObject *expr);
+	JSBool cutExecs();
 };
 
 class StagingProcess{
@@ -83,22 +93,31 @@ class StagingProcess{
 
 	JSContext *cx;
 	Stage stage;
-	StagingProcess(JSContext *x);
+	const char *outputFilename;
+
+	StagingProcess(JSContext *cx, const char *outputFilename);
 
   public:
-	static void createSingleton(JSContext *cx);
+	static void createSingleton(JSContext *cx, const char *outputFileName);
 	static void destroySingleton();
 	static StagingProcess *getSingleton();
 
-	JSBool getDeapestStage(JSObject *obj, int *depth);
-	JSBool collectStage(JSObject *obj, uint32_t depth);
-	Stage &getStage(){ return stage; };
+	JSBool staging(JSObject *obj, uint32_t depth);
+	JSBool getDeapestStage(JSObject *obj, uint32_t *depth);
+	Stage &getStage(){ return stage; }
+
+  private:
+	JSBool collectStage(JSObject *obj);
+	JSBool reportExecutionStaging();
+	JSBool reportResultStaging(JSString *srcCode);
 };
 
 
 ////////MetaStage////////
 
 }/* js */
+
+
 
 #endif 
 /* jsstaging_h */

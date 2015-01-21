@@ -3500,6 +3500,8 @@ JS_ArrayObjPush(JSContext *cx, JSObject *obj, jsval *val);
 extern JS_PUBLIC_API(JSBool) 
 JS_GetArrayElementToObj(JSContext *cx, JSObject *arrayObj, 	const uint32_t index, JSObject **objVal);
 
+extern JS_PUBLIC_API(JSBool) 
+JS_ArrayIndexOf(JSContext *cx, JSObject *arr, jsval targetElem, int *idx);
 
 extern JS_PUBLIC_API(JSBool)
 JS_GetPropertyDefault(JSContext *cx, JSObject *obj, const char *name, jsval def, jsval *vp);
@@ -4811,6 +4813,10 @@ JS_ReportErrorNumberUCArray(JSContext *cx, JSErrorCallback errorCallback,
 extern JS_PUBLIC_API(JSBool)
 JS_ReportWarning(JSContext *cx, const char *format, ...);
 
+//metadev
+extern JS_PUBLIC_API(JSBool)
+JS_ReportInfo(JSContext *cx, const char *format, ...);
+
 extern JS_PUBLIC_API(JSBool)
 JS_ReportErrorFlagsAndNumber(JSContext *cx, unsigned flags,
                              JSErrorCallback errorCallback, void *userRef,
@@ -5196,6 +5202,8 @@ class AutoFile
 	bool open(JSContext *cx, const char *filename, const char *mode = "r");
 	bool readAll(JSContext *cx, FileContents &buffer);
 	bool writeAll(JSContext *cx, const char *content);
+
+	static bool OpenAndWriteAll(JSContext *cx, const char *filename, JSString *content);
 };
 
 }

@@ -4200,7 +4200,28 @@ JS_GetArrayElementToObj(JSContext *cx, JSObject *arrayObj, 	const uint32_t index
 	return JS_TRUE;
 }
 
+extern JS_PUBLIC_API(JSBool) 
+JS_ArrayIndexOf(JSContext *cx, JSObject *arr, jsval targetElem, int *idx)
+{
+	uint32_t arrayLen;
+	if ( !JS_GetArrayLength(cx, arr, &arrayLen) )
+		return JS_FALSE;
 
+	for( uint32_t i=0; i<arrayLen; ++i ){
+		jsval elem;
+		if (!JS_GetElement(cx, arr, i, &elem))
+			return JS_FALSE;
+		JSBool isEq;
+		if(!JS_SameValue(cx, elem, targetElem, &isEq)) 
+			return JS_FALSE;
+		if(isEq) {
+			*idx = i;
+			return JS_TRUE;
+		}
+	}
+	*idx = -1;
+	return JS_TRUE;
+}
 
 JS_PUBLIC_API(JSBool)
 JS_GetPropertyDefault(JSContext *cx, JSObject *objArg, const char *name, jsval defArg, jsval *vp)
@@ -5123,6 +5144,16 @@ JS::AutoFile::open(JSContext *cx, const char *filename, const char *mode)
         }
     }
     return true;
+}
+
+bool JS::AutoFile::OpenAndWriteAll(JSContext *cx, const char *filename, JSString *contentStr)
+{
+	char *content = JS_EncodeString(cx, contentStr);
+	JS::AutoFile file;
+	if (!file.open(cx, filename, "w") || !file.writeAll(cx, content))
+		return false;
+	js_free(content);
+	return true;
 }
 
 JS::CompileOptions::CompileOptions(JSContext *cx, JSVersion version)
@@ -6551,6 +6582,23 @@ JS_ReportWarning(JSContext *cx, const char *format, ...)
     ok = js_ReportErrorVA(cx, JSREPORT_WARNING, format, ap);
     va_end(ap);
     return ok;
+}
+
+//metadev
+extern JS_PUBLIC_API(JSBool)
+JS_ReportInfo(JSContext *cx, const char *format, ...)
+{
+    va_list ap;
+    JSBool ok;
+
+    AssertHeapIsIdle(cx);
+    va_start(ap, format);
+	char *message = JS_vsmprintf(format, ap);
+	fprintf(stdout, message);
+	js_free(message);
+    va_end(ap);
+	return JS_TRUE;
+
 }
 
 JS_PUBLIC_API(JSBool)

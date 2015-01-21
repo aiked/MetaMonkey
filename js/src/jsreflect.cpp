@@ -1610,7 +1610,8 @@ ASTSerializer::metaExecStatement(ParseNode *pn, MutableHandleValue dst)
 	JS_ASSERT(pn->isKind(PNK_METAEXEC));
 	ParseNode *next = pn->pn_head;
     RootedValue stmt(cx);
-    return statement(next, &stmt) &&
+    return next && 
+		   statement(next, &stmt) &&
            nodeHandler.metaExecStatement(stmt, &next->pn_pos, dst);
 }
 

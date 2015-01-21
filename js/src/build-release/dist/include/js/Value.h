@@ -80,7 +80,7 @@ JS_ENUM_HEADER(JSValueType, uint8_t)
     JSVAL_TYPE_MISSING             = 0x21
 } JS_ENUM_FOOTER(JSValueType);
 
-JS_STATIC_ASSERT(sizeof(JSValueType) == 1);
+//JS_STATIC_ASSERT(sizeof(JSValueType) == 1);
 
 #if JS_BITS_PER_WORD == 32
 
