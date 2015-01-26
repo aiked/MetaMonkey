@@ -79,8 +79,8 @@ char const * const js::unopNames[] = {
     "delete",  /* UNOP_DELETE */
 	".!",
 	".&",
-	"meta_esc",
-	"meta_duck",
+	".~",
+	".@",
     "-",       /* UNOP_NEG */
     "+",       /* UNOP_POS */
     "!",       /* UNOP_NOT */
@@ -2971,23 +2971,24 @@ reflect_parse_from_string(JSContext *cx, jschar *jsQuaziSnippet, uint32_t quaziS
 {
     ScopedJSFreePtr<char> filename;
     uint32_t lineno = 1;
-
     CompileOptions options(cx);
-    options.setFileAndLine(filename, lineno);
-    options.setCanLazilyParse(false);
+    options.setFileAndLine("<string>", 1)
+			.setCompileAndGo(false);
     Parser<FullParseHandler> parser(cx, options, jsQuaziSnippet, quaziSnippetLength,
                                     /* foldConstants = */ false, NULL, NULL);
 	RootedObject builder(cx);
-	bool loc = false;
+	bool loc = true;
 	ASTSerializer serialize(cx, loc, filename, lineno);
     if (!serialize.init(builder)){
         return JS_FALSE;
 	}
     serialize.setParser(&parser);
-
+	
     ParseNode *pn = parser.parse(NULL);
-    if (!pn)
+    if (!pn){
+		JS_ReportException(cx);
         return JS_FALSE;
+	}
 
     RootedValue retVal(cx);
     if (!serialize.program(pn, &retVal)) {

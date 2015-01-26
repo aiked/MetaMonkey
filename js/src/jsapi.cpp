@@ -6920,6 +6920,17 @@ JS_ReportPendingException(JSContext *cx)
     return js_ReportUncaughtException(cx);
 }
 
+JS_PUBLIC_API(JSBool)
+JS_ReportException(JSContext *cx)
+{
+	if(JS_IsExceptionPending(cx)) {
+		JS_ReportPendingException(cx);
+		JS_ClearPendingException(cx);
+		return JS_TRUE;
+	}
+	return JS_FALSE;
+}
+
 struct JSExceptionState {
     bool throwing;
     jsval exception;

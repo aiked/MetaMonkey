@@ -182,9 +182,6 @@ class unparse{
 	///////////////////////
 	// inline evaluator
 
-	JSBool inlineEvalAppendCode(JSString *code);
-	JSBool inlineEvalExecInline(JSString *code, JSString **child);
-
 	public:
 	///////////////////////
 	// object stringify

@@ -3595,7 +3595,6 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 			return JS_FALSE;
 		if(depth==0)
 			break;
-		JS_ReportInfo(cx, "- executing stage %d\n", (int)depth);
 		if(!stagingProcess->staging(obj, depth))
 			return JS_FALSE;
 	}
@@ -3604,8 +3603,8 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 	unparse *up = unparse::getSingleton();
 	if (!up->unParse_start(obj, &str))
 		return JS_FALSE;
-	vp->setString(str);
 
+	vp->setString(str);
 	return JS_TRUE;
 }
 
@@ -5146,23 +5145,23 @@ static int stagingProcess(JSContext *cx, JSObject *global, const char *inputFile
 	{
 		AutoFile file;
 		if (!file.open(cx, inputFileName) || !file.readAll(cx, buffer))
-			return 1;
+			return EXIT_FAILURE;
 	}
 	
 	size_t length = buffer.length();
     jschar *chars = InflateUTF8String(cx, buffer.begin(), &length);
     if (!chars)
-        return 1;
+        return EXIT_FAILURE;
 
 //============================= START ================================
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
 	jsval rval;
 
-	JS_ReportInfo(cx, "converting src to ast... ");
+	JS_ReportInfo(cx, "converting src to ast. ");
 	if (!reflect_parse_from_string(cx, chars, length, &rval)){
-		JS_ReportError(cx, "reflection parse error\n");
-		return JS_FALSE;
+		JS_ReportError(cx, "reflection parse error.\n");
+		return EXIT_FAILURE;
 	}
 	JS_ReportInfo(cx, "done.\n");
 
@@ -5171,18 +5170,19 @@ static int stagingProcess(JSContext *cx, JSObject *global, const char *inputFile
 	JS::Value stringify;
 	if (!JS_CallFunctionName(cx, global, "unparse", 1, args, &stringify)){
 		JS_ReportError(cx, "unparse error\n");
-		return JS_FALSE;
+		return EXIT_FAILURE;
 	}
 	JS_ReportInfo(cx, "done.\n", outputFileName);
 
 //============================= END =================================
-	JS_ReportInfo(cx, "saving \"%s\"...\n", outputFileName);
+	JS_ReportInfo(cx, "saving \"%s\".\n", outputFileName);
 	if (!JS::AutoFile::OpenAndWriteAll(cx, outputFileName, stringify.toString()))
-		return 1;
+		return EXIT_FAILURE;
+	
 	js_free(chars);
 	StagingProcess::destroySingleton();
 	JS_ReportInfo(cx, "finish.\n");
-    return 0;
+	return EXIT_SUCCESS;
 }
 
 
@@ -5194,17 +5194,20 @@ run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFil
     RootedObject glob(cx);
     glob = NewGlobalObject(cx, NULL);
     if (!glob)
-        return 1;
+        return EXIT_FAILURE;
 
     JSAutoCompartment ac(cx, glob);
     JS_SetGlobalObject(cx, glob);
 
     JSObject *envobj = JS_DefineObject(cx, glob, "environment", &env_class, NULL, 0);
     if (!envobj)
-        return 1;
+        return EXIT_FAILURE;
     JS_SetPrivate(envobj, envp);
 
 	int result = stagingProcess(cx, glob, inputFileName, outputFileName);
+
+	if(result==EXIT_FAILURE)
+		JS_ReportException(cx);
 
     if (enableDisassemblyDumps)
         JS_DumpCompartmentPCCounts(cx);

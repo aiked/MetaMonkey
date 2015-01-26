@@ -1,7 +1,1 @@
-
-    if (1) {
-    print("staging vol.2");
-    }
-
-    x = {loc:null, type:"Program", body:[{loc:null, type:"VariableDeclaration", kind:"var", declarations:[{loc:null, type:"VariableDeclarator", id:{loc:null, type:"Identifier", name:"stg"}, init:{loc:null, type:"Literal", value:"stage 2"}}]}]};
-inline( x );
+inline( {loc:null, type:"Program", body:[{loc:null, type:"TryStatement", block:{loc:null, type:"BlockStatement", body:meta_escape( true,[],[{index:0,expr:ast}],true)}, guardedHandlers:[], handler:{loc:null, type:"CatchClause", param:{loc:null, type:"Identifier", name:"e"}, guard:null, body:{loc:null, type:"BlockStatement", body:[]}}, finalizer:null},{loc:null, type:"EmptyStatement"}]} );

@@ -204,8 +204,6 @@ JSBool js::MergeNodeToAst(JSContext *cx, NodeInfo nodeinfo, JSObject *ast)
 }
 
 
-
-
 ///////////////////////
 // StagingProcess
 
@@ -229,134 +227,7 @@ void StagingProcess::destroySingleton()
 
 StagingProcess * StagingProcess::getSingleton(){ return stagingProcessSingleInst; }
 
-
-
-//struct FindDeapestStage
-//{
-//	JSContext *cx;
-//	int depth;
-//
-//	FindDeapestStage(JSContext *_cx): cx(_cx), depth(-1) {}
-//
-//	JSBool singleObj(const char *propKey,JSObject *node, JSObject *parentNode){
-//		JSObject *parentBody;
-//		if( parentNode ) {
-//			if(!AstObjMng::getMetaExec(cx, parentNode, &parentBody))
-//				return JS_FALSE;
-//
-//			if(parentBody)
-//				return JS_TRUE;
-//		}
-//
-//		int currDepth = 0;
-//		JSObject *lastExecNode = NULL;
-//		JSObject *tmpNode;
-//		while(1) {
-//			if( !AstObjMng::getMetaExec(cx, node, &tmpNode) )
-//				return JS_FALSE;
-//
-//			if(tmpNode) {
-//				++currDepth;
-//				lastExecNode = node;
-//				node = tmpNode;
-//			}else {
-//				JSObject *inlineBody;
-//				JSString *op;
-//				if( !AstObjMng::getUnary(cx, node, &op, &inlineBody) )
-//					return JS_FALSE;
-//
-//				if( inlineBody && op->equals(".!") ) {
-//					depth = Max( depth, currDepth );
-//				}else if( currDepth > 0 ) {
-//					JS_ASSERT( lastExecNode );
-//					depth = Max( depth, currDepth - 1 );
-//				}
-//				break;
-//			}
-//		}
-//
-//		return JS_TRUE;
-//	}
-//	JSBool arrayLoopStart(JSObject *node, JSObject *parentNode, uint32_t arrayLen){ return JS_TRUE; }
-//	JSBool arrayLoopIdx(JSObject *node, JSObject *parentNode, uint32_t idx, JSObject *elem){
-//		if(!singleObj(NULL, elem, parentNode))
-//			return JS_FALSE;
-//
-//		return JS_TRUE;
-//	}
-//	JSBool arrayLoopEnd(JSObject *node, JSObject *parentNode){ return JS_TRUE; }
-//};
-//
-//JSBool StagingProcess::getDeapestStage(JSObject *obj, int *depth )
-//{
-//	FindDeapestStage stageDepthFinder(cx);
-//	AstObjIterator objIterator(cx);
-//	if(!objIterator.iterateObject(obj, &stageDepthFinder))
-//		return JS_FALSE;
-//	*depth = stageDepthFinder.depth;
-//	return JS_TRUE;
-//}
-
-//struct ExtractStagingTags
-//{
-//	JSContext *cx;
-//	const uint32_t depth;
-//	Stage *stage;
-//
-//	ExtractStagingTags(JSContext *_cx, Stage *_stage, const uint32_t _depth): cx(_cx), 
-//						depth(_depth), stage(_stage) {}
-//
-//	JSBool singleObj(const char *propKey, JSObject *node, JSObject *parentNode){ 
-//		//return JS_TRUE;
-//		JSObject *inlineBodyObj;
-//		bool isExpr;
-//		if( !AstObjMng::getInlineNode(cx, parentNode, node, &inlineBodyObj, &isExpr, depth ) )
-//			return JS_FALSE;
-//		if(inlineBodyObj){
-//			stage->pushInline(isExpr, inlineBodyObj, parentNode, propKey);
-//		}else {
-//			JSObject *execBodyObj;
-//			if( !AstObjMng::getExecNode(cx, parentNode, node, &execBodyObj, &isExpr, depth ) )
-//				return JS_FALSE;
-//			if(execBodyObj){
-//				stage->pushExec(node, execBodyObj);
-//			}
-//		}
-//		return JS_TRUE;
-//	}
-//	JSBool arrayLoopStart(JSObject *node, JSObject *parentNode, uint32_t arrayLen){ 
-//		return JS_TRUE; 
-//	}
-//	JSBool arrayLoopIdx(JSObject *node, JSObject *parentNode, uint32_t idx, JSObject *elem){
-//		//return JS_TRUE;
-//		JSObject *inlineBodyObj;
-//		bool isExpr;
-//		if( !AstObjMng::getInlineNode(cx, parentNode, elem, &inlineBodyObj, &isExpr, depth ) )
-//			return JS_FALSE;
-//		if(inlineBodyObj){
-//			stage->pushInline(isExpr, inlineBodyObj, node, elem);
-//		}else {
-//			JSObject *execBodyObj;
-//			if( !AstObjMng::getExecNode(cx, parentNode, elem, &execBodyObj, &isExpr, depth ) )
-//				return JS_FALSE;
-//			if(execBodyObj){
-//				stage->pushExec(elem, execBodyObj);
-//			}
-//		}
-//		return JS_TRUE;
-//	}
-//	JSBool arrayLoopEnd(JSObject *node, JSObject *parentNode){ 
-//		return JS_TRUE; 
-//	}
-//};
-
-struct StagedNodeVisitor
-{
-	virtual JSBool InlineNodeEnter(const NodeInfo &nodeInfo, JSObject *expr, uint32_t depth) = 0;
-	virtual JSBool ExecNodeEnter(const NodeInfo &nodeInfo, JSObject *stmt, uint32_t depth) = 0;
-};
-
-//template<class StagedNodeVisitor>
+template<class StagedNodeVisitor>
 struct StagedNodeIterator
 {
 	JSContext *cx;
@@ -473,7 +344,7 @@ struct StagedNodeIterator
 	JSBool arrayLoopStart(JSObject *node, JSObject *parentNode, uint32_t arrayLen){ return JS_TRUE; }
 	JSBool arrayLoopIdxEnter(JSObject *node, JSObject *parentNode, uint32_t idx, JSObject *elem){
 		JSObject *body;
-		if( !AstObjMng::getMetaQuaziStmt(cx, node, &body))
+		if( !AstObjMng::getMetaQuaziStmt(cx, elem, &body))
 			return JS_FALSE;
 		if(body){
 			++quazis;
@@ -536,7 +407,7 @@ struct StagedNodeIterator
 };
 
 
-struct StageDepthFinder : StagedNodeVisitor
+struct StageDepthFinder
 {
 	JSContext *cx;
 	uint32_t maxdepth;
@@ -559,7 +430,7 @@ struct StageDepthFinder : StagedNodeVisitor
 JSBool StagingProcess::getDeapestStage(JSObject *obj, uint32_t *depth )
 {
 	StageDepthFinder stageDepthFinder(cx);
-	StagedNodeIterator stagednodesIterator(cx, &stageDepthFinder);
+	StagedNodeIterator<StageDepthFinder> stagednodesIterator(cx, &stageDepthFinder);
 	AstObjIterator objIterator(cx);
 	if(!objIterator.iterateObject(obj, &stagednodesIterator))
 		return JS_FALSE;
@@ -568,7 +439,7 @@ JSBool StagingProcess::getDeapestStage(JSObject *obj, uint32_t *depth )
 }
 
 
-struct ExtractStagingTags : StagedNodeVisitor
+struct ExtractStagingTags
 {
 	JSContext *cx;
 	uint32_t targetDepth;
@@ -597,29 +468,20 @@ struct ExtractStagingTags : StagedNodeVisitor
 JSBool StagingProcess::collectStage(JSObject *obj)
 {
 	ExtractStagingTags stageDepthFinder(cx, &stage, stage.getDepth());
-	StagedNodeIterator stagednodesIterator(cx, &stageDepthFinder);
+	StagedNodeIterator<ExtractStagingTags> stagednodesIterator(cx, &stageDepthFinder);
 	AstObjIterator objIterator(cx);
-	if(!objIterator.iterateObject(obj, &stagednodesIterator))
-		return JS_FALSE;
-	return JS_TRUE;
+	return objIterator.iterateObject(obj, &stagednodesIterator);
 }
 
 JSBool StagingProcess::staging(JSObject *obj, uint32_t depth)
 {
-	if(!stage.init(obj, depth))
-		return JS_FALSE;
-	if(!collectStage(obj))
-		return JS_FALSE;
-	if(!reportExecutionStaging())
-		return JS_FALSE;
-	if(!stage.exec())
-		return JS_FALSE;
 	JSString *srcCode;
-	if(!stage.unparseAst(&srcCode))
-		return JS_FALSE;
-	if(!reportResultStaging(srcCode))
-		return JS_FALSE;
-	return JS_TRUE;
+	return stage.init(obj, depth)
+		&& collectStage(obj)
+		&& reportExecutionStaging()
+		&& stage.exec()
+		&& stage.unparseAst(&srcCode)
+		&& reportResultStaging(srcCode);
 }
 
 JSBool StagingProcess::reportExecutionStaging()

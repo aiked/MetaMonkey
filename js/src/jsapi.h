@@ -4979,6 +4979,9 @@ JS_ClearPendingException(JSContext *cx);
 extern JS_PUBLIC_API(JSBool)
 JS_ReportPendingException(JSContext *cx);
 
+extern JS_PUBLIC_API(JSBool)
+JS_ReportException(JSContext *cx);
+
 /*
  * Save the current exception state.  This takes a snapshot of cx's current
  * exception state without making any change to that state.

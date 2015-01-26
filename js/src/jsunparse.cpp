@@ -1676,46 +1676,6 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 
 unparse::~unparse(){}
 
-///////////////////////////////
-// inline evaluator
-
-JSBool unparse::inlineEvalAppendCode(JSString *code)
-{
-	return inlineEvaluateCode.append(code) 
-			&& inlineEvaluateCode.append(srcStr(JSSRCNAME_NL));
-}
-
-JSBool unparse::inlineEvalExecInline(JSString *code, JSString **child)
-{
-	JSString *snippetCode = JS_JoinStringVector(cx, &inlineEvaluateCode, NULL, NULL, NULL);
-	JSString *evaluatedCode = JS_JoinStrings(cx, 4, snippetCode, srcStr(JSSRCNAME_INLINECALL), code, srcStr(JSSRCNAME_SPACERPSEMI));
-
-	char *source = JS_EncodeString(cx, evaluatedCode);
-
-/*	staggingReport("\n===================RUNNING========================\n");
-	staggingReport(source);
-	staggingReport("\n===================RESULT==========================\n");
-*/
-	jsval inlineRetVal;
-	if (!JS_EvaluateScript(cx, cx->global(), source, strlen(source),
-							"inlineEval.js", 1, &inlineRetVal))
-		return JS_FALSE;
-
-	JSObject *inlineObj;
-	if (!JS_ValueToObject(cx, inlineRetVal, &inlineObj))
-		return JS_FALSE;
-
-	if (!unParse_start(inlineObj, child))
-		return JS_FALSE;
-
-	if(*child){
-/*		staggingReport(JS_EncodeString(cx, *child));
-		staggingReport("\n==================================================\n");
-		*/
-	}
-
-	return JS_TRUE;
-}
 
 ///////////////////////
 // object stringify
@@ -1760,7 +1720,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				return JS_FALSE;
 			
 			Vector<JSString*> arrayElements(cx), escapeElements(cx);
-			bool hasNodeEscape, fromStmtDepth;
+			bool hasNodeEscape, fromStmtDepth=false;
 			const JSObject *escapeNode;
 
 			for(uint32_t i=0; i<arrayLen; ++i) {
@@ -1768,6 +1728,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 				if( !JS_GetArrayElementToObj(cx, obj, i, &nodeObj) )
 					return JS_FALSE;
 
+				bool tmpfromStmtDepth = fromStmtDepth;
 				if ( !objectContainEscape(nodeObj, &hasNodeEscape, &fromStmtDepth, &escapeNode)  )
 					return JS_FALSE;
 
@@ -1789,6 +1750,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 
 					escapeElements.append(escapeElementStr);
 				} else {
+					fromStmtDepth = tmpfromStmtDepth;
 					JSString *objStr;
 					if( !stringifyObject( nodeObj, &objStr) )
 						return JS_FALSE;
@@ -2262,10 +2224,6 @@ JSBool unparse::functionDeclaration(const JSString *funcInitStr, JSString **s,
 	children.append(bodyStr);
 
 	*s = JS_JoinStringVector(cx, &children, NULL, NULL, NULL );
-	
-	if(!isIdNull){
-		inlineEvalAppendCode(*s);
-	}
 	return JS_TRUE;
 }
 
@@ -2302,7 +2260,7 @@ JSBool unparse::objectContainEscapejsvalue(const JSObject *obj, bool *hasNodeEsc
 		if( !JS_GetPropertyToString(cx, obj, "operator", &opStr) )
 			return JS_FALSE;
 
-		if(opStr && opStr->equals("meta_duck")){
+		if(opStr && opStr->equals(".@")){
 
 			if( !JS_GetPropertyToObj(cx, obj, "argument", escapeArgObj ) )
 				return JS_FALSE;
@@ -2322,7 +2280,7 @@ JSBool unparse::objectContainEscapeExpr(const JSString *typeExprStr, const JSObj
 		JSString *opStr;
 		if( !JS_GetPropertyToString(cx, exprObj, "operator", &opStr) )
 			return JS_FALSE;
-		if(opStr && opStr->equals("meta_esc")){
+		if(opStr && opStr->equals(".~")){
 			*retval = true;
 			*expr = exprObj; 
 		}
@@ -2341,13 +2299,13 @@ JSBool unparse::objectContainEscape(const JSObject *obj, bool *retval, bool *fro
 	*fromStmt = false;
 	if( typeStr && typeStr->equals("ExpressionStatement") ){
 		*fromStmt = true;
-		if( !JS_GetPropertyToObj(cx, obj, "expression", &node ) )
+		if( !JS_GetPropertyToObj(cx, node, "expression", &node ) )
 			return JS_FALSE;
 
-		if( !JS_GetPropertyToString(cx, obj, "type", &typeStr) )
+		if( !JS_GetPropertyToString(cx, node, "type", &typeStr) )
 			return JS_FALSE;		
 	}
-	if( !objectContainEscapeExpr(typeStr, obj, retval, retObj) )
+	if( !objectContainEscapeExpr(typeStr, node, retval, retObj) )
 		return JS_FALSE;
 
 	return JS_TRUE;
@@ -2454,8 +2412,7 @@ JSBool unparse::unParse_start(const JSObject *obj, JSString **s)
 		return JS_FALSE;
 	
 	if( !( *s = JS_JoinStringVector(cx, &children, NULL, NULL, NULL ) ) ){
-		fprintf(stderr, "empty string" );
-		return JS_TRUE;
+		*s = cx->runtime()->emptyString;
 	}
 
 	return JS_TRUE;
