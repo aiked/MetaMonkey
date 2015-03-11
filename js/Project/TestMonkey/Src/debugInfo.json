@@ -1,0 +1,55 @@
+{
+	"1": [
+		{
+			"lineNo": 7,
+			"commands":	[
+				{
+					"type": "dump",
+					"args": "value"
+				}
+			]
+		},
+		{
+			"lineNo": 8,
+			"commands":	[
+				{
+					"type": "dump",
+					"args": "value"
+				}
+			]
+		}
+	],
+	"2": [
+		{
+			"lineNo": 4,
+			"commands":	[
+				{
+					"type": "dump",
+					"args": "objectx"
+				}
+			]
+		},
+		{
+			"lineNo": 5,
+			"commands":	[
+				{
+					"type": "object info",
+					"args": "objectx"
+				}
+			]
+		},
+		{
+			"lineNo": 7,
+			"commands":	[
+				{
+					"type": "array info",
+					"args": "objecty"
+				},
+				{
+					"type": "dump",
+					"args": "y"
+				}
+			]
+		}
+	]
+}

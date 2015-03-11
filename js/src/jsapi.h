@@ -3492,6 +3492,9 @@ extern JS_PUBLIC_API(JSBool)
 JS_GetPropertyToString(JSContext *cx, const JSObject *obj, const char *name, JSString **vp);
 
 extern JS_PUBLIC_API(JSBool)
+JS_GetPropertyToInt(JSContext *cx, const JSObject *obj, const char *name, int *vp);
+
+extern JS_PUBLIC_API(JSBool)
 JS_GetPropertyToObj(JSContext *cx, const JSObject *obj, const char *name, JSObject **vp);
 
 extern JS_PUBLIC_API(JSBool)
@@ -5207,6 +5210,7 @@ class AutoFile
 	bool writeAll(JSContext *cx, const char *content);
 
 	static bool OpenAndWriteAll(JSContext *cx, const char *filename, JSString *content);
+	static bool OpenAndReadAll(JSContext *cx, const char *filename, jschar **chars);
 };
 
 }

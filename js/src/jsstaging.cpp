@@ -1,4 +1,5 @@
 #include "jsprf.h"
+#include "vm/Debugger.h"
 #include "jsstaging.h"
 #include "jsunparse.h"
 
@@ -13,23 +14,41 @@ using namespace std;
 // Stage
 
 Stage::Stage(JSContext *_cx) : 
-			cx(_cx), inlineNodesInfo(_cx), execNodesInfo(_cx), depth(0)
+			cx(_cx), inlineNodesInfo(_cx), execNodesInfo(_cx), depth(0), stagedDBInfo(NULL)
 {
 	code = cx->runtime()->emptyString;
+}
+
+JSBool Stage::execFinish(char *source, bool res)
+{
+	js_free(source);
+	if(res){
+		if (!cutExecs())
+			return JS_FALSE;
+	}
+	return res;
 }
 
 JSBool Stage::exec()
 {
 	char *source = JS_EncodeString(cx, code);
+	if(stagedDBInfo){
+		bool hasDebug;
+		if (!stagedDBInfo->hasDebugAtDepth(depth, &hasDebug))
+			return execFinish(source, false);
+		if(hasDebug) {
+			if (!stagedDBInfo->debug(source, depth))
+				return execFinish(source, false);
+			return execFinish(source, true);
+		}
+		
+	}
 	jsval inlineRetVal;
 	if (!JS_EvaluateScript(cx, cx->global(), source, strlen(source),
 							"inlineEval.js", 1, &inlineRetVal))
-		return JS_FALSE;
-	js_free(source);
-	if (!cutExecs())
-		return JS_FALSE;
-
-	return JS_TRUE;
+		return execFinish(source, false);
+	
+	return execFinish(source, true);
 }
 
 JSBool Stage::init(JSObject *_ast, uint32_t _depth)
@@ -209,18 +228,30 @@ JSBool js::MergeNodeToAst(JSContext *cx, NodeInfo nodeinfo, JSObject *ast)
 
 StagingProcess *StagingProcess::stagingProcessSingleInst = NULL;
 
-StagingProcess::StagingProcess(JSContext *_cx, const char *_outputFilename): 
-								cx(_cx), stage(_cx), outputFilename(_outputFilename){}
+StagingProcess::StagingProcess(JSContext *_cx, const char *_outputFilename, const char *dbInfoFileName): 
+								cx(_cx), stage(_cx), outputFilename(_outputFilename)
+{
+	if( dbInfoFileName ) {
+		stagedDBInfo = StagedDBInfo::createFromFile(cx, dbInfoFileName);
+		stage.attachDebugger(stagedDBInfo);
+	}else {
+		stagedDBInfo = NULL;
+	}
+}
 
-void StagingProcess::createSingleton(JSContext *cx, const char *outputFilename)
+void StagingProcess::createSingleton(JSContext *cx, const char *outputFilename, const char *dbInfoFileName)
 {
 	JS_ASSERT(!stagingProcessSingleInst);
-	stagingProcessSingleInst = cx->new_<StagingProcess>(cx, outputFilename);
+	stagingProcessSingleInst = cx->new_<StagingProcess>(cx, outputFilename, dbInfoFileName);
 }
 
 void StagingProcess::destroySingleton()
 {
 	JS_ASSERT(stagingProcessSingleInst);
+	if(stagingProcessSingleInst->stagedDBInfo){
+		js_delete(stagingProcessSingleInst->stagedDBInfo);
+		stagingProcessSingleInst->stagedDBInfo = NULL;
+	}
 	js_delete(stagingProcessSingleInst);
 	stagingProcessSingleInst = NULL;
 }
@@ -473,6 +504,25 @@ JSBool StagingProcess::collectStage(JSObject *obj)
 	return objIterator.iterateObject(obj, &stagednodesIterator);
 }
 
+JSBool StagingProcess::nextStage(JSObject *ast, uint32_t *depth)
+{
+	if(!getDeapestStage(ast, depth))
+		return JS_FALSE;
+	if(*depth!=0){
+		if(!staging(ast, *depth))
+			return JS_FALSE;
+	}
+	return JS_TRUE;
+}
+
+JSBool StagingProcess::executeInline(JSObject *inlnArg)
+{
+	NodeInfo inlineNodeInfo = stage.dequeueInline();
+	if(!MergeNodeToAst(cx, inlineNodeInfo, inlnArg))
+		return JS_FALSE;
+	return JS_TRUE;
+}
+
 JSBool StagingProcess::staging(JSObject *obj, uint32_t depth)
 {
 	JSString *srcCode;
@@ -489,9 +539,42 @@ JSBool StagingProcess::reportExecutionStaging()
 	char *filename = JS_sprintf_append(NULL, "%s_stage_%d.js", 
 							outputFilename, (int) stage.getDepth());
 	JS_ReportInfo(cx, "\tsaving execution source\n\tto \"%s\"\n", filename);
-	if(!JS::AutoFile::OpenAndWriteAll(cx, filename, stage.getSrcCode()))
+	JSString *srcCode = stage.getSrcCode();
+	if(!JS::AutoFile::OpenAndWriteAll(cx, filename, srcCode))
 		return JS_FALSE;
+
 	js_free(filename);
+
+	filename = JS_sprintf_append(NULL, "%s_stage_%d_db.html", 
+							outputFilename, (int) stage.getDepth());
+	char *srcCodeChar = JS_EncodeString( cx, srcCode );
+	char *dbcode = JS_sprintf_append(NULL, 
+		"<html>						\
+			<head>					\
+				<script>			\
+					debugger;		\
+					%s				\
+				</script>			\
+			</head>					\
+			<body>					\
+			<h2>Debugging staged code,<br> please Open the developer tools<\/h2>\
+				<pre>%s</pre>		\
+			</body>					\
+		</html>",
+		srcCodeChar,
+		srcCodeChar
+	);
+	
+	if(!JS::AutoFile::OpenAndWriteAll(cx, filename, JS_NewStringCopyZ(cx, dbcode)))
+		return JS_FALSE;
+
+	
+	//char *syssmd = JS_sprintf_append(NULL, "start /wait firefox %s", filename);
+	//system( syssmd );
+
+	//js_free(syssmd);
+	js_free(filename);
+
 	return JS_TRUE;
 }
 

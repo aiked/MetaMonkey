@@ -129,6 +129,12 @@
     <Filter Include="Header Files\Std\Metaprogramming">
       <UniqueIdentifier>{ec7e5fbd-bbb0-47c4-809c-6e97158ca7ef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\HttpLib">
+      <UniqueIdentifier>{2da7c804-61a4-455c-8198-478603f52be3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\HttpLib">
+      <UniqueIdentifier>{54a9ec7b-b554-4f2e-ac8f-28fc6951bc0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\jsscript.cpp">
@@ -706,6 +712,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\shell\jsheaptools.cpp">
       <Filter>Source Files\Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\jsstagedbinfo.cpp">
+      <Filter>Source Files\Std\Metaprogramming</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HttpLib\HttpLib.cpp">
+      <Filter>Source Files\HttpLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HttpLib\HttpHandler.cpp">
+      <Filter>Source Files\HttpLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1797,6 +1812,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\jsstaging.h">
       <Filter>Header Files\Std\Metaprogramming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsstagedbinfo.h">
+      <Filter>Header Files\Std\Metaprogramming</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HttpLib\HttpLib.h">
+      <Filter>Header Files\HttpLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HttpLib\HttpHandler.h">
+      <Filter>Header Files\HttpLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

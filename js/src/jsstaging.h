@@ -9,7 +9,7 @@ metadev
 
 #include "jsapi.h"
 #include "jsastmng.h"
-
+#include "jsstagedbinfo.h"
 
 namespace js {
 
@@ -67,6 +67,7 @@ class Stage{
 	uint32_t depth;
 	Vector<NodeInfo> inlineNodesInfo;
 	Vector<NodeInfo> execNodesInfo;
+	StagedDBInfo *stagedDBInfo;
 
   public:
 	Stage(JSContext *cx);
@@ -80,9 +81,13 @@ class Stage{
 	JSBool init(JSObject *ast, uint32_t depth);
 	JSBool unparseAst(JSString **srcCode);
 
+	void attachDebugger(StagedDBInfo *_stagedDBInfo){ stagedDBInfo = _stagedDBInfo; };
+	StagedDBInfo *getDebugger(){ return stagedDBInfo; };
+
 	uint32_t getDepth(){ return depth; }
 	JSString *getSrcCode(){ return code; }
   private:
+	JSBool execFinish(char *source, bool res);
 	JSBool cutExecs();
 };
 
@@ -93,20 +98,23 @@ class StagingProcess{
 
 	JSContext *cx;
 	Stage stage;
+	StagedDBInfo *stagedDBInfo;
 	const char *outputFilename;
 
-	StagingProcess(JSContext *cx, const char *outputFilename);
+	StagingProcess(JSContext *cx, const char *outputFilename, const char *dbInfoFileName);
 
   public:
-	static void createSingleton(JSContext *cx, const char *outputFileName);
+	static void createSingleton(JSContext *cx, const char *outputFileName, const char *dbInfoFileName = NULL);
 	static void destroySingleton();
 	static StagingProcess *getSingleton();
 
-	JSBool staging(JSObject *obj, uint32_t depth);
-	JSBool getDeapestStage(JSObject *obj, uint32_t *depth);
+	JSBool nextStage(JSObject *ast, uint32_t *depth);
+	JSBool executeInline(JSObject *inlnArg);
 	Stage &getStage(){ return stage; }
 
   private:
+	JSBool staging(JSObject *obj, uint32_t depth);
+	JSBool getDeapestStage(JSObject *obj, uint32_t *depth);
 	JSBool collectStage(JSObject *obj);
 	JSBool reportExecutionStaging();
 	JSBool reportResultStaging(JSString *srcCode);

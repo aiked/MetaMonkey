@@ -52,7 +52,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src;..\..\src\build-release\dist\include;..\..\src\assembler\assembler;..\..\src\assembler\jit;..\..\src\assembler\moco;..\..\src\assembler\wtf;..\..\src\ds;..\..\src\frontend;..\..\src\jit\x86;..\..\src\perf;..\..\src\vm;..\..\src\build-release;..\..\src\assembler;..\..\..\mfbt;..\..\..\mfbt\decimal;..\..\..\mfbt\double-conversion;..\..\src\jit;..\..\..\intl\icu\source\common;..\..\src\jsapi-tests</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\src\build-release\dist\include;..\..\src\assembler\assembler;..\..\src\assembler\jit;..\..\src\assembler\moco;..\..\src\assembler\wtf;..\..\src\ds;..\..\src\frontend;..\..\src\httplib;..\..\src\jit\x86;..\..\src\perf;..\..\src\vm;..\..\src\build-release;..\..\src\assembler;..\..\..\mfbt;..\..\..\mfbt\decimal;..\..\..\mfbt\double-conversion;..\..\src\jit;..\..\..\intl\icu\source\common;..\..\src\jsapi-tests</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>STATIC_JS_API;WIN32;_WIN32;XP_WIN;WTF_COMPILER_MSVC;_X86_;JS_ION;ENABLE_YARR_JIT;HAVE_FORCEINLINE;HAVE_LOCALECONV;HAVE_SNPRINTF;HAVE_WINSDKVER_H;HW_THREADS;JSGC_INCREMENTAL;JS_CPU_X86;JS_METHODJIT;JS_METHODJIT_TYPED_ARRAY;JS_MONOIC;JS_NUNBOX32;JS_POLYIC;MOZ_DEBUG_SYMBOLS;NO_X11;NS_ATTR_MALLOC;NS_WARN_UNUSED_RESULT;RELEASE_BUILD;STDC_HEADERS;WIN32_LEAN_AND_MEAN;XP_WIN32;X_DISPLAY_MISSING;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WINDOWS;__MWERKS__;DEBUG;JS_DEBUG</PreprocessorDefinitions>
     </ClCompile>
     <Link>

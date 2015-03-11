@@ -1,10 +1,44 @@
 
 
+.& {
+	var t = .< 1 + 2;  >.;
+	var y = .< 1 + .~t; >.;
+}
+
+.!y;
+
+
 // y = "begin";
 //.& parse( "&2;" );
- .& if(1) {
- 	print("staging vol.2");
- }
+
+
+// .&.& {
+//  	var y  = 2;
+//  	t = "staging vol.2 start";
+
+//  	var objectx  = { testKey: "testVal" };
+
+//  	randval = 1 + 5;
+
+//  	var objecty  = [ 1, 4, "asd", 9 ];
+
+//  	q = "staging vol.2 finished";
+// };
+
+//  .& if(1) {
+//  	var y  = 2;
+//  	t = "staging vol.1 start";
+
+//  	var value  = "dbprint1";
+
+//  	q = "staging vol.1 finished";
+
+//  	var ast1 = .< if(0){ doSomething(); }; >.;
+//  };
+
+// .! ast1;
+
+
 
 // .& if(1) {
 // 	print("staging vol.1")

@@ -45,6 +45,7 @@
 #include "jsunparse.h"
 #include "jsastmng.h"
 #include "jsstaging.h"
+#include "httplib/HttpHandler.h"
 
 #include "builtin/TestingFunctions.h"
 #include "frontend/BytecodeEmitter.h"
@@ -3590,14 +3591,10 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 
 	StagingProcess *stagingProcess = StagingProcess::getSingleton();
 	uint32_t depth;
-	while(1){
-		if(!stagingProcess->getDeapestStage(obj, &depth))
-			return JS_FALSE;
-		if(depth==0)
-			break;
-		if(!stagingProcess->staging(obj, depth))
-			return JS_FALSE;
-	}
+	do{
+	if(!stagingProcess->nextStage(obj, &depth))
+		return JS_FALSE;
+	}while(depth!=0);
 
 	JSString *str = NULL;
 	unparse *up = unparse::getSingleton();
@@ -3695,7 +3692,7 @@ Meta_escape(JSContext *cx, unsigned argc, jsval *vp)
 	)
 		return JS_FALSE;
 
-	while( naLen < naIdx || eaIdx < eaLen ) {	
+	while( naIdx < naLen || eaIdx < eaLen ) {	
 		if( eaIdx<eaLen ) {
 			JSObject *escNodeObj;
 			if( !JS_GetArrayElementToObj(cx, escapeArray, eaIdx, &escNodeObj) )
@@ -3753,9 +3750,7 @@ Inline(JSContext *cx, unsigned argc, jsval *vp)
 	}
 
 	StagingProcess *stagingProcess = StagingProcess::getSingleton();
-	Stage &stage = stagingProcess->getStage();
-	NodeInfo inlineNodeInfo = stage.dequeueInline();
-	if(!MergeNodeToAst(cx, inlineNodeInfo, JSVAL_TO_OBJECT(astObj)))
+	if(!stagingProcess->executeInline(JSVAL_TO_OBJECT(astObj)))
 		return JS_FALSE;
 
 	args.rval().setUndefined();
@@ -5132,38 +5127,55 @@ OptionFailure(const char *option, const char *str)
 #endif /* JS_ION */
 
 
-static int stagingProcess(JSContext *cx, JSObject *global, const char *inputFileName, const char *outputFileName) {
-	using namespace JS;
+#define STAGED_DEBUGGER_BUILD 1
 
-    char* staggedFilename = JS_sprintf_append(NULL, "%s_stagged", inputFileName);
-	StagingProcess::createSingleton(cx, outputFileName);
+JSBool httpHandleConncet(struct httpserver::mg_connection *conn) 
+{
+	httpserver::mg_printf_data(conn, "%s", "Hello world");
+	return JS_TRUE;
+}
+
+static int 
+stagingProcess(JSContext *cx, JSObject *global, const char *inputFileName, 
+				const char *outputFileName, const char *dbFilename = NULL) 
+{
+	using namespace JS;
+	
+	StagingProcess::createSingleton(cx, outputFileName, dbFilename);
 	unparse *up = unparse::getSingleton();
 
 	JS_ReportInfo(cx, "opening \"%s\".\n", inputFileName);
 
-    FileContents buffer(cx);
-	{
-		AutoFile file;
-		if (!file.open(cx, inputFileName) || !file.readAll(cx, buffer))
-			return EXIT_FAILURE;
-	}
-	
-	size_t length = buffer.length();
-    jschar *chars = InflateUTF8String(cx, buffer.begin(), &length);
-    if (!chars)
-        return EXIT_FAILURE;
+	jschar *chars;
+	if (!AutoFile::OpenAndReadAll(cx, inputFileName, &chars))
+		return EXIT_FAILURE;
 
-//============================= START ================================
 	uint32_t lineno = 1;
 	ScopedJSFreePtr<char> filename;
 	jsval rval;
 
 	JS_ReportInfo(cx, "converting src to ast. ");
-	if (!reflect_parse_from_string(cx, chars, length, &rval)){
+	if (!reflect_parse_from_string(cx, chars, js_strlen(chars), &rval)){
 		JS_ReportError(cx, "reflection parse error.\n");
 		return EXIT_FAILURE;
 	}
 	JS_ReportInfo(cx, "done.\n");
+
+#ifdef STAGED_DEBUGGER_BUILD
+	using namespace httphandler;
+
+	HttpHandler httpHandler(cx);
+	httpHandler.setOpt("listening_port", "8081");
+
+	httpHandler.installRoute(httpRequestHandlerInfo("/connect", "application/json", "POST", &httpHandleConncet));
+	httpHandler.installRoute(httpRequestHandlerInfo("/connect", "application/json", "GET", &httpHandleConncet));
+
+	httpHandler.start();
+
+#else
+
+//============================= START ================================
+
 
 	JS_ReportInfo(cx, "converting ast to src.\n");
 	JS::Value args[] = { rval  };
@@ -5178,16 +5190,17 @@ static int stagingProcess(JSContext *cx, JSObject *global, const char *inputFile
 	JS_ReportInfo(cx, "saving \"%s\".\n", outputFileName);
 	if (!JS::AutoFile::OpenAndWriteAll(cx, outputFileName, stringify.toString()))
 		return EXIT_FAILURE;
-	
+
+#endif
+
 	js_free(chars);
 	StagingProcess::destroySingleton();
 	JS_ReportInfo(cx, "finish.\n");
 	return EXIT_SUCCESS;
 }
 
-
 int
-run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFileName)
+run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFileName, const char *dbFilename = NULL)
 {
     JSAutoRequest ar(cx);
 
@@ -5204,7 +5217,7 @@ run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFil
         return EXIT_FAILURE;
     JS_SetPrivate(envobj, envp);
 
-	int result = stagingProcess(cx, glob, inputFileName, outputFileName);
+	int result = stagingProcess(cx, glob, inputFileName, outputFileName, dbFilename);
 
 	if(result==EXIT_FAILURE)
 		JS_ReportException(cx);
@@ -5268,6 +5281,8 @@ main(int argc, char **argv, char **envp)
 	//const char *outputFileName = argv[2];
 	const char *outputFileName = "Src/examples/test_final.js";
 	//const char *outputFileName = "Src/examples/simple/simple_staged_.js";
+	//const char *dbFileName = "Src/debugInfo.json";
+	const char *dbFileName = NULL;
 
 #ifdef XP_WIN
     {
@@ -5307,6 +5322,7 @@ main(int argc, char **argv, char **envp)
     rt = JS_NewRuntime(32L * 1024L * 1024L, JS_USE_HELPER_THREADS);
     if (!rt)
         return 1;
+	JS_SetRuntimeDebugMode(rt, 1);
     gTimeoutFunc = NullValue();
     if (!JS_AddNamedValueRootRT(rt, &gTimeoutFunc, "gTimeoutFunc"))
         return 1;
@@ -5328,13 +5344,14 @@ main(int argc, char **argv, char **envp)
     cx = NewContext(rt);
     if (!cx)
         return 1;
-
+	if(!JS_SetDebugModeForAllCompartments(cx, JS_TRUE))
+		return JS_FALSE;	
     JS_SetGCParameter(rt, JSGC_MODE, JSGC_MODE_INCREMENTAL);
     JS_SetGCParameterForThread(cx, JSGC_MAX_CODE_CACHE_BYTES, 16 * 1024 * 1024);
 
     js::SetPreserveWrapperCallback(rt, DummyPreserveWrapperCallback);
 
-    result = run(cx, envp, inputFileName, outputFileName);
+    result = run(cx, envp, inputFileName, outputFileName, dbFileName);
 	system("@pause");
 	JS_DestroyUnparse(cx);
 #ifdef DEBUG

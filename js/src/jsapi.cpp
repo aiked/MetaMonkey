@@ -4154,6 +4154,22 @@ JS_GetPropertyToString(JSContext *cx, const JSObject *obj, const char *name, JSS
 }
 
 extern JS_PUBLIC_API(JSBool)
+JS_GetPropertyToInt(JSContext *cx, const JSObject *obj, const char *name, int *vp)
+{
+	jsval val;
+	if (!JS_GetProperty(cx, const_cast<JSObject*>(obj), name, &val)){
+		JS_ReportError(cx, "object has not property (%s)", name);
+		return JS_FALSE;
+	}
+
+	if (!JS_ValueToInt32(cx, val, vp)){
+		JS_ReportError(cx, "cannot convert value to int");
+		return JS_FALSE;
+	}
+	return JS_TRUE;
+}
+
+extern JS_PUBLIC_API(JSBool)
 JS_GetPropertyToObj(JSContext *cx, const JSObject *obj, const char *name, JSObject **vp)
 {
 	jsval val;
@@ -5156,6 +5172,23 @@ bool JS::AutoFile::OpenAndWriteAll(JSContext *cx, const char *filename, JSString
 	return true;
 }
 
+bool JS::AutoFile::OpenAndReadAll(JSContext *cx, const char *filename, jschar **chars)
+{
+	using namespace JS;
+    FileContents buffer(cx);
+	{
+		AutoFile file;
+		if (!file.open(cx, filename) || !file.readAll(cx, buffer))
+			return false;
+	}
+	size_t length = buffer.length();
+    *chars = InflateUTF8String(cx, buffer.begin(), &length);
+    if (!(*chars))
+        return false;
+
+	return true;
+}
+
 JS::CompileOptions::CompileOptions(JSContext *cx, JSVersion version)
     : principals(NULL),
       originPrincipals(NULL),
@@ -6147,6 +6180,10 @@ JS_JoinStrings(JSContext *cx, size_t num, ...)
 	for ( size_t i = 1; i < num; ++i ){  
 		JSString *arg = va_arg ( args, JSString * );
 		if(arg){
+			if(!str){
+				int i =0;
+			}
+
 			str = JS_ConcatStrings(cx, str, arg);
 		}
 	}
