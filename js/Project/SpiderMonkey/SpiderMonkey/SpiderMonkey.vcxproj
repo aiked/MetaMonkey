@@ -226,6 +226,7 @@
     <ClCompile Include="..\..\..\src\jspropertytree.cpp" />
     <ClCompile Include="..\..\..\src\jsproxy.cpp" />
     <ClCompile Include="..\..\..\src\jsreflect.cpp" />
+    <ClCompile Include="..\..\..\src\jsremotestagedbg.cpp" />
     <ClCompile Include="..\..\..\src\jsscript.cpp" />
     <ClCompile Include="..\..\..\src\jsstagedbinfo.cpp" />
     <ClCompile Include="..\..\..\src\jsstaging.cpp" />
@@ -557,6 +558,7 @@
     <ClInclude Include="..\..\..\src\jsprvtd.h" />
     <ClInclude Include="..\..\..\src\jspubtd.h" />
     <ClInclude Include="..\..\..\src\jsreflect.h" />
+    <ClInclude Include="..\..\..\src\jsremotestagedbg.h" />
     <ClInclude Include="..\..\..\src\jsscript.h" />
     <ClInclude Include="..\..\..\src\jsscriptinlines.h" />
     <ClInclude Include="..\..\..\src\jsstagedbinfo.h" />

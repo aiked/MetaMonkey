@@ -1,0 +1,26 @@
+<h1>Stage Debugging</h1>
+<div class="stg-table-container col-xs-3">
+  <table class="table table-hover">
+    <tbody>
+      <tr>
+        <th>status</th>
+        <td class="stg-status" target-data="status" > <%= model.get( 'status' ) %> </td>
+      </tr>
+      <tr>
+        <th>depth</th>
+        <td class="stg-depth" target-data="depth" > <%= model.get( 'depth' ) %> </td>
+      </tr>
+      <tr>
+        <th>inlines</th>
+        <td class="stg-inlines" target-data="inlines" > <%= model.get( 'inlines' ) %> </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="stg-prc-src-container col-xs-10" style="display: none;">
+	<button type="button" class="btn btn-link stg-prc-showsrc-btn" target-toggle="close" >Show staged source code</button>
+	<p><code class="stg-prc-src" style="display: none;" target-data="srcCode" ></code></p>
+</div>
+
+<div class="stg-asttabmenu-container col-xs-10"></div>

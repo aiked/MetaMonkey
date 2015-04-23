@@ -45,7 +45,7 @@
 #include "jsunparse.h"
 #include "jsastmng.h"
 #include "jsstaging.h"
-#include "httplib/HttpHandler.h"
+#include "jsremotestagedbg.h"
 
 #include "builtin/TestingFunctions.h"
 #include "frontend/BytecodeEmitter.h"
@@ -167,6 +167,12 @@ static PRCondVar *gSleepWakeup = NULL;
 static JSRuntime *gRuntime = NULL;
 
 #endif
+
+//metadev
+char * STG_INPUT_FILE = NULL;
+char * STG_OUTPUT_FILE = NULL;
+char * STG_DBG_FILE = NULL;
+char * STG_DBG_BROWSER = NULL;
 
 int gExitCode = 0;
 bool gQuitting = false;
@@ -3591,10 +3597,14 @@ unParse(JSContext *cx, unsigned argc, jsval *vp)
 
 	StagingProcess *stagingProcess = StagingProcess::getSingleton();
 	uint32_t depth;
-	do{
-	if(!stagingProcess->nextStage(obj, &depth))
-		return JS_FALSE;
-	}while(depth!=0);
+	for(;;){
+		if(!stagingProcess->getDeapestStage(obj, &depth))
+			return JS_FALSE;
+		if(depth==0)
+			break;
+		if(!stagingProcess->staging(obj, depth))
+			return JS_FALSE;
+	}
 
 	JSString *str = NULL;
 	unparse *up = unparse::getSingleton();
@@ -5127,27 +5137,26 @@ OptionFailure(const char *option, const char *str)
 #endif /* JS_ION */
 
 
-#define STAGED_DEBUGGER_BUILD 1
+//#define STAGED_DEBUGGER_BUILD
 
-JSBool httpHandleConncet(struct httpserver::mg_connection *conn) 
+JSBool httpHandleConncet(struct httpserver::mg_connection *conn, void *closures) 
 {
 	httpserver::mg_printf_data(conn, "%s", "Hello world");
 	return JS_TRUE;
 }
 
 static int 
-stagingProcess(JSContext *cx, JSObject *global, const char *inputFileName, 
-				const char *outputFileName, const char *dbFilename = NULL) 
+stagingProcess(JSContext *cx, JSObject *global) 
 {
 	using namespace JS;
 	
-	StagingProcess::createSingleton(cx, outputFileName, dbFilename);
+	StagingProcess::createSingleton(cx, STG_OUTPUT_FILE, STG_DBG_FILE);
 	unparse *up = unparse::getSingleton();
 
-	JS_ReportInfo(cx, "opening \"%s\".\n", inputFileName);
+	JS_ReportInfo(cx, "opening \"%s\".\n", STG_INPUT_FILE);
 
 	jschar *chars;
-	if (!AutoFile::OpenAndReadAll(cx, inputFileName, &chars))
+	if (!AutoFile::OpenAndReadAll(cx, STG_INPUT_FILE, &chars))
 		return EXIT_FAILURE;
 
 	uint32_t lineno = 1;
@@ -5162,15 +5171,9 @@ stagingProcess(JSContext *cx, JSObject *global, const char *inputFileName,
 	JS_ReportInfo(cx, "done.\n");
 
 #ifdef STAGED_DEBUGGER_BUILD
-	using namespace httphandler;
-
-	HttpHandler httpHandler(cx);
-	httpHandler.setOpt("listening_port", "8081");
-
-	httpHandler.installRoute(httpRequestHandlerInfo("/connect", "application/json", "POST", &httpHandleConncet));
-	httpHandler.installRoute(httpRequestHandlerInfo("/connect", "application/json", "GET", &httpHandleConncet));
-
-	httpHandler.start();
+	
+	RemoteStagedDbg remoteStagedDbg(cx, JSVAL_TO_OBJECT(rval));
+	remoteStagedDbg.start(STG_DBG_BROWSER);
 
 #else
 
@@ -5184,11 +5187,11 @@ stagingProcess(JSContext *cx, JSObject *global, const char *inputFileName,
 		JS_ReportError(cx, "unparse error\n");
 		return EXIT_FAILURE;
 	}
-	JS_ReportInfo(cx, "done.\n", outputFileName);
+	JS_ReportInfo(cx, "done.\n", STG_OUTPUT_FILE);
 
 //============================= END =================================
-	JS_ReportInfo(cx, "saving \"%s\".\n", outputFileName);
-	if (!JS::AutoFile::OpenAndWriteAll(cx, outputFileName, stringify.toString()))
+	JS_ReportInfo(cx, "saving \"%s\".\n", STG_OUTPUT_FILE);
+	if (!JS::AutoFile::OpenAndWriteAll(cx, STG_OUTPUT_FILE, stringify.toString()))
 		return EXIT_FAILURE;
 
 #endif
@@ -5200,7 +5203,7 @@ stagingProcess(JSContext *cx, JSObject *global, const char *inputFileName,
 }
 
 int
-run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFileName, const char *dbFilename = NULL)
+run(JSContext *cx, char **envp)
 {
     JSAutoRequest ar(cx);
 
@@ -5217,7 +5220,7 @@ run(JSContext *cx, char **envp, const char *inputFileName, const char *outputFil
         return EXIT_FAILURE;
     JS_SetPrivate(envobj, envp);
 
-	int result = stagingProcess(cx, glob, inputFileName, outputFileName, dbFilename);
+	int result = stagingProcess(cx, glob);
 
 	if(result==EXIT_FAILURE)
 		JS_ReportException(cx);
@@ -5261,6 +5264,16 @@ DummyPreserveWrapperCallback(JSContext *cx, JSObject *obj)
     return true;
 }
 
+#define IF_ARG( argName, varName )  \
+	if( !strcmp( argv[i], argName ) ) {									\
+		++i;															\
+		if( i == argc ) {												\
+			printf("wrong arguments. \n> %s <missing>\n", argName);		\
+			return 1;													\
+		}																\
+		varName = argv[i];												\
+	}
+
 int
 main(int argc, char **argv, char **envp)
 {
@@ -5269,20 +5282,23 @@ main(int argc, char **argv, char **envp)
     JSContext *cx;
     int result;
 
-	//if(argc!=3){
-	//	printf("wrong arguments. \n> inputFilename outputfilename\n");
-		//system("@pause");
-	//	return 1;
+	//for( int i=1; i<argc; ++i ) {
+	//	IF_ARG( "-input", STG_INPUT_FILE )
+	//	else IF_ARG( "-output", STG_OUTPUT_FILE )
+	//	else IF_ARG( "-dbgfile", STG_DBG_FILE )
+	//	else IF_ARG( "-dbgbrowser", STG_DBG_BROWSER )
 	//}
 
 	//const char *inputFileName = argv[1];
-	const char *inputFileName = "Src/examples/test.js";
+	STG_INPUT_FILE = "Src/examples/functionReusability/optimized.js";
 	//const char *inputFileName = "Src/examples/simple/simple.js";
 	//const char *outputFileName = argv[2];
-	const char *outputFileName = "Src/examples/test_final.js";
+	STG_OUTPUT_FILE = "Src/examples/functionReusability/optimized.js_staged.js";
 	//const char *outputFileName = "Src/examples/simple/simple_staged_.js";
 	//const char *dbFileName = "Src/debugInfo.json";
-	const char *dbFileName = NULL;
+	STG_DBG_FILE = NULL;
+
+	STG_DBG_BROWSER = "chrome";
 
 #ifdef XP_WIN
     {
@@ -5351,7 +5367,7 @@ main(int argc, char **argv, char **envp)
 
     js::SetPreserveWrapperCallback(rt, DummyPreserveWrapperCallback);
 
-    result = run(cx, envp, inputFileName, outputFileName, dbFileName);
+    result = run(cx, envp);
 	system("@pause");
 	JS_DestroyUnparse(cx);
 #ifdef DEBUG

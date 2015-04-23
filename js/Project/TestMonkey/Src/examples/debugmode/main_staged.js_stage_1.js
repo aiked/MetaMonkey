@@ -1,0 +1,16 @@
+ {
+    function getBuildMode() {
+    return "release";
+    }
+
+    function assert(cond, msg) {
+    var buildMode = getBuildMode();
+    if (buildMode === "debug") {
+    return {loc:{start:{line:10, column:10}, end:{line:10, column:43}, source:null}, type:"Program", body:[{loc:{start:{line:10, column:13}, end:{line:10, column:43}, source:null}, type:"ExpressionStatement", expression:{loc:{start:{line:10, column:13}, end:{line:10, column:41}, source:null}, type:"CallExpression", callee:{loc:{start:{line:10, column:13}, end:{line:10, column:27}, source:null}, type:"MemberExpression", object:{loc:{start:{line:10, column:13}, end:{line:10, column:20}, source:null}, type:"Identifier", name:"console"}, property:{loc:null, type:"Identifier", name:"assert"}, computed:false}, arguments:meta_escape( true,[],[{index:0,expr:cond},{index:1,expr:msg}],false)}}]};
+    } else {
+    return {loc:{start:{line:12, column:10}, end:{line:15, column:6}, source:null}, type:"Program", body:[{loc:{start:{line:13, column:4}, end:{line:14, column:75}, source:null}, type:"IfStatement", test:meta_escape( false,cond,false), consequent:{loc:{start:{line:13, column:14}, end:{line:14, column:75}, source:null}, type:"BlockStatement", body:[{loc:{start:{line:14, column:5}, end:{line:14, column:75}, source:null}, type:"ExpressionStatement", expression:{loc:{start:{line:14, column:5}, end:{line:14, column:73}, source:null}, type:"CallExpression", callee:{loc:{start:{line:14, column:5}, end:{line:14, column:10}, source:null}, type:"Identifier", name:"alert"}, arguments:[{loc:{start:{line:14, column:11}, end:{line:14, column:73}, source:null}, type:"BinaryExpression", operator:"+", left:{loc:{start:{line:14, column:11}, end:{line:14, column:48}, source:null}, type:"BinaryExpression", operator:"+", left:{loc:{start:{line:14, column:11}, end:{line:14, column:40}, source:null}, type:"Literal", value:"oops!, an error occurred!, "}, right:meta_escape( false,msg,false)}, right:{loc:{start:{line:14, column:51}, end:{line:14, column:73}, source:null}, type:"Literal", value:", pleaze contact us."}}]}}]}, alternate:null},{loc:{start:{line:15, column:5}, end:{line:15, column:6}, source:null}, type:"EmptyStatement"}]};
+    }
+    }
+
+}
+inline( assert({loc:{start:{line:32, column:12}, end:{line:32, column:18}, source:null}, type:"Program", body:[{loc:{start:{line:32, column:14}, end:{line:32, column:18}, source:null}, type:"ExpressionStatement", expression:{loc:{start:{line:32, column:14}, end:{line:32, column:17}, source:null}, type:"Identifier", name:"fun"}}]}, {loc:{start:{line:32, column:22}, end:{line:32, column:64}, source:null}, type:"Program", body:[{loc:{start:{line:32, column:24}, end:{line:32, column:64}, source:null}, type:"ExpressionStatement", expression:{loc:{start:{line:32, column:24}, end:{line:32, column:63}, source:null}, type:"BinaryExpression", operator:"+", left:{loc:{start:{line:32, column:24}, end:{line:32, column:50}, source:null}, type:"BinaryExpression", operator:"+", left:{loc:{start:{line:32, column:24}, end:{line:32, column:39}, source:null}, type:"Literal", value:"cannot find ("}, right:{loc:{start:{line:32, column:42}, end:{line:32, column:50}, source:null}, type:"Identifier", name:"funcName"}}, right:{loc:{start:{line:32, column:53}, end:{line:32, column:63}, source:null}, type:"Literal", value:") method"}}}]}) );

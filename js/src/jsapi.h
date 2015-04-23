@@ -2276,6 +2276,9 @@ JS_updateMallocCounter(JSContext *cx, size_t nbytes);
 extern JS_PUBLIC_API(char *)
 JS_strdup(JSContext *cx, const char *s);
 
+extern JS_PUBLIC_API(char *)
+JS_strduplen(JSContext *cx, const char *s, size_t nbytes);
+
 /* Duplicate a string.  Does not report an error on failure. */
 extern JS_PUBLIC_API(char *)
 JS_strdup(JSRuntime *rt, const char *s);

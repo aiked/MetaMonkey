@@ -85,10 +85,12 @@ class Stage{
 	StagedDBInfo *getDebugger(){ return stagedDBInfo; };
 
 	uint32_t getDepth(){ return depth; }
+	size_t getRemainingInlines(){ return inlineNodesInfo.length(); }
 	JSString *getSrcCode(){ return code; }
+	JSBool cutExecs();
   private:
 	JSBool execFinish(char *source, bool res);
-	JSBool cutExecs();
+	
 };
 
 class StagingProcess{
@@ -108,16 +110,18 @@ class StagingProcess{
 	static void destroySingleton();
 	static StagingProcess *getSingleton();
 
-	JSBool nextStage(JSObject *ast, uint32_t *depth);
+	JSBool nextStage(JSObject *ast, uint32_t *depth, JSString **srcCode);
 	JSBool executeInline(JSObject *inlnArg);
 	Stage &getStage(){ return stage; }
 
-  private:
 	JSBool staging(JSObject *obj, uint32_t depth);
 	JSBool getDeapestStage(JSObject *obj, uint32_t *depth);
+
+	JSBool reportResultStaging(JSString *srcCode);
+  private:
 	JSBool collectStage(JSObject *obj);
 	JSBool reportExecutionStaging();
-	JSBool reportResultStaging(JSString *srcCode);
+	
 };
 
 

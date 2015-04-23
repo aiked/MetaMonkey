@@ -1,0 +1,124 @@
+
+html, body {
+	background-color: #f1f1f1;
+}
+
+.card-box {
+	margin: 10px auto;
+	border: 0;
+	background: #fff;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.1);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.1);
+	box-shadow: 0 1px 2px rgba(0,0,0,.1);
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 15px;
+}
+
+#astview-container {
+	
+}
+
+.astopts {
+	margin-top: 30px;
+}
+
+.astview-wrapper {
+	overflow: auto;	
+	position: relative;
+	border: 1px solid #ddd;
+	margin-top: 10px;
+	margin-right: 20px;
+}
+
+.astview {
+	
+}
+
+.asttree-node {
+	z-index: 1002;
+	position: absolute;
+	text-align: center;
+}
+
+.asttree-node-expr {
+	color: #fff;
+	background-color: #f0ad4e;
+	border-color: #eea236;
+}
+
+.asttree-node-stmt {
+	color: #fff;
+	background-color: #5cb85c;
+	border-color: #4cae4c;
+}
+
+.asttree-node-list {
+	color: #333;
+	background-color: #fff;
+	border-color: #ccc;
+}
+
+.asttree-node-var {
+	color: #fff;
+	background-color: #337ab7;
+	border-color: #2e6da4
+}
+
+.asttree-node-Variant {
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.asttree-node-singleval {
+	color: #333;
+	background-color: #ffe94f;
+	border-color: #ffd54f;
+}
+
+
+.asttree-line {
+	z-index: 1002;
+	padding: 0px;
+	margin: 0px;
+	line-height: 1px; 
+	position: absolute;
+	box-shadow: 5px 1px 2px 0px rgba(50, 50, 50, 0.8);
+}
+
+.asttree-line-simple {
+	background-color: black;
+}
+
+.asttree-line-active {
+	background-color: blue;
+}
+
+
+.asttree-node-menu {
+	position: absolute;
+	z-index: 1003;
+}
+
+.asttree-node-menu.asttree-node-menu-simple {
+	display: none;
+}
+
+.asttree-node-menu.asttree-node-menu-active {
+	display: block;
+}
+
+.asttree-node-menu-opt {
+	display: block;
+}
+
+.asttree-node-menu-opt:not(:first-child)  {
+	margin-top: 2px;
+}
+
+
+.asttree-srcbtn {
+	display: block;
+}

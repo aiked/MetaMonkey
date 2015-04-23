@@ -2089,6 +2089,19 @@ JS_strdup(JSContext *cx, const char *s)
 }
 
 JS_PUBLIC_API(char *)
+JS_strduplen(JSContext *cx, const char *s, size_t nbytes)
+{
+    AssertHeapIsIdle(cx);
+    size_t n = nbytes + 1;
+    void *p = cx->malloc_(n);
+    if (!p)
+        return NULL;
+    char *dupstr = (char *)js_memcpy(p, s, nbytes);
+	dupstr[nbytes] = '\0';
+	return dupstr;
+}
+
+JS_PUBLIC_API(char *)
 JS_strdup(JSRuntime *rt, const char *s)
 {
     AssertHeapIsIdle(rt);

@@ -722,6 +722,9 @@
     <ClCompile Include="..\..\..\src\HttpLib\HttpHandler.cpp">
       <Filter>Source Files\HttpLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\jsremotestagedbg.cpp">
+      <Filter>Source Files\Std\Metaprogramming</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\TraceLogging.h">
@@ -1821,6 +1824,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\HttpLib\HttpHandler.h">
       <Filter>Header Files\HttpLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\jsremotestagedbg.h">
+      <Filter>Header Files\Std\Metaprogramming</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

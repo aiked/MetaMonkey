@@ -53,50 +53,51 @@
 //   return result;
 // };
 
+.& {
+  function genCompare( sign ){
 
-function genCompare( sign ){
+    var arrayCompAst;
+    var objCompAst;
+    var infCompAst;
+    if(sign){
+      arrayCompAst = .< value < result; >.;
+      objCompAst = .< computed < lastComputed; >.;
+      infCompAst = .< Infinity; >.;
+    }else{
+      arrayCompAst = .< value > result; >.;
+      objCompAst = .< computed > lastComputed; >.;
+      infCompAst = .< -Infinity; >.;
+    }
 
-  var arrayCompAst;
-  var objCompAst;
-  var infCompAst;
-  if(sign){
-    arrayCompAst = .< value < result; >.;
-    objCompAst = .< computed < lastComputed; >.;
-    infCompAst = .< Infinity; >.;
-  }else{
-    arrayCompAst = .< value > result; >.;
-    objCompAst = .< computed > lastComputed; >.;
-    infCompAst = .< -Infinity; >.;
-  }
+    return .<
 
-  return .<
-
-    (function(obj, iteratee, context) {
-      var result = Infinity, lastComputed = Infinity,
-          value, computed;
-      if (iteratee == null && obj != null) {
-        obj = obj.length === +obj.length ? obj : _.values(obj);
-        for (var i = 0, length = obj.length; i < length; i++) {
-          value = obj[i];
-          if (.~arrayCompAst) {
-            result = value;
+      (function(obj, iteratee, context) {
+        var result = Infinity, lastComputed = Infinity,
+            value, computed;
+        if (iteratee == null && obj != null) {
+          obj = obj.length === +obj.length ? obj : _.values(obj);
+          for (var i = 0, length = obj.length; i < length; i++) {
+            value = obj[i];
+            if (.~arrayCompAst) {
+              result = value;
+            }
           }
+        } else {
+          iteratee = _.iteratee(iteratee, context);
+          _.each(obj, function(value, index, list) {
+            computed = iteratee(value, index, list);
+            if (.~objCompAst || computed === .~infCompAst && result === .~infCompAst) {
+              result = value;
+              lastComputed = computed;
+            }
+          });
         }
-      } else {
-        iteratee = _.iteratee(iteratee, context);
-        _.each(obj, function(value, index, list) {
-          computed = iteratee(value, index, list);
-          if (.~objCompAst || computed === .~infCompAst && result === .~infCompAst) {
-            result = value;
-            lastComputed = computed;
-          }
-        });
-      }
-      return result;
-    });
+        return result;
+      });
 
-  >.;
-}
+    >.;
+  }
+};
 
 _.max = .!genCompare( true );
 _.min = .!genCompare( false );

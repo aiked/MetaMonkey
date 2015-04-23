@@ -1,17 +1,20 @@
-function getBuildMode(){
-	return 'release'; //debug
-}
 
-function assert(cond, msg){
-	var buildMode =  getBuildMode();
-	if(buildMode === 'debug'){
-		return .< console.assert(.~cond, .~msg); >.;
-	}else{
-		return .< 
-			if(.~cond){
-				alert("oops!, an error occurred!, " + .~msg + ", pleaze contact us.");
-			};
-		>.;
+.& {
+	function getBuildMode(){
+		return 'release'; //debug
+	}
+
+	function assert(cond, msg){
+		var buildMode =  getBuildMode();
+		if(buildMode === 'debug'){
+			return .< console.assert(.~cond, .~msg); >.;
+		}else{
+			return .< 
+				if(.~cond){
+					alert("oops!, an error occurred!, " + .~msg + ", pleaze contact us.");
+				};
+			>.;
+		}
 	}
 }
 

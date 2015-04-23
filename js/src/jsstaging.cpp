@@ -504,13 +504,17 @@ JSBool StagingProcess::collectStage(JSObject *obj)
 	return objIterator.iterateObject(obj, &stagednodesIterator);
 }
 
-JSBool StagingProcess::nextStage(JSObject *ast, uint32_t *depth)
+JSBool StagingProcess::nextStage(JSObject *ast, uint32_t *depth, JSString **srcCode)
 {
+	*srcCode = nullptr;
 	if(!getDeapestStage(ast, depth))
 		return JS_FALSE;
 	if(*depth!=0){
-		if(!staging(ast, *depth))
+
+		if( !(stage.init(ast, *depth) && collectStage(ast)) )
 			return JS_FALSE;
+
+		*srcCode = stage.getSrcCode();
 	}
 	return JS_TRUE;
 }
@@ -547,26 +551,26 @@ JSBool StagingProcess::reportExecutionStaging()
 
 	filename = JS_sprintf_append(NULL, "%s_stage_%d_db.html", 
 							outputFilename, (int) stage.getDepth());
-	char *srcCodeChar = JS_EncodeString( cx, srcCode );
-	char *dbcode = JS_sprintf_append(NULL, 
-		"<html>						\
-			<head>					\
-				<script>			\
-					debugger;		\
-					%s				\
-				</script>			\
-			</head>					\
-			<body>					\
-			<h2>Debugging staged code,<br> please Open the developer tools<\/h2>\
-				<pre>%s</pre>		\
-			</body>					\
-		</html>",
-		srcCodeChar,
-		srcCodeChar
-	);
-	
-	if(!JS::AutoFile::OpenAndWriteAll(cx, filename, JS_NewStringCopyZ(cx, dbcode)))
-		return JS_FALSE;
+	//char *srcCodeChar = JS_EncodeString( cx, srcCode );
+	//char *dbcode = JS_sprintf_append(NULL, 
+	//	"<html>						\
+	//		<head>					\
+	//			<script>			\
+	//				debugger;		\
+	//				%s				\
+	//			</script>			\
+	//		</head>					\
+	//		<body>					\
+	//		<h2>Debugging staged code,<br> please Open the developer tools<\/h2>\
+	//			<pre>%s</pre>		\
+	//		</body>					\
+	//	</html>",
+	//	srcCodeChar,
+	//	srcCodeChar
+	//);
+	//
+	//if(!JS::AutoFile::OpenAndWriteAll(cx, filename, JS_NewStringCopyZ(cx, dbcode)))
+	//	return JS_FALSE;
 
 	
 	//char *syssmd = JS_sprintf_append(NULL, "start /wait firefox %s", filename);

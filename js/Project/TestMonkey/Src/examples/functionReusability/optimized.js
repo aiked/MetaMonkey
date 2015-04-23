@@ -17,35 +17,36 @@
 //   }
 // };
 
+.& {
+  function genMultiParameterOptimizer(argumentsLength){
 
-function genMultiParameterOptimizer(argumentsLength){
+    var optimizedAst = .< 
 
-  var optimizedAst = .< 
+      (function(event, args) {
+        var ev, i = -1;
+        switch (args.length) {
+          case 0: event.callback.call(ev.ctx); return;
+          default: event.callback.apply(ev.ctx, args); return;
+        }
+      });
 
-    (function(event, args) {
-      var ev, i = -1;
-      switch (args.length) {
-        case 0: event.callback.call(ev.ctx); return;
-        default: event.callback.apply(ev.ctx, args); return;
-      }
-    });
-
-  >.;
+    >.;
 
 
-  var switchAst = optimizedAst.body[0].expression.body.body[1];
+    var switchAst = optimizedAst.body[0].expression.body.body[1];
 
-  for(var i=0; i<argumentsLength; ++i){
-    var newoptimizedFuncall = JSON.parse( JSON.stringify( switchAst.cases[i] ) );
-    var argumentsAst = newoptimizedFuncall.consequent[0].expression.arguments;
-    newoptimizedFuncall.test.value = i + 1;
-    var argAst = (.< args[.@i]; >.).body[0].expression;
-    argumentsAst.push( argAst );
-    switchAst.cases.splice(i + 1, 0, newoptimizedFuncall);
+    for(var i=0; i<argumentsLength; ++i){
+      var newoptimizedFuncall = JSON.parse( JSON.stringify( switchAst.cases[i] ) );
+      var argumentsAst = newoptimizedFuncall.consequent[0].expression.arguments;
+      newoptimizedFuncall.test.value = i + 1;
+      var argAst = (.< args[.@i]; >.).body[0].expression;
+      argumentsAst.push( argAst );
+      switchAst.cases.splice(i + 1, 0, newoptimizedFuncall);
+    }
+    
+    return optimizedAst;
   }
-  
-  return optimizedAst;
-}
+};
 
 
 var triggerEvents = .!genMultiParameterOptimizer(10);

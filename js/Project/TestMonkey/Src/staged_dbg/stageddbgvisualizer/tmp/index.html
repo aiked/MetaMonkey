@@ -1,0 +1,82 @@
+<html>
+
+	<head>
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/bootstrap-slider.css" rel="stylesheet">
+		<link href="css/astview.css" rel="stylesheet">
+
+		<script type="text/javascript" src="js/lib/jquery.min.js"></script>
+		<script type="text/javascript" src="js/lib/underscore.min.js"></script>
+		<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/lib/bootstrap-slider.min.js"></script>
+
+		<!--<script type="text/javascript" src="js/asttraverse.js"></script>
+		<script type="text/javascript" src="js/asttreestringify.js"></script>
+		<script type="text/javascript" src="js/asttreeview.js"></script>
+		<script type="text/javascript" src="js/optionsgenerator.js"></script>
+		<script type="text/javascript" src="js/asttreeviewdraw.js"></script>
+      	 <script type="text/javascript" src="js/asttreeviewwithoptions.js"></script> -->
+
+		<script type="text/javascript" src="js/stagedlib.js"></script>
+		<script type="text/javascript" src="js/stagedmain.js"></script>
+	</head>
+
+	<body>
+
+		<div id="content">
+			<div class="container"></div>
+		</div>
+
+		<script type="text/template" id="stg-start-debugging-tmpl">
+			<div id="stg-start-debugging">
+				<h1>Staged Javascript Debugger</h1>
+				<p>Open inspect element tools, then</p>
+				<p><button type="button" class="btn btn-primary startdbg-btn">Start Debugging</button></p>
+			</div>
+        </script>
+
+		<script type="text/template" id="stg-process-debugging-tmpl">
+			<div id="stg-process-debugging">
+				<h1>Stage Debugging</h1>
+				<table class="table table-hover">
+			      <tbody>
+			        <tr>
+			          <td>status</td>
+			          <td class="stg-prc-status"></td>
+			        </tr>
+			        <tr>
+			          <td>depth</td>
+			          <td class="stg-prc-depth"></td>
+			        </tr>
+			        <tr>
+			          <td>inlines</td>
+			          <td class="stg-prc-inlines"></td>
+			        </tr>
+			      </tbody>
+			    </table>
+			    <button type="button" class="btn btn-link stg-prc-showsrc-btn">Show staged source code</button>
+			    <p><code class="stg-prc-src" style="display: none;"></code></p>
+			    <p><button type="button" class="btn btn-xs btn-warning stg-prc-closesession">Close Session</button></p>
+			</div>
+        </script>
+
+		<script type="text/template" id="stg-finish-debugging-tmpl">
+			<div id="stg-finish-debugging">
+				<h1>Stage Debugging Finished</h1>
+				<p><button type="button" class="btn btn-info stg-fns-inspect stg-fns-actions">Inpect Source Code</button></p>
+				<p><button type="button" class="btn btn-warning stg-fns-closesession stg-fns-actions">Close Session</button></p>
+				<p class="stg-fns-finished-txt" style="display: none;">Session has been closed</p>
+			</div>
+        </script>
+
+		<script type="text/template" id="stg-error-debugging-tmpl">
+			<div id="stg-error-debugging">
+				<div class="alert alert-danger" role="alert">
+			    	<strong>An error occurred</strong> 
+			    	<span class="stg-err-details"><span>
+			    </div>
+			</div>
+        </script>
+	</body>
+
+</html>
