@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<object class="wxPanel" name="MyPanel3">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>850,100</size>
+		<object class="wxBoxSizer">
+			<orient>wxHORIZONTAL</orient>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALIGN_CENTER|wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticText" name="m_staticText6">
+					<font>
+						<size>25</size>
+						<family>default</family>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+					</font>
+					<label>Litemail</label>
+					<wrap>-1</wrap>
+				</object>
+			</object>
+			<object class="spacer">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<size>650,10</size>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALIGN_CENTER|wxALL</flag>
+				<border>5</border>
+				<object class="wxHyperlinkCtrl" name="m_hyperlink3">
+					<label>?</label>
+					<url>http://www.wxformbuilder.org</url>
+					<style>wxHL_DEFAULT_STYLE</style>
+					<font>
+						<size>20</size>
+						<family>default</family>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+					</font>
+				</object>
+			</object>
+		</object>
+	</object>
+</resource>

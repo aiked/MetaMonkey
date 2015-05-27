@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<object class="wxPanel" name="ltm-container">
+		<size>850,700</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND | wxALL</flag>
+				<border>5</border>
+				<object class="wxPanel" name="ltm-header-container">
+					<style>wxTAB_TRAVERSAL</style>
+					<size>850,100</size>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxEXPAND|wxTOP</flag>
+						<border>20</border>
+						<object class="wxPanel" name="ltm-left-menu-container">
+							<style>wxTAB_TRAVERSAL</style>
+							<size>200,600</size>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxEXPAND|wxTOP</flag>
+						<border>20</border>
+						<object class="wxPanel" name="ltm-email-body-container">
+							<style>wxTAB_TRAVERSAL</style>
+							<size>650,600</size>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+</resource>

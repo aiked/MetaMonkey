@@ -41,7 +41,10 @@ int HttpHandler::EventHandler(struct mg_connection *conn, enum mg_event ev) {
     return MG_TRUE;   // Authorize all requests
   } else if (ev == MG_REQUEST) {
 	const char *route = conn->uri;
-	cout << route << "\n";
+	//if( strcmp( route, "/syncdbg" ) ) {
+	//	cout << route << "\n";
+	//}
+	
 	mg_send_header(conn, "Access-Control-Allow-Origin", "*");
 	mg_send_header(conn, "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
 	mg_send_header(conn, "Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length");
@@ -76,7 +79,7 @@ int HttpHandler::EventHandler(struct mg_connection *conn, enum mg_event ev) {
 		return MG_FALSE;
 	}
 
-	cout << "success" << "\n";
+
     return MG_TRUE;   // Mark as processed
 
   } else {

@@ -1,0 +1,79 @@
+#object[class="wxPanel"]
+<div class="wx-wxPanel">
+
+#object[class="wx-wxFlexGridSizer"]
+<div wx-wxFlexGridSizer>
+	each row
+	<div class="wx-wxFlexGridSizer-row">
+		each col
+			<div class="wx-wxFlexGridSizer-col">
+
+
+#object[class="wxBoxSizer"]
+<div wx-wxBoxSizer>
+
+
+#sizeritem 
+<div class="wx-sizeritem">
+
+#flag
+
+wxALIGN_BOTTOM
+-
+
+wxALIGN_CENTER
+text-align: center
+
+wxALIGN_CENTER_HORIZONTAL
+text-align: center
+
+wxALIGN_CENTER_VERTICAL
+-
+
+wxALIGN_LEFT
+float:left
+
+
+wxALIGN_RIGHT
+float:right
+
+wxALIGN_TOP
+-
+
+wxALL
+margin: 5px
+
+wxBOTTOM
+margin-bottom: 5px
+
+wxEXPAND
+display: block
+
+wxFIXED_MINSIZE
+-
+
+wxLEFT
+margin-left: 5px
+
+wxRIGHT
+margin-right: 5px
+
+wxSHAPED
+-
+
+wxTOP
+margin-top: 5px
+
+
+border
+margin: 5px
+
+
+#orient
+wxHORIZONTAL -> add wx-wxHorizontal class
+.wxHorizontal > * {
+	float: left
+	|display: inline-box
+}
+
+#size -> width, height

@@ -19,6 +19,7 @@ var RetriveFromServerSync = function( path, error, done ) {
 	    url: 			path,
 	    async: 			false,
 	    cache: 			false,
+	    dataType: 		'text',
 
 	    success: done,
 	    error: 	error

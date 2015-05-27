@@ -5139,11 +5139,6 @@ OptionFailure(const char *option, const char *str)
 
 //#define STAGED_DEBUGGER_BUILD
 
-JSBool httpHandleConncet(struct httpserver::mg_connection *conn, void *closures) 
-{
-	httpserver::mg_printf_data(conn, "%s", "Hello world");
-	return JS_TRUE;
-}
 
 static int 
 stagingProcess(JSContext *cx, JSObject *global) 
@@ -5290,10 +5285,10 @@ main(int argc, char **argv, char **envp)
 	//}
 
 	//const char *inputFileName = argv[1];
-	STG_INPUT_FILE = "Src/examples/functionReusability/optimized.js";
+	STG_INPUT_FILE = "Src/examples/EmailClient/app/js/litemail.js";
 	//const char *inputFileName = "Src/examples/simple/simple.js";
 	//const char *outputFileName = argv[2];
-	STG_OUTPUT_FILE = "Src/examples/functionReusability/optimized.js_staged.js";
+	STG_OUTPUT_FILE = "Src/examples/EmailClient/app/js/litemail_staged.js";
 	//const char *outputFileName = "Src/examples/simple/simple_staged_.js";
 	//const char *dbFileName = "Src/debugInfo.json";
 	STG_DBG_FILE = NULL;

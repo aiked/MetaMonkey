@@ -1,1 +1,1 @@
-print('hello world');
+console.log('file 2 content');
