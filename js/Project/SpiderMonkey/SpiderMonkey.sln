@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpiderMonkey", "SpiderMonkey\SpiderMonkey.vcxproj", "{36228CDC-48FA-4349-B753-F64CAFEF0996}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "..\TestMonkey\Test.vcxproj", "{AFDBF46F-5A9A-4505-8647-C43416E5E287}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiStagedExec", "..\MultiStagedExec\MultiStagedExec.vcxproj", "{AFDBF46F-5A9A-4505-8647-C43416E5E287}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -443,6 +443,29 @@ class NodeBuilder
                setResult(node, dst);
     }
 
+    bool newNode(ASTType type, TokenPos *pos,
+                 const char *childName1, HandleValue child1,
+                 const char *childName2, HandleValue child2,
+                 const char *childName3, HandleValue child3,
+                 const char *childName4, HandleValue child4,
+                 const char *childName5, HandleValue child5,
+                 const char *childName6, HandleValue child6,
+                 const char *childName7, HandleValue child7,
+				 const char *childName8, HandleValue child8,
+                 MutableHandleValue dst) {
+        RootedObject node(cx);
+        return newNode(type, pos, &node) &&
+               setProperty(node, childName1, child1) &&
+               setProperty(node, childName2, child2) &&
+               setProperty(node, childName3, child3) &&
+               setProperty(node, childName4, child4) &&
+               setProperty(node, childName5, child5) &&
+               setProperty(node, childName6, child6) &&
+               setProperty(node, childName7, child7) &&
+			   setProperty(node, childName8, child8) &&
+               setResult(node, dst);
+    }
+
     bool listNode(ASTType type, const char *propName, NodeVector &elts, TokenPos *pos,
                   MutableHandleValue dst) {
         RootedValue array(cx);
@@ -1157,9 +1180,10 @@ class NodeBuilder
 					   "body", body,
 					   dst);
 	}
-
+	//metadev funcdecl
 	bool function(ASTType type, TokenPos *pos,
-						  HandleValue id, NodeVector &args, NodeVector &defaults,
+						  HandleValue escid, HandleValue id, 
+						  NodeVector &args, NodeVector &defaults,
 						  HandleValue body, HandleValue rest,
 						  bool isGenerator, bool isExpression,
 						  MutableHandleValue dst)
@@ -1177,9 +1201,8 @@ class NodeBuilder
 		if (!cb.isNull()) {
 			return callback(cb, opt(id), array, body, isGeneratorVal, isExpressionVal, pos, dst);
 		}
-
 		return newNode(type, pos,
-					   "id", id,
+			"id", id.isUndefined() ? escid: id,
 					   "params", array,
 					   "defaults", defarray,
 					   "body", body,
@@ -1394,8 +1417,8 @@ class ASTSerializer
 
     bool module(ParseNode *pn, MutableHandleValue dst);
     bool function(ParseNode *pn, ASTType type, MutableHandleValue dst);
-    bool functionArgsAndBody(ParseNode *pn, NodeVector &args, NodeVector &defaults,
-                             MutableHandleValue body, MutableHandleValue rest);
+    bool functionArgsAndBody(ParseNode *pn, ParseNode *escpn, NodeVector &args, NodeVector &defaults,
+                             MutableHandleValue body, MutableHandleValue rest, MutableHandleValue escid);
     bool moduleOrFunctionBody(ParseNode *pn, TokenPos *pos, MutableHandleValue dst);
 
     bool comprehensionBlock(ParseNode *pn, MutableHandleValue dst);
@@ -2689,26 +2712,28 @@ ASTSerializer::function(ParseNode *pn, ASTType type, MutableHandleValue dst)
 #endif
 
     RootedValue id(cx);
-    RootedAtom funcAtom(cx, func->atom());
-    if (!optIdentifier(funcAtom, NULL, &id))
-        return false;
+	if(!pn->pn_metaesc){
+		RootedAtom funcAtom(cx, func->atom());
+		if (!optIdentifier(funcAtom, NULL, &id))
+			return false;
+	}
 
     NodeVector args(cx);
     NodeVector defaults(cx);
 
-    RootedValue body(cx), rest(cx);
+    RootedValue body(cx), rest(cx), metaesc(cx);
     if (func->hasRest())
         rest.setUndefined();
     else
         rest.setNull();
-    return functionArgsAndBody(pn->pn_body, args, defaults, &body, &rest) &&
-        nodeHandler.function(type, &pn->pn_pos, id, args, defaults, body,
+    return functionArgsAndBody(pn->pn_body, pn->pn_metaesc, args, defaults, &body, &rest, &metaesc) &&
+        nodeHandler.function(type, &pn->pn_pos, metaesc, id, args, defaults, body,
                          rest, isGenerator, isExpression, dst);
 }
 
 bool
-ASTSerializer::functionArgsAndBody(ParseNode *pn, NodeVector &args, NodeVector &defaults,
-                                   MutableHandleValue body, MutableHandleValue rest)
+ASTSerializer::functionArgsAndBody(ParseNode *pn, ParseNode *escpn, NodeVector &args, NodeVector &defaults,
+                                   MutableHandleValue body, MutableHandleValue rest, MutableHandleValue escid)
 {
     ParseNode *pnargs;
     ParseNode *pnbody;
@@ -2723,6 +2748,10 @@ ASTSerializer::functionArgsAndBody(ParseNode *pn, NodeVector &args, NodeVector &
     }
 
     ParseNode *pndestruct;
+	if(escpn) {
+		if(!expression(escpn, escid))
+			return false;
+	}
 
     /* Extract the destructuring assignments. */
     if (pnbody->isArity(PN_LIST) && (pnbody->pn_xflags & PNX_DESTRUCT)) {
@@ -2801,20 +2830,30 @@ ASTSerializer::functionArgs(ParseNode *pn, ParseNode *pnargs, ParseNode *pndestr
              * index in the formals list, so we rely on the ability to
              * ask destructuring args their index above.
              */
-            JS_ASSERT(arg->isKind(PNK_NAME) || arg->isKind(PNK_ASSIGN));
-            ParseNode *argName = arg->isKind(PNK_NAME) ? arg : arg->pn_left;
-            if (!identifier(argName, &node))
-                return false;
-            if (rest.isUndefined() && arg->pn_next == pnbody)
-                rest.setObject(node.toObject());
-            else if (!args.append(node))
-                return false;
-            if (arg->pn_dflags & PND_DEFAULT) {
-                ParseNode *expr = arg->isDefn() ? arg->expr() : arg->pn_kid->pn_right;
-                RootedValue def(cx);
-                if (!expression(expr, &def) || !defaults.append(def))
-                    return false;
-            }
+			JS_ASSERT(arg->isKind(PNK_METAESC) ||arg->isKind(PNK_NAME) || arg->isKind(PNK_ASSIGN));
+			//metadev funcdecl
+			if(arg->isKind(PNK_METAESC)) {
+				if (!expression(arg, &node))
+					return false;
+				if (!args.append(node))
+					return false;
+			} else {
+			
+				ParseNode *argName = arg->isKind(PNK_NAME) ? arg : arg->pn_left;
+				if (!identifier(argName, &node))
+					return false;
+				if (rest.isUndefined() && arg->pn_next == pnbody)
+					rest.setObject(node.toObject());
+				else if (!args.append(node))
+					return false;
+				if (arg->pn_dflags & PND_DEFAULT) {
+					ParseNode *expr = arg->isDefn() ? arg->expr() : arg->pn_kid->pn_right;
+					RootedValue def(cx);
+					if (!expression(expr, &def) || !defaults.append(def))
+						return false;
+				}
+			}
+
             arg = arg->pn_next;
         } else {
             LOCAL_NOT_REACHED("missing function argument");

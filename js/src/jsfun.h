@@ -348,7 +348,7 @@ JSAPIToJSFunctionFlags(unsigned flags)
 namespace js {
 
 extern JSFunction *
-NewFunction(JSContext *cx, HandleObject funobj, JSNative native, unsigned nargs,
+NewFunction(JSContext *cx, bool escpn, HandleObject funobj, JSNative native, unsigned nargs,
             JSFunction::Flags flags, HandleObject parent, HandleAtom atom,
             gc::AllocKind allocKind = JSFunction::FinalizeKind,
             NewObjectKind newKind = GenericObject);

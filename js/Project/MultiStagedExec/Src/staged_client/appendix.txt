@@ -1,0 +1,26 @@
+compile JavaScript metaprogramming compiler
+JS_STAGEDJS
+
+run
+-i, --inputfile, input filepath
+-o, --outputfile, output filepath
+
+-i power.js -o power_final.js
+
+compile debuger
+JS_STAGEDJS_DBG
+
+run
+-i, --inputfile, input filepath
+-o, --outputfile, output filepath
+-b, --browser, browser executable location
+
+-i power.js -o power_final.js -b chrome
+
+compile web service
+JS_STAGEDJS_SERVICE
+
+Src/staged_client/js/main.js, variable SERVER_URL
+
+run 
+--port, web server port

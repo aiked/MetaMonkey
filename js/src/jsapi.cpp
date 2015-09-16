@@ -3642,7 +3642,7 @@ DefinePropertyById(JSContext *cx, HandleObject obj, HandleId id, HandleValue val
         attrs &= ~JSPROP_NATIVE_ACCESSORS;
         if (getter) {
             RootedObject global(cx, (JSObject*) &obj->global());
-            JSFunction *getobj = NewFunction(cx, NullPtr(), (Native) getter, 0,
+            JSFunction *getobj = NewFunction(cx, false, NullPtr(), (Native) getter, 0,
                                              zeroFlags, global, atom);
             if (!getobj)
                 return false;
@@ -3657,7 +3657,7 @@ DefinePropertyById(JSContext *cx, HandleObject obj, HandleId id, HandleValue val
             // Root just the getter, since the setter is not yet a JSObject.
             AutoRooterGetterSetter getRoot(cx, JSPROP_GETTER, &getter, NULL);
             RootedObject global(cx, (JSObject*) &obj->global());
-            JSFunction *setobj = NewFunction(cx, NullPtr(), (Native) setter, 1,
+            JSFunction *setobj = NewFunction(cx, false, NullPtr(), (Native) setter, 1,
                                              zeroFlags, global, atom);
             if (!setobj)
                 return false;
@@ -4780,7 +4780,7 @@ JS_NewFunction(JSContext *cx, JSNative native, unsigned nargs, unsigned flags,
     }
 
     JSFunction::Flags funFlags = JSAPIToJSFunctionFlags(flags);
-    return NewFunction(cx, NullPtr(), native, nargs, funFlags, parent, atom);
+    return NewFunction(cx, false, NullPtr(), native, nargs, funFlags, parent, atom);
 }
 
 JS_PUBLIC_API(JSFunction *)
@@ -4796,7 +4796,7 @@ JS_NewFunctionById(JSContext *cx, JSNative native, unsigned nargs, unsigned flag
 
     RootedAtom atom(cx, JSID_TO_ATOM(id));
     JSFunction::Flags funFlags = JSAPIToJSFunctionFlags(flags);
-    return NewFunction(cx, NullPtr(), native, nargs, funFlags, parent, atom);
+    return NewFunction(cx, false, NullPtr(), native, nargs, funFlags, parent, atom);
 }
 
 JS_PUBLIC_API(JSObject *)
@@ -5398,7 +5398,7 @@ JS::CompileFunction(JSContext *cx, HandleObject obj, CompileOptions options,
             return NULL;
     }
 
-    RootedFunction fun(cx, NewFunction(cx, NullPtr(), NULL, 0, JSFunction::INTERPRETED, obj,
+    RootedFunction fun(cx, NewFunction(cx, false, NullPtr(), NULL, 0, JSFunction::INTERPRETED, obj,
                                        funAtom, JSFunction::FinalizeKind, TenuredObject));
     if (!fun)
         return NULL;
@@ -6139,6 +6139,29 @@ JS_FileEscapedString(FILE *fp, JSString *str, char quote)
 {
     JSLinearString *linearStr = str->ensureLinear(NULL);
     return linearStr && FileEscapedString(fp, linearStr, quote);
+}
+
+JS_PUBLIC_API(JSBool)
+JS_EscapedString(JSContext *cx, JSString *src, JSString **dest)
+{
+	JS::Value *escArg = { &STRING_TO_JSVAL(src) };
+	JS::Value escapedVal;
+	if(!JS_CallFunctionName(cx, cx->global(), "escape", 1, escArg, &escapedVal))
+		return JS_FALSE;
+
+	*dest = JSVAL_TO_STRING(escapedVal);
+	return JS_TRUE;
+}
+
+JS_PUBLIC_API(JSBool)
+JS_UnescapedString(JSContext *cx, JSString *src, JSString **dest)
+{
+	JS::Value *escArg = { &STRING_TO_JSVAL(src) };
+	JS::Value escapedVal;
+	if(!JS_CallFunctionName(cx, cx->global(), "unescape", 1, escArg, &escapedVal))
+		return JS_FALSE;
+	*dest = JSVAL_TO_STRING(escapedVal);
+	return JS_TRUE;
 }
 
 JS_PUBLIC_API(JSString *)

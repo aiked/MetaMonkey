@@ -452,6 +452,11 @@ OptionParser::getMultiStringOption(const char *longflag) const
     return MultiStringRange(mso->strings.begin(), mso->strings.end());
 }
 
+bool OptionParser::hasOptions() const
+{
+	return options.length()!=0;
+}
+
 OptionParser::~OptionParser()
 {
     for (Option **it = options.begin(), **end = options.end(); it != end; ++it)

@@ -6159,7 +6159,7 @@ js::CompileAsmJS(JSContext *cx, TokenStream &ts, ParseNode *fn, const CompileOpt
     // information that we can recompile the function normally if linking
     // fails.
     RootedPropertyName name(cx, FunctionName(fn));
-    moduleFun.set(NewFunction(cx, NullPtr(), LinkAsmJS, FunctionNumFormals(fn),
+    moduleFun.set(NewFunction(cx, false, NullPtr(), LinkAsmJS, FunctionNumFormals(fn),
                               JSFunction::NATIVE_FUN, NullPtr(), name,
                               JSFunction::ExtendedFinalizeKind, TenuredObject));
     if (!moduleFun)

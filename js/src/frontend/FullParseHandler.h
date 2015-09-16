@@ -579,6 +579,7 @@ FullParseHandler::newFunctionDefinition()
     ParseNode *pn = CodeNode::create(PNK_FUNCTION, this);
     if (!pn)
         return NULL;
+	pn->pn_metaesc = NULL;
     pn->pn_body = NULL;
     pn->pn_funbox = NULL;
     pn->pn_cookie.makeFree();

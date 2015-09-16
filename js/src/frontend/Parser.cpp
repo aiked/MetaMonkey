@@ -1189,10 +1189,10 @@ struct BindData
 
 template <typename ParseHandler>
 JSFunction *
-Parser<ParseHandler>::newFunction(GenericParseContext *pc, HandleAtom atom,
+Parser<ParseHandler>::newFunction(GenericParseContext *pc, Node escpn, HandleAtom atom,
                                   FunctionSyntaxKind kind)
 {
-    JS_ASSERT_IF(kind == Statement, atom != NULL);
+    JS_ASSERT_IF(kind == Statement && !escpn, atom != NULL);
 
     /*
      * Find the global compilation context in order to pre-set the newborn
@@ -1212,7 +1212,7 @@ Parser<ParseHandler>::newFunction(GenericParseContext *pc, HandleAtom atom,
                               : (kind == Arrow)
                                 ? JSFunction::INTERPRETED_LAMBDA_ARROW
                                 : JSFunction::INTERPRETED;
-    fun = NewFunction(context, NullPtr(), NULL, 0, flags, parent, atom,
+    fun = NewFunction(context, !!escpn, NullPtr(), NULL, 0, flags, parent, atom,
                       JSFunction::FinalizeKind, MaybeSingletonObject);
     if (selfHostingMode)
         fun->setIsSelfHostedBuiltin();
@@ -1539,6 +1539,7 @@ Parser<ParseHandler>::functionArguments(FunctionSyntaxKind kind, Node *listp, No
             TokenKind tt = tokenStream.getToken();
             JS_ASSERT_IF(parenFreeArrow, tt == TOK_NAME);
             switch (tt) {
+
 #if JS_HAS_DESTRUCTURING
               case TOK_LB:
               case TOK_LC:
@@ -1648,7 +1649,24 @@ Parser<ParseHandler>::functionArguments(FunctionSyntaxKind kind, Node *listp, No
 
                 break;
               }
+			  //metadev funcdecl
+			  case TOK_META_ESC:
+				{
+					Node escpn = unaryOpExpr(PNK_METAESC, JSOP_NOP, tokenStream.currentToken().pos.begin );
+					if (!escpn)
+						return false;
+					/*			RootedPropertyName name(context, tokenStream.currentToken().name());
+								bool disallowDuplicateArgs = destructuringArg || hasDefaults;*/
 
+
+
+					//if (!checkStrictBinding(name, argpn))
+					//    return false;
+
+					handler.addFunctionArgument(funcpn, escpn);
+					//return pc->define(context, name, argpn, Definition::ARG);
+					break;
+				}
               default:
                 report(ParseError, false, null(), JSMSG_MISSING_FORMAL);
                 /* FALL THROUGH */
@@ -1905,16 +1923,16 @@ Parser<SyntaxParseHandler>::checkFunctionDefinition(HandlePropertyName funName,
 
 template <typename ParseHandler>
 typename ParseHandler::Node
-Parser<ParseHandler>::functionDef(HandlePropertyName funName, const TokenStream::Position &start,
+Parser<ParseHandler>::functionDef(HandlePropertyName funName, Node escpn, const TokenStream::Position &start,
                                   size_t startOffset, FunctionType type, FunctionSyntaxKind kind)
 {
-    JS_ASSERT_IF(kind == Statement, funName);
-
+    JS_ASSERT_IF(kind == Statement && !escpn, funName);
+	//metadev funcdecl
     /* Make a TOK_FUNCTION node. */
     Node pn = handler.newFunctionDefinition();
     if (!pn)
         return null();
-
+	
     bool bodyProcessed;
     if (!checkFunctionDefinition(funName, &pn, kind, &bodyProcessed))
         return null();
@@ -1922,7 +1940,7 @@ Parser<ParseHandler>::functionDef(HandlePropertyName funName, const TokenStream:
     if (bodyProcessed)
         return pn;
 
-    RootedFunction fun(context, newFunction(pc, funName, kind));
+    RootedFunction fun(context, newFunction(pc, escpn, funName, kind));
     if (!fun)
         return null();
 
@@ -1932,7 +1950,7 @@ Parser<ParseHandler>::functionDef(HandlePropertyName funName, const TokenStream:
     handler.setFunctionBody(pn, null());
     bool initiallyStrict = pc->sc->strict;
     bool becameStrict;
-    if (!functionArgsAndBody(pn, fun, funName, startOffset, type, kind, initiallyStrict,
+    if (!functionArgsAndBody(pn, escpn, fun, funName, startOffset, type, kind, initiallyStrict,
                              &becameStrict))
     {
         if (initiallyStrict || !becameStrict || tokenStream.hadError())
@@ -1943,7 +1961,7 @@ Parser<ParseHandler>::functionDef(HandlePropertyName funName, const TokenStream:
         if (funName && tokenStream.getToken() == TOK_ERROR)
             return null();
         handler.setFunctionBody(pn, null());
-        if (!functionArgsAndBody(pn, fun, funName, startOffset, type, kind, true))
+        if (!functionArgsAndBody(pn, escpn, fun, funName, startOffset, type, kind, true))
             return null();
     }
 
@@ -2043,13 +2061,16 @@ Parser<SyntaxParseHandler>::finishFunctionDefinition(Node pn, FunctionBox *funbo
 
 template <>
 bool
-Parser<FullParseHandler>::functionArgsAndBody(ParseNode *pn, HandleFunction fun,
+Parser<FullParseHandler>::functionArgsAndBody(ParseNode *pn, ParseNode *escpn, HandleFunction fun,
                                               HandlePropertyName funName,
                                               size_t startOffset, FunctionType type,
                                               FunctionSyntaxKind kind,
                                               bool strict, bool *becameStrict)
 {
-    if (becameStrict)
+	if(escpn) {
+		pn->pn_metaesc = escpn;
+	}
+	if (becameStrict)
         *becameStrict = false;
     ParseContext<FullParseHandler> *outerpc = pc;
 
@@ -2129,7 +2150,7 @@ Parser<FullParseHandler>::functionArgsAndBody(ParseNode *pn, HandleFunction fun,
 
 template <>
 bool
-Parser<SyntaxParseHandler>::functionArgsAndBody(Node pn, HandleFunction fun,
+Parser<SyntaxParseHandler>::functionArgsAndBody(Node pn, Node escpn, HandleFunction fun,
                                                 HandlePropertyName funName,
                                                 size_t startOffset, FunctionType type,
                                                 FunctionSyntaxKind kind,
@@ -2331,20 +2352,44 @@ Parser<SyntaxParseHandler>::moduleDecl()
     return SyntaxParseHandler::NodeFailure;
 }
 
+
+
 template <typename ParseHandler>
 typename ParseHandler::Node
 Parser<ParseHandler>::functionStmt()
 {	
     JS_ASSERT(tokenStream.currentToken().type == TOK_FUNCTION);
     RootedPropertyName name(context);
+	Node escpn = null();
     if (tokenStream.getToken(TSF_KEYWORD_IS_NAME) == TOK_NAME) {
         name = tokenStream.currentToken().name();
     } else {
-        /* Unnamed function expressions are forbidden in statement context. */
-        report(ParseError, false, null(), JSMSG_UNNAMED_FUNCTION_STMT);
-        return null();
-    }
+		//metadev funcdecl
+		tokenStream.ungetToken();
+		if(tokenStream.getToken() == TOK_META_ESC ) {
+			if(!tokenStream.getToken() == TOK_LP) {
+				/* Unnamed function expressions are forbidden in statement context. */
+				report(ParseError, false, null(), JSMSG_UNNAMED_FUNCTION_STMT);
+				return null();
+			}
+			escpn = unaryOpExpr(PNK_METAESC, JSOP_NOP, tokenStream.currentToken().pos.begin );
+			if (!escpn)
+				return null();
+			if(!tokenStream.getToken() == TOK_RP) {
+				/* Unnamed function expressions are forbidden in statement context. */
+				report(ParseError, false, null(), JSMSG_UNNAMED_FUNCTION_STMT);
+				return null();
+			}
+			JSAtom *atom = genNextAtom();
+			name = atom->asPropertyName();
+		}else {
 
+			/* Unnamed function expressions are forbidden in statement context. */
+			report(ParseError, false, null(), JSMSG_UNNAMED_FUNCTION_STMT);
+			return null();
+		}
+    }
+	
     TokenStream::Position start(keepAtoms);
     tokenStream.positionAfterLastFunctionKeyword(start);
 
@@ -2353,7 +2398,7 @@ Parser<ParseHandler>::functionStmt()
         !report(ParseStrictError, pc->sc->strict, null(), JSMSG_STRICT_FUNCTION_STATEMENT))
         return null();
 
-    return functionDef(name, start, tokenStream.positionToOffset(start), Normal, Statement);
+    return functionDef(name, escpn, start, tokenStream.positionToOffset(start), Normal, Statement);
 }
 
 template <typename ParseHandler>
@@ -2368,7 +2413,7 @@ Parser<ParseHandler>::functionExpr()
         name = tokenStream.currentToken().name();
     else
         tokenStream.ungetToken();
-    return functionDef(name, start, tokenStream.positionToOffset(start), Normal, Expression);
+    return functionDef(name, null(), start, tokenStream.positionToOffset(start), Normal, Expression);
 }
 
 /*
@@ -5227,7 +5272,7 @@ Parser<ParseHandler>::assignExpr()
         size_t offset = pos().begin;
         tokenStream.ungetToken();
 
-        return functionDef(NullPtr(), start, offset, Normal, Arrow);
+        return functionDef(NullPtr(), null(), start, offset, Normal, Arrow);
       }
 
       default:
@@ -6075,7 +6120,7 @@ Parser<FullParseHandler>::generatorExpr(ParseNode *kid)
     {
         ParseContext<FullParseHandler> *outerpc = pc;
 
-        RootedFunction fun(context, newFunction(outerpc, /* atom = */ NullPtr(), Expression));
+        RootedFunction fun(context, newFunction(outerpc, null(),/* atom = */ NullPtr(), Expression));
         if (!fun)
             return null();
 
@@ -6661,7 +6706,7 @@ Parser<ParseHandler>::primaryExpr(TokenKind tt)
                     Rooted<PropertyName*> funName(context, NULL);
                     TokenStream::Position start(keepAtoms);
                     tokenStream.tell(&start);
-                    pn2 = functionDef(funName, start, tokenStream.positionToOffset(start),
+                    pn2 = functionDef(funName, null(), start, tokenStream.positionToOffset(start),
                                       op == JSOP_INITPROP_GETTER ? Getter : Setter,
                                       Expression);
                     if (!pn2)

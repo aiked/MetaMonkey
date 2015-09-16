@@ -457,7 +457,7 @@ js::NewFunctionWithReserved(JSContext *cx, JSNative native, unsigned nargs, unsi
     }
 
     JSFunction::Flags funFlags = JSAPIToJSFunctionFlags(flags);
-    return NewFunction(cx, NullPtr(), native, nargs, funFlags, parent, atom,
+    return NewFunction(cx, false, NullPtr(), native, nargs, funFlags, parent, atom,
                        JSFunction::ExtendedFinalizeKind);
 }
 
@@ -473,7 +473,7 @@ js::NewFunctionByIdWithReserved(JSContext *cx, JSNative native, unsigned nargs, 
 
     RootedAtom atom(cx, JSID_TO_ATOM(id));
     JSFunction::Flags funFlags = JSAPIToJSFunctionFlags(flags);
-    return NewFunction(cx, NullPtr(), native, nargs, funFlags, parent, atom,
+    return NewFunction(cx, false, NullPtr(), native, nargs, funFlags, parent, atom,
                        JSFunction::ExtendedFinalizeKind);
 }
 

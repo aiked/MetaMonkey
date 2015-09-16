@@ -1,0 +1,475 @@
+<html>
+
+	<head>
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/bootstrap-slider.css" rel="stylesheet">
+		<link href="css/multiStagejs.css" rel="stylesheet">
+
+		<script type="text/javascript" src="js/lib/jquery.min.js"></script>
+		<script type="text/javascript" src="js/lib/underscore.min.js"></script>
+		<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/lib/bootstrap-slider.min.js"></script>
+
+    <script src="js/lib/ace-builds-master/ace-builds-master/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+
+		<script type="text/javascript" src="js/main.js"></script>
+	</head>
+
+	<body>
+
+    <div class="sjs_f__header sjs_f__section-org">
+      <h1 class="text-center sjs_f__header-title">Multi-Staged Metaprogramming JavaScript</h1>
+      <div class="text-center sjs_f__header-menu">
+        <ul clas="clearfix ">
+          <li class="pull-left"><a href="#sjs_js__sectionAbout">About</a></li>
+          <li class="pull-left"><a href="#sjs_js__sectionHowToUse">How-To-Use</a></li>
+          <li class="pull-left"><a target="_blank" href="./dl/Staged-JavaScript.pdf">Documentation <span class="glyphicon glyphicon-save-file"></span></a></li>
+          <li class="pull-left"><a href="#sjs_js__sectionDownload">Download</a></li>
+          <li class="pull-left"><a target="_blank" href="https://github.com/apostolidhs/MetaMonkey">Github <span class="glyphicon glyphicon-link"></span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sjs_js__editorWrapper sjs_f__editorWrapper sjs_f__section-blk">
+      <div class="sjs_js__editor sjs_f__editor center-block sjs_is__editor-onlySrc">
+
+        <div class="sjs_f__editor-header clearfix">
+          <button type="button" class="btn btn-primary sjs_js__editor-header-item sjs_f__editor-header-compileBtn sjs_js__editor-header-compileBtn" aria-label="Left Align" title="Compile">
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+            Compile
+          </button>
+          <img src="./img/loading.gif" alt="compiling" class="sjs_js__editor-header-loading" style="display:none;">
+          <button type="button" class="btn btn-default pull-right sjs_js__editor-header-item sjs_f__editor-header-closeBtn sjs_js__editor-header-closeBtn" aria-label="Left Align" title="Compile">
+            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          </button>
+          <div class="sjs_f__editor-header-demoChooser-wrapper pull-right">
+            <label>Demos:</label>
+            <div class="sjs_js__editor-header-demoChooser sjs_f__editor-header-demoChooser dropdown" aria-label="Left Align"></div>
+          </div>
+        </div>
+
+        <div class="sjs_js__editor-row sjs_f__editor-row clearfix ">
+          <div class="sjs_js__sourceEditorWrapper sjs_f__editor-col pull-left">
+            <div class="sjs_f__editorInfo">Meta js</div>
+            <div id="sjs_js__sourceEditor" class="sjs_f__sourceEditor"></div>
+          </div>
+          <div class="sjs_f__editor-col pull-left">
+            <div class="sjs_f__editorInfo">Compiled js</div>
+            <div class="sjs_js__resultEditors sjs_f__resultEditors"></div>
+          </div>  
+        </div>
+
+      </div>
+      
+    </div>
+
+    <div class="sjs_f__section-org">
+      <div class="sjs_f__section center-block">
+        <h1 id="sjs_js__sectionAbout" class="text-center">About</h1>
+        <h2>Metaprogramming</h2>
+        <hr>
+        <p>
+          Metaprogramming is the ability to treat the source code as first-class data and emit it to the program. In Multi-stage compile-time metaprogramming the above procedure can be repeated in infinite nesting level at compile time.
+        </p>
+        <h2>Contributions</h2>
+        <hr>
+        <p>
+          We extend JavaScript with the essentials of multi-staged metaprogramming and implement it in SpiderMonkey JavaScript engine. We indicate the minimal modification occurred in SpiderMonkey by minor extending the lexer, parser, AST, reflection (parse) and the addition of the unparsing procedure, some library functions, the staged logic and a debugging system.
+        </p>
+      </div>
+    </div>
+
+    <div class="sjs_f__section-blk">
+      <div class="sjs_f__section center-block">
+        <h1 id="sjs_js__sectionHowToUse" class="text-center">How-To-Use</h1>
+        <h2>Semantics</h2>
+        <hr>
+        <dl class="dl-horizontal">
+
+          <dt>Quasi-quotes <code>.&lt; &gt;.</code> </dt>
+          <dd>Are holding JavaScript code definitions in order to convey them to AST form.</dd>
+
+          <dt>Escape <code>.~</code> </dt>
+          <dd>It prevents an expression to convert its context to AST by evaluating its current value. It is defined only inside a Quasi-quote definitions.</dd>
+
+          <dt>Escape-value <code>.@</code> </dt>
+          <dd>Is used when we need to prevent the conversion of an expression to AST by matching the current evaluated value to an AST form.</dd>
+
+          <dt>Inline <code>.!</code> </dt>
+          <dd>Injects the declared location with the AST of the evaluated value, eliminating itself.</dd>
+
+          <dt>Execute <code>.&amp;</code> </dt>
+          <dd>Defines a statement that will be executed in the staged process.</dd>
+
+        </dl>
+        <h2>Example</h2>
+        <hr>
+        <pre>
+          <code>
+            .& { //This block of code will be executed at compile time
+
+              // Assign to variable printArgAst the source code of 2 arguments
+              var printArgAst = .< 'compile time', 'metaprogramming'; >.;
+              
+              // Assign to variable logAst the source code of console.log, 
+              // enriched with the printArgAst arguments;
+              var logAst = .< console.log( .~printArgAst ); >.;
+            }
+
+            // pure javascript statement
+            console.log( 'runtime pure statement' );
+
+            // emit to final program the logAst
+            .!logAst;
+          </code>
+        </pre>
+      </div>
+    </div>
+
+    <div class="sjs_f__section-org sjs_f__sectionDownloadWrapper">
+      <div class="sjs_f__section center-block">
+        <h1 id="sjs_js__sectionDownload" class="text-center">Download</h1>
+        <h2>MultiStaged Compiler</h2>
+        <hr>
+        <p>
+          <pre>
+            <code>
+-i, --inputfile, input filepath
+-o, --outputfile, output filepath
+
+example> -i power.js -o power_final.js
+            </code>
+          </pre>
+          <a class="btn btn-primary" href="./dl/MultiStagedJs.zip" role="button" title="download" target="_blank">
+            <span class="glyphicon glyphicon-download-alt"> MultiStagedJs.zip</span>
+          </a>
+        </p>
+        <h2>MultiStaged Debugger</h2>
+        <hr>
+        <p>
+          <pre>
+            <code>
+-i, --inputfile, input filepath
+-o, --outputfile, output filepath
+-b, --browser, browser executable location
+
+example> -i power.js -o power_final.js -b chrome
+            </code>
+          </pre>
+          <a class="btn btn-primary" href="./dl/MultiStagedDebugger.zip" role="button" title="download" target="_blank">
+            <span class="glyphicon glyphicon-download-alt"> MultiStagedDebugger.zip</span>
+          </a>
+        </p>
+        <h2>MultiStaged Web Service</h2>
+        <hr>
+        <p>
+          <pre>
+            <code>
+(optional) --port, web server port
+
+Src/staged_client/js/main.js, variable SERVER_URL
+            </code>
+          </pre>
+          <a class="btn btn-primary" href="./dl/MultiStagedService.zip" role="button" title="download" target="_blank">
+            <span class="glyphicon glyphicon-download-alt"> MultiStagedService.zip</span>
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <div class="sjs_f__section-blk">
+      <div class="sjs_f__section center-block text-center">
+        <h1 id="sjs_js__sectionCredits">Creators</h1>
+        
+        <p class="sjs_f__sectionCredits-mainCreator">
+          Thesis submitted by <a href="https://www.linkedin.com/in/giannisapostolidis" target="_blank">Yannis Apostolidis</a> In partial fulfillment of the requirements for the Masters&rsquo; of Science degree in Computer Science.
+        </p>
+        <div class="sjs_f__sectionCredits-contact">
+          <a href="mailto:giannhs.apostolidhs@gmail.com" target="_blank" title="email"><img src="./img/email.png" alt="email"></a>
+          <a href="https://www.linkedin.com/in/giannisapostolidis" target="_blank" title="linkedin"><img src="./img/linkedin.png" alt="linkedin"></a>
+        </div>
+        <hr>
+        <p class="sjs_f__sectionCredits-supervisor">
+          Thesis Supervisor <a href="http://www.ics.forth.gr/hci/index_main.php?l=e&c=517" target="_blank">Anthony Savidis</a>
+        </p>
+        <p>
+          <small>
+          The work reported in this thesis has been conducted at the Human Computer Interaction (HCI) laboratory of the Institute of Computer Science (ICS) of the Foundation for Research and Technology - Hellas (FORTH), and has been financially supported by a FORTH-ICS scholarship.
+          </small>
+        </p>
+      </div>
+
+    </div>
+
+    <script id="sjs_js__resultEditorTmpl" type="text/template">
+      <ul class="nav nav-tabs sjs_f__resultsEditors-menu" role="tablist">
+        <% _.each(results, function(res, idx) {
+          var currExecId = composeId(idx, 'exec');
+          var currResId = composeId(idx, 'result');
+        %>
+          <li role="presentation">
+            <a href="#<%= currExecId %>" aria-controls="<%= currExecId %>" role="tab" data-toggle="tab" title="Compile time execution at depth <%= idx %>">Execution <%= idx %>
+            </a>
+
+          </li>
+          <li role="presentation">
+            <a href="#<%= currResId %>" aria-controls="<%= currResId %>" role="tab" data-toggle="tab" title="Compile time result at depth <%= idx %>">Result <%= idx %></a>
+          </li>
+        <% }); %>
+      </ul>
+
+      <div class="tab-content">
+        <% _.each(results, function(res, idx) { 
+          var currExecId = composeId(idx, 'exec');
+          var currResId = composeId(idx, 'result');
+        %>
+          <div role="tabpanel" class="tab-pane" id="<%= currExecId %>">
+            <div id="sjs_js__resultEditor-ID<%= currExecId %>" class="sjs_f__resultEditor"></div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="<%= currResId %>">
+            <div id="sjs_js__resultEditor-ID<%= currResId %>" class="sjs_f__resultEditor""></div>
+          </div>
+        <% }); %>
+      </div>
+    </script>
+
+    <script id="sjs_js__demoChooserTmpl" type="text/template">
+      <% 
+        var activeDemo = _.first(demosSrc);
+        var otherDemo = _.rest(demosSrc);
+      %>
+      <button class="btn btn-default dropdown-toggle sjs_js__editor-header-item sjs_js__demoChooser-idx" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" target-idx="0">
+        <span class="sjs_js__demoChooser-name"><%= activeDemo.name %></span>
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        <% _.each(otherDemo, function(demo, idx) { %>
+          <li><a href="#" target-idx="<%= idx + 1 %>" ><%= demo.name %></a></li>
+        <% }); %>
+      </ul>
+    </script>    
+
+    <script id="sjs_js__errorMsgTmpl" type="text/template">
+      <div class="sjs_f__editorError alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>Oups!</strong> An error occured.<br>
+        Error code: <%= code %><br>
+        <% if(desc) { %>
+          <%= desc %>
+        <% } %>
+      </div>
+    </script> 
+
+
+<script class="sjs_js__demoSrc" demo-name="generate power iteratively" type="text/template">
+.& {
+  var gen_power = function( baseAst, exponent ) {
+    var resAst = .< .~baseAst; >.;
+    for(var i=0; i<exponent; ++i) {
+      resAst = .< 
+        .~resAst * .~baseAst; 
+      >.;
+    }
+    return resAst;
+  };
+};
+
+x = Math.random();
+y = Math.random();
+var rand = .!gen_power( .< x + y; >., 3 );
+console.log( rand );
+</script>
+
+<script class="sjs_js__demoSrc" demo-name="generate power recursively" type="text/template">
+.& {
+  var gen_power = function( baseAst, exponent ) {
+    if(--exponent===0) {
+      return baseAst;
+    }else {
+      return .< 
+        .~gen_power(baseAst, exponent) * .~baseAst; 
+      >.;
+    }
+  };
+};
+
+x = Math.random();
+y = Math.random();
+var rand = .!gen_power( .< x + y; >., 4 );
+console.log( rand );
+</script>
+
+<script class="sjs_js__demoSrc" demo-name="generate constructor" type="text/template">
+.& {
+  function Ctor(name, args, stmts) {
+    return .< 
+      function .~(name)(.~args){
+        .~stmts;
+      };
+    >.;
+  }
+
+  var a = .< x, y; >.;
+  var s = .< this.x = x; this.y = y; >.;
+
+  var point2dCtor = Ctor (.< Point2d; >., a, s);
+  point3dCtor = Ctor (
+  .< Point3d; >.,
+  .< .~a, z; >.,
+  .< .~s; this.z = z; >.
+  );
+}
+
+.!point2dCtor;
+var point1 = new Point2d(2,10);
+.!point3dCtor;
+var point2 = new Point3d(2,10, 50);
+</script>
+
+<script class="sjs_js__demoSrc" demo-name="optimize multi-param function call" type="text/template">
+// from http://backbonejs.org/backbone.js
+
+// A difficult-to-believe, but optimized internal dispatch function for
+// triggering events. Tries to keep the usual cases speedy (most internal
+// Backbone events have 3 arguments).
+//
+// var triggerEvents = function(event, args) {
+//   var ev, i = -1, a1 = args[0], a2 = args[1], a3 = args[2];
+//   switch (args.length) {
+//     case 0: event.callback.call(ev.ctx); return;
+//     case 1:event.callback.call(ev.ctx, a1); return;
+//     case 2:event.callback.call(ev.ctx, a1, a2); return;
+//     case 3:event.callback.call(ev.ctx, a1, a2, a3); return;
+//     default:event.callback.apply(ev.ctx, args); return;
+//   }
+// };
+
+.& {
+  function genMultiParameterOptimizer(argumentsLength){
+
+    var optimizedAst = .< 
+
+      (function(event, args) {
+        var ev, i = -1;
+        switch (args.length) {
+          case 0: event.callback.call(ev.ctx); return;
+          default: event.callback.apply(ev.ctx, args); return;
+        }
+      });
+
+    >.;
+
+    var switchAst = optimizedAst.body[0].expression.body.body[1];
+
+    for(var i=0; i<argumentsLength; ++i){
+      var newoptimizedFuncall = JSON.parse( JSON.stringify( switchAst.cases[i] ) );
+      var argumentsAst = newoptimizedFuncall.consequent[0].expression.arguments;
+      newoptimizedFuncall.test.value = i + 1;
+      var argAst = (.< args[.@i]; >.).body[0].expression;
+      argumentsAst.push( argAst );
+      switchAst.cases.splice(i + 1, 0, newoptimizedFuncall);
+    }
+    
+    return optimizedAst;
+  }
+};
+
+var triggerEvents = .!genMultiParameterOptimizer(5);
+triggerEvents(1,2,3,4);
+</script>
+
+<script class="sjs_js__demoSrc" demo-name="generate class" type="text/template">
+// var point = (function(){
+
+//  var x=1;
+//  var y=2;
+
+//  function getSum(){
+//    return this.x;
+//  }
+
+//  function toStringSum(){
+//    return getSum();
+//  }
+
+//  return {
+//    toStringSum: toStringSum
+//  }
+
+// })( )
+
+.& {
+  function genClass( className, fields ){
+
+    var classAst = .< 
+
+      var className = (function(){
+
+        return {
+          init: function(){
+            .~fields.init;
+          }
+        };
+
+      })();
+
+    >.;
+
+    classAst.body[0].declarations[0].id.name = className;
+
+    function AppendField( field, classAst ){
+      var funcBody = classAst.body[0].declarations[0].init.callee.body.body;
+      funcBody.splice(0, 0, field.body[0]);
+    }
+
+
+    if(fields.private) {
+      for(var i=0; i<fields.private.length; ++i){
+        AppendField( fields.private[i], classAst );
+      } 
+    }
+
+    if(fields.public) {
+      for(var i=0; i<fields.public.length; ++i){
+        var field = fields.public[i];
+        AppendField( field, classAst );
+
+        var funcBody = classAst.body[0].declarations[0].init.callee.body.body;
+
+        var objTemplate =  .< r = {k: v}; >.;
+        var propertytemplate = objTemplate.body[0].expression.right.properties[0];
+        propertytemplate.key = field.body[0].id;
+        propertytemplate.value = field.body[0].id;
+
+        funcBody[funcBody.length-1].argument.properties.push(propertytemplate);
+      } 
+    }
+
+    return classAst;
+  }
+};
+
+.!genClass(
+    "point",
+    {
+      private: [
+        .< var x; >.,
+        .< var y; >.,
+        .< function getSum(){ return x + y; }; >.
+      ],
+
+      public: [
+        .< function getStringSum(){ return getSum() + ""; }; >.
+      ],
+
+      init: .<
+        x = 1;
+        y = 2;
+      >.
+    }
+  );
+</script>  
+
+	</body>
+
+</html>

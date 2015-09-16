@@ -211,7 +211,7 @@ GlobalObject::initFunctionAndObjectClasses(JSContext *cx)
          * give it the guts to be one.
          */
         {
-            JSObject *proto = NewFunction(cx, functionProto, NULL, 0, JSFunction::INTERPRETED,
+            JSObject *proto = NewFunction(cx, false, functionProto, NULL, 0, JSFunction::INTERPRETED,
                                           self, NullPtr());
             if (!proto)
                 return NULL;
@@ -272,7 +272,7 @@ GlobalObject::initFunctionAndObjectClasses(JSContext *cx)
         if (!ctor)
             return NULL;
         RootedAtom objectAtom(cx, cx->names().Object);
-        objectCtor = NewFunction(cx, ctor, obj_construct, 1, JSFunction::NATIVE_CTOR, self,
+        objectCtor = NewFunction(cx, false, ctor, obj_construct, 1, JSFunction::NATIVE_CTOR, self,
                                  objectAtom);
         if (!objectCtor)
             return NULL;
@@ -293,7 +293,7 @@ GlobalObject::initFunctionAndObjectClasses(JSContext *cx)
         if (!ctor)
             return NULL;
         RootedAtom functionAtom(cx, cx->names().Function);
-        functionCtor = NewFunction(cx, ctor, Function, 1, JSFunction::NATIVE_CTOR, self,
+        functionCtor = NewFunction(cx, false, ctor, Function, 1, JSFunction::NATIVE_CTOR, self,
                                    functionAtom);
         if (!functionCtor)
             return NULL;
@@ -322,12 +322,12 @@ GlobalObject::initFunctionAndObjectClasses(JSContext *cx)
      * function so that cross-compartment [[Prototype]]-getting is implemented
      * in one place.
      */
-    RootedFunction getter(cx, NewFunction(cx, NullPtr(), ProtoGetter, 0, JSFunction::NATIVE_FUN,
+    RootedFunction getter(cx, NewFunction(cx, false, NullPtr(), ProtoGetter, 0, JSFunction::NATIVE_FUN,
                                           self, NullPtr()));
     if (!getter)
         return NULL;
 #if JS_HAS_OBJ_PROTO_PROP
-    RootedFunction setter(cx, NewFunction(cx, NullPtr(), ProtoSetter, 0, JSFunction::NATIVE_FUN,
+    RootedFunction setter(cx, NewFunction(cx, false, NullPtr(), ProtoSetter, 0, JSFunction::NATIVE_FUN,
                                           self, NullPtr()));
     if (!setter)
         return NULL;
@@ -368,7 +368,7 @@ GlobalObject::initFunctionAndObjectClasses(JSContext *cx)
     self->setOriginalEval(evalobj);
 
     /* ES5 13.2.3: Construct the unique [[ThrowTypeError]] function object. */
-    RootedFunction throwTypeError(cx, NewFunction(cx, NullPtr(), ThrowTypeError, 0,
+    RootedFunction throwTypeError(cx, NewFunction(cx, false, NullPtr(), ThrowTypeError, 0,
                                                   JSFunction::NATIVE_FUN, self, NullPtr()));
     if (!throwTypeError)
         return NULL;
@@ -502,7 +502,7 @@ GlobalObject::createConstructor(JSContext *cx, Native ctor, JSAtom *nameArg, uns
 {
     RootedAtom name(cx, nameArg);
     RootedObject self(cx, this);
-    return NewFunction(cx, NullPtr(), ctor, length, JSFunction::NATIVE_CTOR, self, name, kind);
+    return NewFunction(cx, false, NullPtr(), ctor, length, JSFunction::NATIVE_CTOR, self, name, kind);
 }
 
 static JSObject *

@@ -28,18 +28,7 @@ const char *RESP_SUCCESS_STR =
 	"{ \"msg\": true }";
 
 const char *RESP_FAIL_STR = 
-	"{ \"msg\": true }";
-
-static JSBool escapeString(JSContext *cx, JSString *str, JSString **strdest) 
-{
-	JS::Value *escArg = { &STRING_TO_JSVAL(str) };
-	JS::Value escapedVal;
-	if(!JS_CallFunctionName(cx, cx->global(), "escape", 1, escArg, &escapedVal))
-		return JS_FALSE;
-
-	*strdest = JSVAL_TO_STRING(escapedVal);
-	return JS_TRUE;
-}
+	"{ \"msg\": false }";
 
 // routes
 JSBool RemoteStagedDbg::nextStage(struct mg_connection *conn, void *closures)
@@ -53,7 +42,7 @@ JSBool RemoteStagedDbg::nextStage(struct mg_connection *conn, void *closures)
 
 	srcCode = JS_JoinStrings(that->cx, 2, that->debuggerSourceStmt, srcCode);
 	JSString *escSrcCode;
-	if(!escapeString(that->cx, srcCode, &escSrcCode))
+	if(!JS_EscapedString(that->cx, srcCode, &escSrcCode))
 		return JS_FALSE;
 
 	mg_send_header(conn, "Content-Type", "application/json");
@@ -141,7 +130,7 @@ JSBool RemoteStagedDbg::syncDbgInfo(struct mg_connection *conn, void *closures)
 		Stage &stage = that->stagingProcess->getStage();
 
 		JSString *escSrcCode;
-		if(!escapeString(that->cx, stage.getSrcCode(), &escSrcCode))
+		if(!JS_EscapedString(that->cx, stage.getSrcCode(), &escSrcCode))
 			return JS_FALSE;
 		char * srcCode = JS_EncodeString( that->cx, escSrcCode );
 		resp = JS_sprintf_append( NULL, 

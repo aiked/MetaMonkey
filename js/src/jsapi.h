@@ -4331,6 +4331,12 @@ JS_PutEscapedString(JSContext *cx, char *buffer, size_t size, JSString *str, cha
 extern JS_PUBLIC_API(JSBool)
 JS_FileEscapedString(FILE *fp, JSString *str, char quote);
 
+extern JS_PUBLIC_API(JSBool)
+JS_EscapedString(JSContext *cx, JSString *src, JSString **dest);
+
+extern JS_PUBLIC_API(JSBool)
+JS_UnescapedString(JSContext *cx, JSString *src, JSString **dest);
+
 /*
  * Extracting string characters and length.
  *

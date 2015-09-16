@@ -1,0 +1,229 @@
+.sjs_f__header {
+	height: 160px;
+}
+.sjs_f__editor {
+	width: 100%;
+    padding: 20px;
+}
+.sjs_f__editor-header {
+	height: 43px;
+	padding: 5px;
+	background-color: #F0F0F0;
+}
+.sjs_f__editor-header > * {
+	display: inline-block;
+}
+.sjs_f__editor-header-demoChooser-wrapper {
+
+}
+.sjs_f__editor-header-demoChooser-wrapper > * {
+	display: inline-block;
+}
+.sjs_f__editor-header-demoChooser {
+
+}
+.sjs_f__header-title {
+	width: 550px;
+	padding: 30px 0px 0px 0px;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+.sjs_f__header-menu {
+	padding: 14px 0px;
+}
+.sjs_f__header-menu ul {
+	list-style: none;
+	margin-right: auto;
+	margin-left: auto;
+	display: block;
+	width: 600px;
+}
+.sjs_f__header-menu li {
+	list-style: none;
+	margin-left: 5px;
+}
+.sjs_f__header-menu li:after {
+	content: " \00b7";
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    margin: 0px 4px;	
+}
+.sjs_f__header-menu li:last-child:after {
+	content: none;
+}
+.sjs_f__header-menu a {
+	color: white;
+	font-size: 18px;
+}
+.sjs_f__header-menu a:hover {
+	color: black;
+	text-decoration: none;
+}
+.sjs_f__editorWrapper {
+	padding-bottom: 15px;
+}
+.sjs_f__editor-row {
+	border-left: 2px solid #F0F0F0;
+	border-right: 2px solid #F0F0F0;
+	border-bottom: 2px solid #F0F0F0;
+}
+.sjs_is__editor-active .sjs_f__editor-row{
+	border-left: 2px solid #666;
+	border-right: 2px solid #666;
+	border-bottom: 2px solid #666;
+}
+.sjs_f__editorWrapper.sjs_is__editor-active{
+	height: 100%
+}
+.sjs_f__editor-col {
+	position: relative;
+	width: 50%;
+	/*height: 364px;*/
+	height: 600px;
+	padding: 3px 0px;
+}
+.sjs_is__editor-onlySrc .sjs_f__editor-col:first-child {
+	width: 100%;
+}
+.sjs_is__editor-onlySrc .sjs_f__editor-col:last-child {
+	display: none;
+}
+.sjs_is__editor-onlySrc .sjs_f__editor-header-closeBtn {
+	display: none;
+}
+.sjs_f__editor-header-closeBtn {
+	margin-left: 20px;
+}
+#sjs_f__sourceEditor, .sjs_f__resultEditor {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+.sjs_f__editorError {
+    position: absolute;
+    bottom: 10px;
+    height: 100px;
+    left: 65px;
+    right: 15px;
+    color: rgb(169, 68, 66);
+    z-index: 12;	
+}
+.sjs_f__editorError strong {
+	color: #a94442;
+}
+.sjs_f__editorInfo {
+    position: absolute;
+    bottom: 3px;
+    right: 8px;
+    color: #ccc;
+    z-index: 12;	
+}
+.sjs_f__resultEditor {
+	height: 570px;
+}
+.sjs_f__sourceEditor {
+	height: 100%;
+}
+.sjs_f__resultEditors {
+	border-left: 2px solid #F0F0F0;
+}
+.sjs_f__resultsEditors-menu {
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: flex;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.sjs_f__section {
+	width: 80%;
+	padding-top: 40px;
+	padding-bottom: 50px;
+}
+.sjs_f__section p{
+	font-size: 18px;
+} 
+.sjs_f__section-org {
+	background-color: #EA8635;
+}
+.sjs_f__section-blk {
+	background-color: #2F3129;
+}
+.sjs_f__section h1{
+	padding: 20px 0px;
+}
+.sjs_f__section h2{
+	padding: 40px 0px 0px 0px;
+}
+.sjs_f__section-org h1{
+	color: #2F3129;
+}
+.sjs_f__section-blk h1{
+	color: #EA8635;
+}
+.sjs_f__section-org h2{
+	color: white;
+}
+.sjs_f__section-blk h2, 
+.sjs_f__section-blk p, 
+.sjs_f__section-blk dl{
+	color: white;
+}
+.sjs_f__section-blk dl{
+	font-size: 18px;
+}
+.sjs_f__sectionDownloadWrapper pre{
+    padding: 0px 15px;
+    margin-top: 0;
+    margin-bottom: 15;
+    word-break: normal;
+    white-space: nowrap;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 0;
+}
+.sjs_f__sectionDownloadWrapper .glyphicon {
+	top: -1px;
+}
+.sjs_f__sectionCredits-contact a {
+	margin: 0px 15px;
+}
+.sjs_f__sectionCredits-mainCreator {
+	margin: 20px 0px;
+}
+.sjs_f__sectionCredits-contact{
+	margin: 20px 0px;
+}
+.sjs_f__sectionCredits-supervisor {
+	margin: 40px 0px 30px 0px;
+}
+
+h1, h2 {
+	margin: 0px;
+}
+.nav>li>a {
+	position: relative;
+	display: block;
+	color: #ccc;
+	padding: 0px 8px;
+}
+.nav>li>a:hover {
+	color: black;
+}
+hr {
+	margin: 10px 0px;
+}
+p {
+	margin: 0px;
+}
+.dl-horizontal dt {
+	overflow: visible;
+	padding-top: 15px;
+}
+.dl-horizontal dd {
+	overflow: visible;
+	padding-top: 15px;
+}

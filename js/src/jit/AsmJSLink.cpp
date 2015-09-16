@@ -363,7 +363,7 @@ NewExportedFunction(JSContext *cx, const AsmJSModule::ExportedFunction &func,
                     HandleObject moduleObj, unsigned exportIndex)
 {
     RootedPropertyName name(cx, func.name());
-    JSFunction *fun = NewFunction(cx, NullPtr(), CallAsmJS, func.numArgs(),
+    JSFunction *fun = NewFunction(cx, false, NullPtr(), CallAsmJS, func.numArgs(),
                                   JSFunction::NATIVE_FUN, cx->global(), name,
                                   JSFunction::ExtendedFinalizeKind);
     if (!fun)
@@ -388,7 +388,7 @@ HandleDynamicLinkFailure(JSContext *cx, CallArgs args, AsmJSModule &module, Hand
         return false;
     const jschar *chars = src->chars().get();
 
-    RootedFunction fun(cx, NewFunction(cx, NullPtr(), NULL, 0, JSFunction::INTERPRETED,
+    RootedFunction fun(cx, NewFunction(cx, false, NullPtr(), NULL, 0, JSFunction::INTERPRETED,
                                        cx->global(), name, JSFunction::FinalizeKind,
                                        TenuredObject));
     if (!fun)

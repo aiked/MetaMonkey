@@ -355,7 +355,7 @@ js::XDRInterpretedFunction(XDRState<mode> *xdr, HandleObject enclosingScope, Han
         atom = fun->atom();
         flagsword = (fun->nargs << 16) | fun->flags;
     } else {
-        fun = NewFunction(cx, NullPtr(), NULL, 0, JSFunction::INTERPRETED, NullPtr(), NullPtr(),
+        fun = NewFunction(cx, false, NullPtr(), NULL, 0, JSFunction::INTERPRETED, NullPtr(), NullPtr(),
                           JSFunction::FinalizeKind, TenuredObject);
         if (!fun)
             return false;
@@ -401,7 +401,7 @@ js::CloneFunctionAndScript(JSContext *cx, HandleObject enclosingScope, HandleFun
 {
     /* NB: Keep this in sync with XDRInterpretedFunction. */
 
-    RootedFunction clone(cx, NewFunction(cx, NullPtr(), NULL, 0,
+    RootedFunction clone(cx, NewFunction(cx, false, NullPtr(), NULL, 0,
                                          JSFunction::INTERPRETED, NullPtr(), NullPtr(),
                                          JSFunction::FinalizeKind, TenuredObject));
     if (!clone)
@@ -1288,7 +1288,7 @@ js_fun_bind(JSContext *cx, HandleObject target, HandleValue thisArg,
     /* Step 4-6, 10-11. */
     RootedAtom name(cx, target->is<JSFunction>() ? target->as<JSFunction>().atom() : NULL);
 
-    RootedObject funobj(cx, NewFunction(cx, NullPtr(), CallOrConstructBoundFunction, length,
+    RootedObject funobj(cx, NewFunction(cx, false, NullPtr(), CallOrConstructBoundFunction, length,
                                         JSFunction::NATIVE_CTOR, target, name));
     if (!funobj)
         return NULL;
@@ -1516,7 +1516,7 @@ js::Function(JSContext *cx, unsigned argc, Value *vp)
      * and so would a call to f from another top-level's script or function.
      */
     RootedAtom anonymousAtom(cx, cx->names().anonymous);
-    RootedFunction fun(cx, NewFunction(cx, NullPtr(), NULL, 0, JSFunction::INTERPRETED_LAMBDA,
+    RootedFunction fun(cx, NewFunction(cx, false, NullPtr(), NULL, 0, JSFunction::INTERPRETED_LAMBDA,
                                        global, anonymousAtom, JSFunction::FinalizeKind,
                                        TenuredObject));
     if (!fun)
@@ -1537,7 +1537,7 @@ js::IsBuiltinFunctionConstructor(JSFunction *fun)
 }
 
 JSFunction *
-js::NewFunction(JSContext *cx, HandleObject funobjArg, Native native, unsigned nargs,
+js::NewFunction(JSContext *cx, bool escpn, HandleObject funobjArg, Native native, unsigned nargs,
                 JSFunction::Flags flags, HandleObject parent, HandleAtom atom,
                 gc::AllocKind allocKind /* = JSFunction::FinalizeKind */,
                 NewObjectKind newKind /* = GenericObject */)
@@ -1580,7 +1580,10 @@ js::NewFunction(JSContext *cx, HandleObject funobjArg, Native native, unsigned n
         fun->flags |= JSFunction::EXTENDED;
         fun->initializeExtended();
     }
-    fun->initAtom(atom);
+
+		fun->initAtom(atom);
+	
+    
 
     return fun;
 }
@@ -1685,7 +1688,7 @@ js::DefineFunction(JSContext *cx, HandleObject obj, HandleId id, Native native,
     else
         funFlags = JSAPIToJSFunctionFlags(flags);
     RootedAtom atom(cx, JSID_IS_ATOM(id) ? JSID_TO_ATOM(id) : NULL);
-    fun = NewFunction(cx, NullPtr(), native, nargs, funFlags, obj, atom, allocKind, newKind);
+    fun = NewFunction(cx, false, NullPtr(), native, nargs, funFlags, obj, atom, allocKind, newKind);
     if (!fun)
         return NULL;
 

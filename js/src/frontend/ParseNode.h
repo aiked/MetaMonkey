@@ -525,6 +525,8 @@ struct ParseNode
                                            base object of PNK_DOT */
                 Definition  *lexdef;    /* lexical definition for this use */
             };
+			//metadev
+			ParseNode   *escfuncname;
             UpvarCookie cookie;         /* upvar cookie with absolute frame
                                            level (not relative skip), possibly
                                            in current frame */
@@ -568,6 +570,7 @@ struct ParseNode
 #define pn_expr         pn_u.name.expr
 #define pn_lexdef       pn_u.name.lexdef
 #define pn_dval         pn_u.number.value
+#define pn_metaesc		pn_u.name.escfuncname
 
   protected:
     void init(TokenKind type, JSOp op, ParseNodeArity arity) {

@@ -31,7 +31,7 @@ JSBool unparse::expr_array(const JSObject *val, JSString **child, JSString *inde
 	for(uint32_t i=0; i<arrayLen; ++i) {
 		
 		JSObject *nodeObj = NULL;
-		if( !JS_GetArrayElementToObj(cx, arrayObj, i, &nodeObj) )
+		if(!JS_GetArrayElementToObj(cx, arrayObj, i, &nodeObj))
 			return JS_FALSE;
 
 		if (nodeObj){
@@ -574,7 +574,7 @@ JSBool unparse::expr_logic(const JSObject *val, JSString **child, JSString *inde
         noIn = false;
 
 	JSObject *rightObj;
-	if( !JS_GetPropertyToObj(cx, val, "right", &rightObj) )
+	if( !(JS_GetPropertyToObj(cx, val, "right", &rightObj) && rightObj ) )
 		return JS_FALSE;
 
 	JSString *firstExprStr;
@@ -761,7 +761,7 @@ JSBool unparse::expr_metaQuazi(const JSObject *val, JSString **child, JSString *
 	jsval programVal = STRING_TO_JSVAL( srcStr(JSSRCNAME_PROGRAM) );
 	if(!JS_SetProperty(cx, CONST_OBJ(val), "type", &programVal))
 		return JS_FALSE;
-
+	
 	if (!stringifyObject(val, child))
 		return JS_FALSE;
 
@@ -1520,6 +1520,7 @@ unparse::unparse(JSContext *x) : precedence(x), stringifyExprHandlerMapInst(x), 
 {
 	const char *outputFileName = "Src/stanging.js";
 	using namespace JS;
+	ignorecprec = false;
 
 	JSObject *globalObj = cx->global();
 	if( !JS_GetPropertyToObj(cx, globalObj, "JSON", &jsonGlobalObj) )
@@ -1685,7 +1686,7 @@ JSBool unparse::stringifyObjectValue(const Value &v, JSString **s)
 {
 	Vector<JSString*> children(cx);
 
-    if (v.isNull())
+	if (v.isNull() || v.isUndefined())
 		children.append(srcStr(JSSRCNAME_NULL));
 	else if (v.isString()){
 		children.append(srcStr(JSSRCNAME_QM));
@@ -1848,7 +1849,6 @@ JSBool unparse::stringifyObjectProperty(const JSObject *obj, Shape &shape, JSStr
 		JS_ReportError(cx, "property has not shape slot stringifyObjectProperty");
 		return JS_FALSE;
 	}
-
 	if (!stringifyObjectValue(obj->getSlot(slot), propVal))
 		return JS_FALSE;
 
@@ -1915,7 +1915,7 @@ JSBool unparse::declarators(const JSObject *decls, JSString **s, JSString *inden
 
 JSBool unparse::wrapExpr(JSString **s, int cprec, int xprec)
 {
-	if(xprec <= cprec){
+	if(xprec <= cprec && !ignorecprec){
 		*s = JS_JoinStrings(cx, 3, srcStr(JSSRCNAME_LP), *s, srcStr(JSSRCNAME_RP)); 
 	}
 	return JS_TRUE;
@@ -2209,11 +2209,13 @@ JSBool unparse::functionDeclaration(const JSString *funcInitStr, JSString **s,
 	JSObject *paramsObj;
 	if( !JS_GetPropertyToObj(cx, val, "params", &paramsObj) )
 		return JS_FALSE;
-
+	
+	ignorecprec = true;
 	JSString *paramsStr;
 	if(!params(paramsObj, &paramsStr, indent)){
 		return JS_FALSE;
 	}
+	ignorecprec = false;
 
 	Vector<JSString*> children(cx);
 	children.append( CONST_STR(funcInitStr) );
@@ -2355,7 +2357,7 @@ JSBool unparse::unparse_values(const JSObject *obj, Vector<JSString*> *children,
 		}
 
 		JSObject *nodeObj;
-		if( !JS_ValueToObject(cx, node, &nodeObj) ){
+		if( !(JS_ValueToObject(cx, node, &nodeObj) && nodeObj) ){
 			JS_ReportError(cx, "array has not object as value @ index: %d", i);
 			return JS_FALSE;
 		}

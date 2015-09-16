@@ -2,6 +2,7 @@
 #include <functional>
 #include <sstream>  
 #include <string> 
+#include <ctime>
 #include <iostream>
 
 #include "vm\StringBuffer.h"
@@ -28,9 +29,11 @@ struct MatchRequestRoute {
 
 	bool operator()(const httpRequestHandlerInfo &reqhandler)
 	{
-		const char * res = strstr(contentType, reqhandler.contentType);
-		return res
-			&& !strcmp(reqhandler.route, route)
+		if(contentType) {
+			if(!strstr(contentType, reqhandler.contentType))
+			return false;
+		}
+		return !strcmp(reqhandler.route, route)
 			&& !strcmp(reqhandler.method, method);
 	}
 };
@@ -41,9 +44,13 @@ int HttpHandler::EventHandler(struct mg_connection *conn, enum mg_event ev) {
     return MG_TRUE;   // Authorize all requests
   } else if (ev == MG_REQUEST) {
 	const char *route = conn->uri;
-	//if( strcmp( route, "/syncdbg" ) ) {
-	//	cout << route << "\n";
-	//}
+	bool enableLog = strcmp( route, "/syncdbg" ) && strcmp( route, "/favicon.ico" ) && !strstr( route, ".map" );
+	if( enableLog ) {
+		time_t t = time(0);   
+    struct tm *now = localtime(&t);
+		cout << (now->tm_year + 1900) << '/' << (now->tm_mon + 1) << '/' <<  now->tm_mday 
+					<< " " << now->tm_hour << ":" << now->tm_min << ", " << route << "\n";
+	}
 	
 	mg_send_header(conn, "Access-Control-Allow-Origin", "*");
 	mg_send_header(conn, "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
@@ -56,8 +63,10 @@ int HttpHandler::EventHandler(struct mg_connection *conn, enum mg_event ev) {
 		HttpHandler::response(conn, NULL, RESP_OPTIONS_ALLOW_ORIGIN_STR);
 		return MG_TRUE;
 	}
-	if( !route || !contentType || !method ) {
-		cout << "fail" << "\n";
+	if( !route || !method ) {
+		if( enableLog ) {
+			cout << "fail" << "\n";
+		}
 		return MG_FALSE;
 	}
 
@@ -70,12 +79,16 @@ int HttpHandler::EventHandler(struct mg_connection *conn, enum mg_event ev) {
 		MatchRequestRoute( route, contentType, method )
 	);
 	if( itehandlerIter == reqHandlersInf.end() ) {
-		cout << "fail" << "\n";
+		if( enableLog ) {
+			cout << "fail" << "\n";
+		}
 		return MG_FALSE;
 	}
 	if(!itehandlerIter->requestHandler(conn, itehandlerIter->closures)) {
 		that->stop(true);
-		cout << "fail" << "\n";
+		if( enableLog ) {
+			cout << "fail" << "\n";
+		}
 		return MG_FALSE;
 	}
 

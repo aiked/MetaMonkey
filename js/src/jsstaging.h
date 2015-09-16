@@ -93,6 +93,14 @@ class Stage{
 	
 };
 
+class StagingProcessReporter{
+	public:
+		virtual JSBool reportExec(JSString *srcCode)=0;
+		virtual JSBool reportResult(JSString *srcCode)=0;
+		virtual ~StagingProcessReporter(){}
+};
+
+typedef void (*stagingReporter)(JSString *srcCode);
 class StagingProcess{
 	template<class Client> friend struct MallocProvider;
 
@@ -118,7 +126,12 @@ class StagingProcess{
 	JSBool getDeapestStage(JSObject *obj, uint32_t *depth);
 
 	JSBool reportResultStaging(JSString *srcCode);
+
+	void setStagingReporter(StagingProcessReporter *stgrep);
+
   private:
+	StagingProcessReporter *stgrep;
+
 	JSBool collectStage(JSObject *obj);
 	JSBool reportExecutionStaging();
 	

@@ -229,7 +229,7 @@ JSBool js::MergeNodeToAst(JSContext *cx, NodeInfo nodeinfo, JSObject *ast)
 StagingProcess *StagingProcess::stagingProcessSingleInst = NULL;
 
 StagingProcess::StagingProcess(JSContext *_cx, const char *_outputFilename, const char *dbInfoFileName): 
-								cx(_cx), stage(_cx), outputFilename(_outputFilename)
+								cx(_cx), stage(_cx), outputFilename(_outputFilename), stgrep(NULL)
 {
 	if( dbInfoFileName ) {
 		stagedDBInfo = StagedDBInfo::createFromFile(cx, dbInfoFileName);
@@ -540,10 +540,18 @@ JSBool StagingProcess::staging(JSObject *obj, uint32_t depth)
 
 JSBool StagingProcess::reportExecutionStaging()
 {	
+	JSString *srcCode = stage.getSrcCode();
+	if(stgrep){
+		if(!stgrep->reportExec(srcCode))
+			return JS_FALSE;
+	}
+
+	if(!outputFilename) 
+		return JS_TRUE;
+
 	char *filename = JS_sprintf_append(NULL, "%s_stage_%d.js", 
 							outputFilename, (int) stage.getDepth());
 	JS_ReportInfo(cx, "\tsaving execution source\n\tto \"%s\"\n", filename);
-	JSString *srcCode = stage.getSrcCode();
 	if(!JS::AutoFile::OpenAndWriteAll(cx, filename, srcCode))
 		return JS_FALSE;
 
@@ -551,32 +559,6 @@ JSBool StagingProcess::reportExecutionStaging()
 
 	filename = JS_sprintf_append(NULL, "%s_stage_%d_db.html", 
 							outputFilename, (int) stage.getDepth());
-	//char *srcCodeChar = JS_EncodeString( cx, srcCode );
-	//char *dbcode = JS_sprintf_append(NULL, 
-	//	"<html>						\
-	//		<head>					\
-	//			<script>			\
-	//				debugger;		\
-	//				%s				\
-	//			</script>			\
-	//		</head>					\
-	//		<body>					\
-	//		<h2>Debugging staged code,<br> please Open the developer tools<\/h2>\
-	//			<pre>%s</pre>		\
-	//		</body>					\
-	//	</html>",
-	//	srcCodeChar,
-	//	srcCodeChar
-	//);
-	//
-	//if(!JS::AutoFile::OpenAndWriteAll(cx, filename, JS_NewStringCopyZ(cx, dbcode)))
-	//	return JS_FALSE;
-
-	
-	//char *syssmd = JS_sprintf_append(NULL, "start /wait firefox %s", filename);
-	//system( syssmd );
-
-	//js_free(syssmd);
 	js_free(filename);
 
 	return JS_TRUE;
@@ -584,6 +566,14 @@ JSBool StagingProcess::reportExecutionStaging()
 
 JSBool StagingProcess::reportResultStaging(JSString *srcCodeStr)
 {
+	if(stgrep) {
+		if(!stgrep->reportResult(srcCodeStr))
+			return JS_FALSE;
+	}
+
+	if(!outputFilename) 
+		return JS_TRUE;
+
 	char *filename = JS_sprintf_append(NULL, "%s_stage_%d_result.js", 
 							outputFilename, (int) stage.getDepth());
 	JS_ReportInfo(cx, "\tsaving execution source\n\tto \"%s\"\n", filename);
@@ -591,6 +581,11 @@ JSBool StagingProcess::reportResultStaging(JSString *srcCodeStr)
 		return JS_FALSE;
 	js_free(filename);
 	return JS_TRUE;
+}
+
+void StagingProcess::setStagingReporter(StagingProcessReporter *stgrep) 
+{
+	this->stgrep = stgrep;
 }
 
 ////////MStagingProcess////////

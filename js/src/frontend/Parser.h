@@ -361,7 +361,7 @@ struct Parser : private AutoGCRooter, public StrictModeGetter
      * Create a new function object given parse context (pc) and a name (which
      * is optional if this is a function expression).
      */
-    JSFunction *newFunction(GenericParseContext *pc, HandleAtom atom, FunctionSyntaxKind kind);
+    JSFunction *newFunction(GenericParseContext *pc, Node escpn, HandleAtom atom, FunctionSyntaxKind kind);
 
     void trace(JSTracer *trc);
 
@@ -467,9 +467,9 @@ struct Parser : private AutoGCRooter, public StrictModeGetter
      */
     bool functionArguments(FunctionSyntaxKind kind, Node *list, Node funcpn, bool &hasRest);
 
-    Node functionDef(HandlePropertyName name, const TokenStream::Position &start,
+    Node functionDef(HandlePropertyName name, Node escpn, const TokenStream::Position &start,
                      size_t startOffset, FunctionType type, FunctionSyntaxKind kind);
-    bool functionArgsAndBody(Node pn, HandleFunction fun, HandlePropertyName funName,
+    bool functionArgsAndBody(Node pn, Node escpn, HandleFunction fun, HandlePropertyName funName,
                              size_t startOffset, FunctionType type, FunctionSyntaxKind kind,
                              bool strict, bool *becameStrict = NULL);
 
@@ -559,6 +559,12 @@ struct Parser : private AutoGCRooter, public StrictModeGetter
     friend class CompExprTransplanter;
     friend class GenexpGuard<ParseHandler>;
     friend struct BindData<ParseHandler>;
+
+	JSAtom* genNextAtom() {
+		static uint32_t nextNum = 0;
+		char* nextAtomName = JS_smprintf("$tmp$esc$func$__%d", ++nextNum);
+		return Atomize(context, nextAtomName, strlen(nextAtomName));
+	}
 };
 
 /* Declare some required template specializations. */

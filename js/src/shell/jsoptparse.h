@@ -281,6 +281,7 @@ class OptionParser
     MultiStringRange getMultiStringOption(char shortflag) const;
     MultiStringRange getMultiStringOption(const char *longflag) const;
 
+		bool hasOptions() const;
     /*
      * Return whether the help option was present (and thus help was already
      * displayed during parse_args).

@@ -110,6 +110,7 @@ class unparse{
 	JSString *indentChar;
 	JSString *fourHash;
 	JSObject *jsonGlobalObj;
+	bool ignorecprec;
 
 	typedef JSBool (unparse::*stringifyStmtHandler)
 		(const JSObject *val, JSString **child, JSString *indent);
@@ -245,7 +246,7 @@ class unparse{
 		JSBool apply(unparse *uprs, const JSObject *nodeObj, 
 			JSString **child, JSString *indent, JSString *indentChar, bool noIn) 
 		{
-			return uprs->unparse_expr(nodeObj, child, indentArg, 18, false);
+			return uprs->unparse_expr(nodeObj, child, indentArg, 0, false);
 		}
 	};
 
